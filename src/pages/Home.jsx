@@ -20,7 +20,7 @@ export default function Home() {
           <span className="text-lg text-blue-900 mb-2">Usa nuestra herramienta SplArt para diseñar tu propia prenda deportiva</span>
           <p className="text-gray-500 mb-6">-</p>
           <div className="flex gap-4 justify-center">
-            <Link to="/personalizar" className="btn bg-blue-900 text-white rounded-lg px-6 py-3 hover:bg-blue-700">
+            <Link to="/admin" className="btn bg-blue-900 text-white rounded-lg px-6 py-3 hover:bg-blue-700">
               Probar SplArt
             </Link>
             <Link to="/catalogo" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
@@ -70,6 +70,8 @@ export default function Home() {
                 <h3 className="font-semibold text-lg mb-1">Camisa con estampado</h3>
                 <span className="text-blue-900 font-bold text-xl mb-1">$238.85</span>
                 <button className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700">Añadir al carrito</button>
+
+                
               </div>
             ))}
           </div>

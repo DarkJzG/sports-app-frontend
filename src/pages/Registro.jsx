@@ -1,10 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../services/registroServicio";
 
 export default function Registro() {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ nombre: "", correo: "", password: "" });
+  const [msg, setMsg] = useState(null);
 
-  // Aquí va tu lógica handleRegister
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setMsg(null);
+    try {
+      const res = await registerUser(form);
+      if (res.ok) {
+        setMsg({ text: "¡Registro exitoso! Redirigiendo...", color: "green" });
+        setTimeout(() => navigate("/login"), 1800);
+      } else {
+        setMsg({ text: res.msg || "Error al registrar", color: "red" });
+      }
+    } catch (error) {
+      setMsg({ text: "Error de conexión con el servidor", color: "red" });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 to-blue-300 py-10">
@@ -23,7 +44,7 @@ export default function Registro() {
         {/* Formulario de Registro (DERECHA) */}
         <div className="w-1/2 flex items-center justify-center order-2">
           <form
-            // onSubmit={handleRegister} ← aquí agregas tu lógica
+            onSubmit={handleRegister}
             className="flex flex-col gap-2 bg-white px-10 py-14 rounded-3xl shadow-md w-full max-w-md"
           >
             <h2 className="text-center text-3xl font-bold font-rubik mb-3 text-blue-900">Crear Cuenta</h2>
@@ -37,6 +58,8 @@ export default function Registro() {
               placeholder="Nombre"
               className="mb-2 px-4 py-2 w-full rounded bg-gray-100 border outline-blue-300"
               required
+              value={form.nombre}
+              onChange={handleChange}
             />
             <input
               name="correo"
@@ -44,6 +67,8 @@ export default function Registro() {
               placeholder="Correo"
               className="mb-2 px-4 py-2 w-full rounded bg-gray-100 border outline-blue-300"
               required
+              value={form.correo}
+              onChange={handleChange}
             />
             <input
               name="password"
@@ -51,7 +76,12 @@ export default function Registro() {
               placeholder="Contraseña"
               className="mb-2 px-4 py-2 w-full rounded bg-gray-100 border outline-blue-300"
               required
+              value={form.password}
+              onChange={handleChange}
             />
+            {msg && (
+              <span className={`text-sm text-${msg.color}-600 mb-2 text-center`}>{msg.text}</span>
+            )}
             <button
               className="w-full py-3 bg-blue-800 text-white font-bold font-rubik rounded-lg hover:bg-blue-600 transition mt-5"
               type="submit"

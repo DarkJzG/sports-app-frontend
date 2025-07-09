@@ -11,7 +11,7 @@ export default function Navbar() {
     <header className="shadow bg-white sticky top-0 z-30">
       <nav className="container mx-auto flex items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/admin" className="flex items-center gap-2">
           <img
             className="h-10"
             src="/img/Logopeque.png"
@@ -33,10 +33,10 @@ export default function Navbar() {
           }`}
         >
           <div className="sm:flex items-center gap-7 p-8 sm:p-0">
-            <Link to="/" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Inicio</Link>
-            <Link to="/catalogo" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Shop</Link>
-            <Link to="/perfil" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Perfil</Link>
-            <Link to="/compartir" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Compartir</Link>
+            <Link to="/admin" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Inicio</Link>
+            <Link to="/" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Productos</Link>
+            <Link to="/" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Mano</Link>
+            <Link to="/catgPrd" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Categorías</Link>
             
             {/* --- CAMBIO AQUÍ --- */}
             {user ? (
@@ -54,17 +54,7 @@ export default function Navbar() {
                 Login
               </Link>
             )}
-            {/* Search input */}
-            <div className="mt-4 sm:mt-0 flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="border rounded-lg px-2 py-1 outline-blue-700 text-sm"
-              />
-              <button className="p-2">
-                <img src="/img/search.png" alt="search" className="h-4 w-4" />
-              </button>
-            </div>
+            
             {/* Cerrar menu mobile */}
             <button
               className="absolute top-3 right-4 sm:hidden"
