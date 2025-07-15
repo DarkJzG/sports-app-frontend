@@ -1,6 +1,7 @@
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
 import NavbarA from "../../components/NavbarAdmin";
+import React, { useEffect, useState } from "react";
 import FooterA from "../../components/FooterAdmin";
 
 
@@ -21,14 +22,13 @@ function ModalEliminarCategoria({ show, onClose, onConfirm }) {
   );
 }
 
-function CategoriaCard({ nombre, descripcion, onEditar, onEliminar }) {
+function CategoriaCard({ nombre, descripcion, imagen_url, onEditar, onEliminar }) {
   return (
     <div className="bg-[#f4f4f4] flex items-center gap-6 p-6 mb-5 rounded-xl shadow-sm">
-      <img src="/img/categoria.png" alt="icono-categoria" className="h-16 w-16" />
+      <img src={imagen_url || "/img/categoria.png"} alt="icono-categoria" className="h-16 w-16 object-contain" />
       <div className="flex-1">
-        <div className="font-bold text-lg text-gray-900">Nombre</div>
-        <div className="text-gray-700 mb-1">{nombre}</div>
-        <div className="text-sm text-gray-500"><b>Descripción</b><br />{descripcion}</div>
+        <div className="font-bold text-lg text-gray-900">{nombre}</div>
+        <div className="text-sm text-gray-500 mb-1"><b>Descripción</b><br />{descripcion}</div>
       </div>
       <button className="bg-blue-900 text-white font-bold px-5 py-2 rounded mr-2 flex items-center gap-2" onClick={onEditar}>
         <span>EDITAR</span>
@@ -43,15 +43,28 @@ function CategoriaCard({ nombre, descripcion, onEditar, onEliminar }) {
 }
 
 export default function CategoriasProductos() {
-  const [showModal, setShowModal] = React.useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaIdEliminar, setCategoriaIdEliminar] = useState(null);
   const navigate = useNavigate();
 
-  // Dummy data
-  const categorias = [
-    { nombre: "Copa", descripcion: "Esta categoría es para copas de deportes..." },
-    { nombre: "Uniformes", descripcion: "Uniformes para diferentes deportes." },
-    { nombre: "Accesorios", descripcion: "Incluye todo tipo de accesorios deportivos." },
-  ];
+  // Cargar categorías de la API
+  useEffect(() => {
+    fetch("http://localhost:5000/catg/all")
+      .then(res => res.json())
+      .then(data => setCategorias(data));
+  }, []);
+
+  async function eliminarCategoria() {
+  if (!categoriaIdEliminar) return;
+  const res = await fetch(`http://localhost:5000/catg/delete/${categoriaIdEliminar}`, {
+    method: "DELETE",
+  });
+  const data = await res.json();
+  // Quita la categoría eliminada de la lista sin recargar
+  if (data.ok) setCategorias(categorias.filter(cat => cat._id !== categoriaIdEliminar));
+  setShowModal(false);
+}
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -61,12 +74,13 @@ export default function CategoriasProductos() {
 
       {/* Banner */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
-        <h2 className="text-3xl font-semibold flex-1">Categorías Productos</h2>
+        <h2 className="text-4xl font-semibold flex-5">Categorías Productos</h2>
         <div className="rounded-full bg-blue-200 p-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {/* Icono de herramienta */}
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17.25l1.5 1.5M16.5 13.5a4.5 4.5 0 11-6.364-6.364A4.5 4.5 0 0116.5 13.5z" />
-          </svg>
+          <img
+            className="h-10"
+            src="/img/catg.png"
+            alt="website logo"
+          />
         </div>
       </section>
 
@@ -88,23 +102,26 @@ export default function CategoriasProductos() {
         </div>
         {/* Lista de categorías */}
         <div>
-          {categorias.map((cat, idx) => (
-            <CategoriaCard
-              key={idx}
-              nombre={cat.nombre}
-              descripcion={cat.descripcion}
-              onEditar={() => alert('Editar categoría')}
-              onEliminar={() => setShowModal(true)}
-            />
-          ))}
-        </div>
+          {categorias.map((cat) => (
+          <CategoriaCard
+          key={cat._id}
+          nombre={cat.nombre}
+          descripcion={cat.descripcion}
+          imagen_url={cat.imagen_url}
+          onEditar={() => navigate(`/catgPrd/editar/${cat._id}`)}
+          onEliminar={() => { setShowModal(true); setCategoriaIdEliminar(cat._id); }}
+        />
+      ))}
+      </div>
+
       </main>
 
       <ModalEliminarCategoria
         show={showModal}
         onClose={() => setShowModal(false)}
-        onConfirm={() => { setShowModal(false); alert('Categoría eliminada'); }}
+        onConfirm={eliminarCategoria}
       />
+      
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white mt-10 px-8 py-6 flex flex-col md:flex-row justify-between items-center">

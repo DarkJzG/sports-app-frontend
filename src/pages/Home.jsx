@@ -1,12 +1,19 @@
 // src/pages/Home.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-// Si tienes imágenes en /public/img puedes usarlas así: "/img/Logo1-T.png"
-
 export default function Home() {
+  const [productos, setProductos] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/producto/all")
+      .then((res) => res.json())
+      .then((data) => setProductos(data))
+      .catch((err) => console.error("Error cargando productos:", err));
+  }, []);
+
   return (
     <div>
       {/* NAVBAR */}
@@ -30,20 +37,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Carrusel de categorías - Aquí puedes usar Swiper, Slick, o solo cards por ahora */}
+      {/* Carrusel de categorías */}
       <section className="py-10 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-semibold mb-3">
-            <span>Compra por</span> Categoría
-          </h2>
+          <h2 className="text-2xl font-semibold mb-3">Compra por <span className="text-blue-900">Categoría</span></h2>
           <p className="text-gray-600 mb-6">Conoce los diseños de los productos que tenemos actualmente</p>
-          {/* Ejemplo de cards en vez de swiper */}
           <div className="flex gap-4 overflow-x-auto pb-4">
             {[
-              {img: "/img/category-1.jpg", label: "Camisetas"},
-              {img: "/img/category-2.jpg", label: "Pantalones"},
-              {img: "/img/category-3.jpg", label: "Zapatos"},
-              {img: "/img/category-4.jpg", label: "Accesorios"}
+              { img: "/img/category-1.jpg", label: "Camisetas" },
+              { img: "/img/category-2.jpg", label: "Pantalones" },
+              { img: "/img/category-3.jpg", label: "Zapatos" },
+              { img: "/img/category-4.jpg", label: "Accesorios" }
             ].map((cat, idx) => (
               <div key={idx} className="min-w-[180px] bg-gray-100 rounded-xl shadow p-2 flex flex-col items-center">
                 <img src={cat.img} alt={cat.label} className="h-24 rounded mb-2" />
@@ -55,7 +59,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Productos Destacados - Puedes iterar productos falsos por ahora */}
+      {/* Productos Destacados */}
       <section className="py-10 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="flex gap-4 mb-4">
@@ -64,16 +68,18 @@ export default function Home() {
             <span className="tab__btn">Recién Agregados</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white rounded-xl shadow p-3 flex flex-col items-center">
-                <img src={`/img/product-${i}-1.jpg`} alt="" className="h-28 rounded mb-2" />
-                <h3 className="font-semibold text-lg mb-1">Camisa con estampado</h3>
-                <span className="text-blue-900 font-bold text-xl mb-1">$238.85</span>
-                <button className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700">Añadir al carrito</button>
-
-                
-              </div>
-            ))}
+            {productos.length === 0 ? (
+              <p className="text-gray-500">Cargando productos...</p>
+            ) : (
+              productos.map((prod) => (
+                <div key={prod._id} className="bg-white rounded-xl shadow p-3 flex flex-col items-center">
+                  <img src={prod.imageUrl} alt={prod.nombre} className="h-28 rounded mb-2 object-contain" />
+                  <h3 className="font-semibold text-lg mb-1 text-center">{prod.nombre}</h3>
+                  <span className="text-blue-900 font-bold text-xl mb-1">${prod.preciomenor?.toFixed(2) || "0.00"}</span>
+                  <button className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700">Añadir al carrito</button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -95,4 +101,3 @@ export default function Home() {
     </div>
   );
 }
-// Aquí puedes agregar más secciones o componentes según sea necesario

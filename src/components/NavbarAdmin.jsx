@@ -34,8 +34,9 @@ export default function Navbar() {
         >
           <div className="sm:flex items-center gap-7 p-8 sm:p-0">
             <Link to="/admin" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Inicio</Link>
-            <Link to="/" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Productos</Link>
-            <Link to="/" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Mano</Link>
+            <Link to="/producto" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Productos</Link>
+            <Link to="/manObra" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Mano</Link>
+            <Link to="/telas" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Telas</Link>
             <Link to="/catgPrd" className="block py-2 sm:py-0 hover:text-blue-900 font-medium">Categorías</Link>
             
             {/* --- CAMBIO AQUÍ --- */}

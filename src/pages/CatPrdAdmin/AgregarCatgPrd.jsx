@@ -6,7 +6,21 @@ export default function AgregarCategoria() {
   const [descripcion, setDescripcion] = useState("");
   const [imagen, setImagen] = useState(null);
   const [msg, setMsg] = useState("");
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
+
+  // 1. Subir imagen a Cloudinary (frontend)
+  const uploadImageToCloudinary = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "categoria_prd_preset"); // <- pon aquí tu preset
+    const res = await fetch("https://api.cloudinary.com/v1_1/dcn5d4wbo/image/upload", {
+      method: "POST",
+      body: data,
+    });
+    const img = await res.json();
+    return img.secure_url;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,35 +28,43 @@ export default function AgregarCategoria() {
       setMsg("Completa todos los campos e imagen");
       return;
     }
-    const formData = new FormData();
-    formData.append("nombre", nombre);
-    formData.append("descripcion", descripcion);
-    formData.append("imagen", imagen);
+    setCargando(true);
 
+    // 2. Subir imagen a Cloudinary primero
+    let imagen_url = "";
+    try {
+      imagen_url = await uploadImageToCloudinary(imagen);
+    } catch {
+      setMsg("Error subiendo la imagen a Cloudinary");
+      setCargando(false);
+      return;
+    }
+
+    // 3. Enviar datos a backend
     try {
       const res = await fetch("http://localhost:5000/catg/add", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, descripcion, imagen_url }),
       });
       const data = await res.json();
       setMsg(data.msg);
+      setCargando(false);
       if (data.ok) setTimeout(() => navigate("/admin"), 1200);
     } catch {
       setMsg("Error al conectar con el servidor");
+      setCargando(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header ... */}
       <main className="flex-1 max-w-5xl mx-auto w-full py-10 px-4">
         <h2 className="text-3xl font-bold mb-2">Agregar Categoría de Producto</h2>
         <p className="text-gray-600 mb-10">Complete los campos solicitados para agregar una nueva categoría</p>
         <form className="flex flex-col md:flex-row gap-10 items-start" onSubmit={handleSubmit}>
-          {/* Imagen */}
           <div className="flex flex-col items-center">
             <div className="w-56 h-56 bg-[#f4f4f4] rounded-xl flex items-center justify-center shadow mb-5">
-              {/* Vista previa imagen */}
               {imagen ? (
                 <img src={URL.createObjectURL(imagen)} alt="preview" className="h-32 w-32 object-contain" />
               ) : (
@@ -54,7 +76,6 @@ export default function AgregarCategoria() {
             </div>
             <input type="file" accept="image/*" onChange={e => setImagen(e.target.files[0])} />
           </div>
-          {/* Formulario */}
           <div className="flex flex-col gap-7 flex-1">
             <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
               <label className="text-sm font-bold">Nombre Categoría</label>
@@ -77,15 +98,15 @@ export default function AgregarCategoria() {
             </div>
             <button
               type="submit"
+              disabled={cargando}
               className="bg-blue-900 text-white font-bold px-8 py-3 rounded-xl shadow hover:bg-blue-700 w-full max-w-xs mx-auto"
             >
-              Agregar Categoría
+              {cargando ? "Agregando..." : "Agregar Categoría"}
             </button>
             {msg && <p className="text-center text-red-500">{msg}</p>}
           </div>
         </form>
       </main>
-      {/* Footer ... */}
     </div>
   );
 }
