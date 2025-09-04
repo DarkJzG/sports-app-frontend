@@ -2,7 +2,8 @@
 import { useNavigate } from "react-router-dom";
 import NavbarA from "../../components/NavbarAdmin";
 import React, { useEffect, useState } from "react";
-import FooterA from "../../components/FooterAdmin";
+
+import { API_URL } from "../../config";
 
 
 // Componente para el modal de confirmación de eliminación
@@ -50,14 +51,14 @@ export default function CategoriasProductos() {
 
   // Cargar categorías de la API
   useEffect(() => {
-    fetch("http://localhost:5000/catg/all")
+    fetch(`${API_URL}/catg/all`)
       .then(res => res.json())
       .then(data => setCategorias(data));
   }, []);
 
   async function eliminarCategoria() {
   if (!categoriaIdEliminar) return;
-  const res = await fetch(`http://localhost:5000/catg/delete/${categoriaIdEliminar}`, {
+  const res = await fetch(`${API_URL}/catg/delete/${categoriaIdEliminar}`, {
     method: "DELETE",
   });
   const data = await res.json();

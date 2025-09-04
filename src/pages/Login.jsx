@@ -1,22 +1,34 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../components/AuthContext"; 
+import { API_URL } from "../config";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();   // <-- dentro del componente
+  const location = useLocation();
+  const { setUser } = useAuth();
 
-  // Estado para los campos y mensaje
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState(null);
+  const [mensajeVerificado, setMensajeVerificado] = useState(null);
 
-  // Lógica de login
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const verificado = queryParams.get("verificado");
+    if (verificado === "true") {
+      setMensajeVerificado("✅ Tu cuenta ha sido verificada con éxito. Ya puedes iniciar sesión.");
+
+      const newUrl = window.location.pathname;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, [location.search]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg(null);
     try {
-      const res = await fetch("http://127.0.0.1:5000/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, password }),
@@ -24,12 +36,11 @@ export default function Login() {
       const data = await res.json();
 
       if (data.ok) {
-        setUser(data.usuario);  
+        setUser(data.usuario);
+        localStorage.setItem("user", JSON.stringify(data.usuario));
         if (data.usuario.rol === "admin") {
-
           navigate("/admin");
         } else {
-
           navigate("/");
         }
       } else {
@@ -43,6 +54,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 to-blue-300 py-10">
       <div className="relative w-full max-w-4xl min-h-[550px] flex rounded-3xl shadow-2xl overflow-hidden bg-white/90">
+        
         {/* Panel lateral DERECHO */}
         <div className="flex flex-col w-1/2 justify-center items-center bg-gradient-to-br from-blue-900 to-blue-500 text-white rounded-r-3xl p-8 transition-all duration-700 order-2">
           <h1 className="text-2xl font-bold font-rubik mb-2">¡Hola!</h1>
@@ -54,6 +66,7 @@ export default function Login() {
             Crear Cuenta
           </button>
         </div>
+
         {/* Formulario de Login (IZQUIERDA) */}
         <div className="w-1/2 flex items-center justify-center order-1">
           <form
@@ -61,10 +74,13 @@ export default function Login() {
             onSubmit={handleLogin}
           >
             <h2 className="text-center text-3xl font-bold font-rubik mb-3 text-blue-900">Iniciar Sesión</h2>
+
             <div className="mb-4 w-10 h-10 border rounded-full flex items-center justify-center bg-blue-800 shadow hover:bg-black cursor-pointer mx-auto">
               <i className="fab fa-google text-xl text-white"></i>
             </div>
+
             <span className="text-gray-500 text-center text-sm mb-3">o usa tu contraseña de correo electrónico</span>
+
             <input
               type="email"
               placeholder="Correo"
@@ -81,13 +97,25 @@ export default function Login() {
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
+
             <button
               type="button"
+              onClick={() => navigate("/olvido-contrasena")}
               className="text-xs text-blue-700 mb-2 hover:underline w-fit"
             >
               ¿Olvidaste tu contraseña?
             </button>
-            {msg && <span className="text-red-600 text-sm mb-2 text-center">{msg}</span>}
+
+            {/* Mensaje de verificación */}
+            {mensajeVerificado && (
+              <div className="text-green-600 text-sm mb-2 text-center">{mensajeVerificado}</div>
+            )}
+
+            {/* Mensaje de error */}
+            {msg && (
+              <div className="text-red-600 text-sm mb-2 text-center">{msg}</div>
+            )}
+
             <button
               className="w-full py-3 bg-blue-900 text-white font-bold font-rubik rounded-lg hover:bg-blue-700 transition mt-2"
               type="submit"

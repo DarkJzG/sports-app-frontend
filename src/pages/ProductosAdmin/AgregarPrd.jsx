@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function AgregarProducto() {
   const [nombre, setNombre] = useState("");
@@ -26,20 +27,22 @@ export default function AgregarProducto() {
   const navigate = useNavigate();
   const [talla, setTalla] = useState("");
   const [coloresSeleccionados, setColoresSeleccionados] = useState([]);
+  const [observaciones, setObservaciones] = useState("");
+
 
 
   // Fetch categorías y telas
   useEffect(() => {
-    fetch("http://localhost:5000/catg/all")
+    fetch(`${API_URL}/catg/all`)
       .then(res => res.json()).then(setCategorias);
-    fetch("http://localhost:5000/tela/all")
+    fetch(`${API_URL}/tela/all`)
       .then(res => res.json()).then(setTelas);
   }, []);
 
   // Cargar mano de obra y valores de diseño
   useEffect(() => {
     if (categoria) {
-      fetch(`http://localhost:5000/mano/all`)
+      fetch(`${API_URL}/mano/all`)
         .then(res => res.json())
         .then(data => {
           const mano = data.find(m => m.categoria_id === categoria);
@@ -52,7 +55,7 @@ export default function AgregarProducto() {
   // Cargar colores cuando selecciona tela
   useEffect(() => {
     if (tela) {
-      fetch(`http://localhost:5000/tela/get/${tela}`)
+      fetch(`${API_URL}/tela/get/${tela}`)
         .then(res => res.json())
         .then(data => setColores(data.colores || []));
     } else {
@@ -106,23 +109,32 @@ export default function AgregarProducto() {
       return;
     }
     const data = {
-      nombre, categoria, 
+      nombre,
+      observaciones, 
+      categoria: categorias.find(c => c._id === categoria)?.nombre, 
       tela: telas.find(t=>t._id===tela)?.nombre, 
       color: coloresSeleccionados,
       talla,
-      manoobra: manoObra, namediseno, diseno,
-      metrocantidad, costounitario, costoxmayor,
-      preciomenor: precioMenor, preciomayor: precioMayor,
-      ganamenor, ganamayor, imageUrl
+      manoobra: manoObra, 
+      namediseno, 
+      diseno,
+      metrocantidad, 
+      costounitario, 
+      costoxmayor,
+      preciomenor: precioMenor, 
+      preciomayor: precioMayor,
+      ganamenor, 
+      ganamayor, 
+      imageUrl
     };
-    const res = await fetch("http://localhost:5000/producto/add", {
+    const res = await fetch(`${API_URL}/producto/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
     const resData = await res.json();
     setMsg(resData.msg);
-    if (resData.ok) setTimeout(() => navigate("/productos"), 1200);
+    if (resData.ok) setTimeout(() => navigate("/producto"), 1200);
   }
 
   return (
@@ -149,6 +161,15 @@ export default function AgregarProducto() {
               value={nombre} onChange={e=>setNombre(e.target.value)}
               placeholder="Nombre de la prenda..." />
           </div>
+
+          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+            <label className="font-bold">Observaciones</label>
+            <textarea 
+              className="w-full bg-transparent outline-none mt-1 border-none"
+              value={observaciones} onChange={e=>setObservaciones(e.target.value)}
+              placeholder="Observaciones sobre la prenda..." />
+          </div>
+
           <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
             <label className="font-bold">Categoría</label>
             <select className="w-full bg-transparent mt-1" value={categoria}

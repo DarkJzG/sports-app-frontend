@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 // Modal para seleccionar la categoría (reutilizado)
 function ModalCategorias({ show, categorias, onSelect, onClose }) {
@@ -49,11 +50,11 @@ export default function EditarManoObra() {
 
   // Cargar categorías y datos actuales de la mano de obra
   useEffect(() => {
-    fetch("http://localhost:5000/catg/all")
+    fetch(`${API_URL}/catg/all`)
       .then(res => res.json())
       .then(data => setCategorias(data));
 
-    fetch(`http://localhost:5000/mano/get/${id}`)
+    fetch(`${API_URL}/mano/get/${id}`)
       .then(res => res.json())
       .then(mano => {
         setCategoriaSeleccionada({ _id: mano.categoria_id, nombre: mano.categoria_nombre });
@@ -96,7 +97,7 @@ export default function EditarManoObra() {
       sublimado: sublimado,
       total: total,
     };
-    const res = await fetch(`http://localhost:5000/mano/update/${id}`, {
+    const res = await fetch(`${API_URL}/mano/update/${id}`, {
       method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(data)

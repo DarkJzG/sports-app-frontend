@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function EditarCategoria() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function EditarCategoria() {
 
   // Cargar la categoría al montar
   useEffect(() => {
-    fetch(`http://localhost:5000/catg/get/${id}`)
+    fetch(`${API_URL}/catg/get/${id}`)
       .then(res => res.json())
       .then(cat => {
         setNombre(cat.nombre);
@@ -46,7 +47,7 @@ export default function EditarCategoria() {
     if (nuevaImagen) {
       imagen_url = await uploadImageToCloudinary(nuevaImagen);
     }
-    const res = await fetch(`http://localhost:5000/catg/update/${id}`, {
+    const res = await fetch(`${API_URL}/catg/update/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, descripcion, imagen_url }),

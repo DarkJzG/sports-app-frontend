@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function EditarProducto() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [nombre, setNombre] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [categoria, setCategoria] = useState("");
   const [telas, setTelas] = useState([]);
@@ -27,15 +29,16 @@ export default function EditarProducto() {
   const [talla, setTalla] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/catg/all").then(res => res.json()).then(setCategorias);
-    fetch("http://localhost:5000/tela/all").then(res => res.json()).then(setTelas);
+    fetch(`${API_URL}/catg/all`).then(res => res.json()).then(setCategorias);
+    fetch(`${API_URL}/tela/all`).then(res => res.json()).then(setTelas);
   }, []);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/producto/get/${id}`)
+    fetch(`${API_URL}/producto/get/${id}`)
       .then(res => res.json())
       .then(producto => {
         setNombre(producto.nombre);
+        setObservaciones(producto.observaciones || "");
         setCategoria(producto.categoria);
         setTela(telas.find(t => t.nombre === producto.tela)?._id || "");
         setColoresSeleccionados(producto.color || []);
@@ -56,7 +59,7 @@ export default function EditarProducto() {
 
   useEffect(() => {
     if (tela) {
-      fetch(`http://localhost:5000/tela/get/${tela}`)
+      fetch(`${API_URL}/tela/get/${tela}`)
         .then(res => res.json())
         .then(data => setColores(data.colores || []));
     } else {
@@ -97,7 +100,9 @@ export default function EditarProducto() {
       return;
     }
     const data = {
-      nombre, categoria,
+      nombre,
+      categoria: categorias.find(c => c._id === categoria)?.nombre,
+      observaciones,
       tela: telas.find(t => t._id === tela)?.nombre,
       color: coloresSeleccionados,
       namediseno, diseno, manoobra: manoObra,
@@ -105,14 +110,14 @@ export default function EditarProducto() {
       preciomenor, preciomayor, ganamenor, ganamayor,
       imageUrl, talla
     };
-    const res = await fetch(`http://localhost:5000/producto/update/${id}`, {
+    const res = await fetch(`${API_URL}/producto/update/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
     const resData = await res.json();
     setMsg(resData.msg);
-    if (resData.ok) setTimeout(() => navigate("/productos"), 1500);
+    if (resData.ok) setTimeout(() => navigate("/producto"), 1500);
   };
 
   return (
@@ -126,6 +131,17 @@ export default function EditarProducto() {
         </div>
         <div className="flex-1 grid grid-cols-2 gap-4">
           <input value={nombre} onChange={e => setNombre(e.target.value)} className="border p-2 rounded" placeholder="Nombre" />
+          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+            <label className="font-bold">Observaciones</label>
+            <textarea
+              className="w-full bg-transparent outline-none mt-1 border-none"
+              placeholder="Detalles especiales de la prenda..."
+              rows={3}
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+            />
+          </div>
+
           <select value={categoria} onChange={e => setCategoria(e.target.value)} className="border p-2 rounded">
             <option value="">Selecciona categoría</option>
             {categorias.map(c => <option key={c._id} value={c._id}>{c.nombre}</option>)}

@@ -15,15 +15,25 @@ import ProductoF from "./pages/ProductosAdmin/ProductosAdm";
 import AgregarProducto from "./pages/ProductosAdmin/AgregarPrd";
 import EditarProducto from "./pages/ProductosAdmin/EditarPrd";
 
+import RestContra from "./pages/RecupContra";
+import OldContra from "./pages/OldContra"; 
 
 
 import Home from "./pages/Home";
 import Catalogo from "./pages/Catalogo";
+import DetallePrd from "./pages/DetallePrd";
+import DetalleCarrito from "./pages/DetalleCarrito";
+
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import Perfil from "./pages/Perfil";
 import Modelo from "./pages/Modelo";
 import Carrito from "./pages/Carrito";
+
+
+import GenerarImagen from "./pages/ModeloIA/GenerarImagen";
+import GenerarImagenForm from "./pages/ModeloIA/GenerarImagenForm";
+import GenerarImagenStable from "./pages/ModeloIA/GenerarImagenStable";
 
 function App() {
   return (
@@ -43,15 +53,28 @@ function App() {
           <Route path="/producto" element={<ProductoF />} />
           <Route path="/producto/agregar" element={<AgregarProducto />} />
           <Route path="/producto/editar/:id" element={<EditarProducto />} />
+          <Route path="/restablecer-contrasena" element={<RestContra />} />
+          <Route path="/olvido-contrasena" element={<OldContra />} />
           
           {/* Rutas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalogo />} />
+          <Route path="/producto/:id" element={<DetallePrd />} />
+          <Route path="/carrito" element={<Carrito />} />
+          <Route path="/carrito/detalle/:itemId" element={<DetalleCarrito />} />
+
+          {/* Rutas de usuario */} 
+          
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/personalizar" element={<Modelo />} />
-          <Route path="/carrito" element={<Carrito />} />
+
+
+          <Route path="/gen-img" element={<GenerarImagen />} />
+          <Route path="/gen-img-form" element={<GenerarImagenForm />} />
+          <Route path="/gen-img-stable" element={<GenerarImagenStable />} />
+
         </Routes>
       </Router>
     

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 // Modal simple para seleccionar la categoría (puedes mejorarlo luego)
 function ModalCategorias({ show, categorias, onSelect, onClose }) {
@@ -48,7 +49,7 @@ export default function AgregarManoObra() {
 
   // Traer las categorías de producto
   useEffect(() => {
-    fetch("http://localhost:5000/catg/all")
+    fetch(`${API_URL}/catg/all`)
       .then(res => res.json())
       .then(data => setCategorias(data));
   }, []);
@@ -82,7 +83,7 @@ export default function AgregarManoObra() {
       sublimado: sublimado,
       total: total,
     };
-    const res = await fetch("http://localhost:5000/mano/add", {
+    const res = await fetch(`${API_URL}/mano/add`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(data)

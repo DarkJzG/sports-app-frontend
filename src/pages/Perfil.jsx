@@ -7,7 +7,8 @@ export default function PerfilUsuario() {
   const navigate = useNavigate();
 
     const handleLogout = () => {
-    setUser(null); // Borra usuario del contexto y localStorage
+    localStorage.removeItem("user"); // Borra el usuario del localStorage
+    setUser(null); // Borra el usuario del contexto
     navigate("/"); // Redirige al home o a la ruta que prefieras
     };
 

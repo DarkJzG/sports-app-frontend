@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import NavbarA from "../../components/NavbarAdmin";
 import React, { useEffect, useState } from "react";
 import FooterA from "../../components/FooterAdmin";
+import { API_URL } from "../../config";
 
 // Modal para eliminar mano de obra
 function ModalEliminarMano({ show, onClose, onConfirm }) {
@@ -53,14 +54,14 @@ export default function ListarManoObra() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/mano/all")
+    fetch(`${API_URL}/mano/all`)
       .then(res => res.json())
       .then(data => setManos(data));
   }, []);
 
   async function eliminarMano() {
     if (!manoIdEliminar) return;
-    const res = await fetch(`http://localhost:5000/mano/delete/${manoIdEliminar}`, {
+    const res = await fetch(`${API_URL}/mano/delete/${manoIdEliminar}`, {
       method: "DELETE",
     });
     const data = await res.json();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function AgregarCategoria() {
   const [nombre, setNombre] = useState("");
@@ -42,7 +43,7 @@ export default function AgregarCategoria() {
 
     // 3. Enviar datos a backend
     try {
-      const res = await fetch("http://localhost:5000/catg/add", {
+      const res = await fetch(`${API_URL}/catg/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, descripcion, imagen_url }),

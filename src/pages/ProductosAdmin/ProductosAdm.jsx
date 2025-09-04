@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function ListarProducto() {
   const [productos, setProductos] = useState([]);
@@ -9,13 +10,13 @@ export default function ListarProducto() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/producto/all")
+    fetch(`${API_URL}/producto/all`)
       .then(res => res.json())
       .then(setProductos);
   }, []);
 
   function handleEliminar() {
-    fetch(`http://localhost:5000/producto/delete/${idEliminar}`, { method: "DELETE" })
+    fetch(`${API_URL}/producto/delete/${idEliminar}`, { method: "DELETE" })
       .then(res => res.json())
       .then(data => {
         if (data.ok) setProductos(productos.filter(p => p._id !== idEliminar));

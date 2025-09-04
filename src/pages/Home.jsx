@@ -27,11 +27,14 @@ export default function Home() {
           <span className="text-lg text-blue-900 mb-2">Usa nuestra herramienta SplArt para diseñar tu propia prenda deportiva</span>
           <p className="text-gray-500 mb-6">-</p>
           <div className="flex gap-4 justify-center">
-            <Link to="/admin" className="btn bg-blue-900 text-white rounded-lg px-6 py-3 hover:bg-blue-700">
+            <Link to="/gen-img" className="btn bg-blue-900 text-white rounded-lg px-6 py-3 hover:bg-blue-700">
               Probar SplArt
             </Link>
-            <Link to="/catalogo" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
+            <Link to="/gen-img-form" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
               Ver Productos
+            </Link>
+            <Link to="/gen-img-stable" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
+              Ver Stable
             </Link>
           </div>
         </div>
@@ -75,8 +78,15 @@ export default function Home() {
                 <div key={prod._id} className="bg-white rounded-xl shadow p-3 flex flex-col items-center">
                   <img src={prod.imageUrl} alt={prod.nombre} className="h-28 rounded mb-2 object-contain" />
                   <h3 className="font-semibold text-lg mb-1 text-center">{prod.nombre}</h3>
-                  <span className="text-blue-900 font-bold text-xl mb-1">${prod.preciomenor?.toFixed(2) || "0.00"}</span>
-                  <button className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700">Añadir al carrito</button>
+                  <span className="text-blue-900 font-bold text-xl mb-1">
+                    ${prod.preciomenor?.toFixed(2) || "0.00"}
+                  </span>
+                  <Link
+                    to={`/producto/${prod._id}`}
+                    className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700 text-center w-full"
+                  >
+                    Ver Detalles
+                  </Link>
                 </div>
               ))
             )}
