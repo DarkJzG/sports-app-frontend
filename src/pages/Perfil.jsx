@@ -2,6 +2,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 export default function PerfilUsuario() {
   const { setUser } = useAuth();
   const navigate = useNavigate();
@@ -15,20 +18,8 @@ export default function PerfilUsuario() {
   return (
     
     <div className="min-h-screen flex flex-col bg-[#f7f7f7]">
-      {/* Header */}
-      <header className="bg-white shadow flex items-center px-8 py-3 justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="Logo" className="h-10" />
-          <span className="font-bold text-xl text-blue-800">Johan Sports</span>
-        </div>
-        <nav className="flex gap-6 text-gray-700 font-medium">
-          <a href="/productos">Productos</a>
-          <a href="/telas">Telas</a>
-          <a href="/ofertas">Ofertas</a>
-          <a href="/categorias">Categorías</a>
-          <button className="ml-4 px-4 py-1 rounded bg-blue-900 text-white hover:bg-blue-700 transition">Iniciar Sesión</button>
-        </nav>
-      </header>
+      {/* NAVBAR */}
+      <Navbar />
 
       {/* Banner Perfil */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
@@ -132,15 +123,8 @@ export default function PerfilUsuario() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-blue-900 text-white mt-10 px-8 py-6 flex flex-col md:flex-row justify-between items-center">
-        <span className="font-bold text-xl">Johan Sports</span>
-        <div className="flex gap-4 mt-3 md:mt-0">
-          <a href="/"><i className="fab fa-facebook text-2xl"></i></a>
-          <a href="/"><i className="fab fa-instagram text-2xl"></i></a>
-          <a href="/"><i className="fab fa-youtube text-2xl"></i></a>
-        </div>
-      </footer>
+      {/* FOOTER */}
+      <Footer />
     </div>
   );
 }

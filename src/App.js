@@ -35,6 +35,10 @@ import GenerarImagen from "./pages/ModeloIA/GenerarImagen";
 import GenerarImagenForm from "./pages/ModeloIA/GenerarImagenForm";
 import GenerarImagenStable from "./pages/ModeloIA/GenerarImagenStable";
 
+import SeleccionPrenda from "./pages/ModeloIA/SeleccionPrenda";
+import FormCamiseta from "./pages/ModeloIA/FormCamiseta";
+import PrendasIA from "./pages/PrendasIA";
+
 function App() {
   return (
     
@@ -74,6 +78,10 @@ function App() {
           <Route path="/gen-img" element={<GenerarImagen />} />
           <Route path="/gen-img-form" element={<GenerarImagenForm />} />
           <Route path="/gen-img-stable" element={<GenerarImagenStable />} />
+
+          <Route path="/modeloia" element={<SeleccionPrenda />} />
+          <Route path="/modeloia/camiseta" element={<FormCamiseta />} />
+          <Route path="/ver-prendaIA" element={<PrendasIA />} />
 
         </Routes>
       </Router>

@@ -36,6 +36,12 @@ export default function Home() {
             <Link to="/gen-img-stable" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
               Ver Stable
             </Link>
+            <Link to="/modeloia" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
+              Crear Prenda
+            </Link>
+            <Link to="/ver-prendaIA" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
+              Ver Prenda
+            </Link>
           </div>
         </div>
       </section>
