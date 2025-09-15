@@ -38,6 +38,11 @@ import GenerarImagenStable from "./pages/ModeloIA/GenerarImagenStable";
 import SeleccionPrenda from "./pages/ModeloIA/SeleccionPrenda";
 import FormCamiseta from "./pages/ModeloIA/FormCamiseta";
 import PrendasIA from "./pages/PrendasIA";
+import ListarPrendasIA from "./pages/ModeloIA/ListarPrendasIA";
+
+import SeleccionDiseno from "./pages/DisenarPrendas/SeleccionDiseno";
+import Camiseta3D from "./pages/DisenarPrendas/Camiseta3D";
+
 
 function App() {
   return (
@@ -75,13 +80,20 @@ function App() {
           <Route path="/personalizar" element={<Modelo />} />
 
 
+          {/* Rutas de IA Genera Imagen*/}
           <Route path="/gen-img" element={<GenerarImagen />} />
           <Route path="/gen-img-form" element={<GenerarImagenForm />} />
           <Route path="/gen-img-stable" element={<GenerarImagenStable />} />
 
+          {/* Rutas Generar Prendas Imagen */} 
           <Route path="/modeloia" element={<SeleccionPrenda />} />
           <Route path="/modeloia/camiseta" element={<FormCamiseta />} />
           <Route path="/ver-prendaIA" element={<PrendasIA />} />
+          <Route path="/listar-prendasIA" element={<ListarPrendasIA />} />
+
+          {/* Rutas Modelo 3D Camiseta */} 
+          <Route path="/modelo3d" element={<SeleccionDiseno />} />
+          <Route path="/modelo3d/camiseta3d" element={<Camiseta3D />} />
 
         </Routes>
       </Router>

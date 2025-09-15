@@ -22,7 +22,7 @@ export default function FormCamiseta() {
   const [genero, setGenero] = useState("");
 
   // Resultado / UI
-  const [imagen, setImagen] = useState(null);
+  const [imagen, setImagen] = useState(null); // ahora guarda la URL de Cloudinary
   const [promptResult, setPromptResult] = useState("");
   const [fichaTecnica, setFichaTecnica] = useState(null);
   const [costo, setCosto] = useState(null);
@@ -51,11 +51,11 @@ export default function FormCamiseta() {
     return user.id || user._id || null;
   };
 
-
   const isValidObjectIdString = (id) => {
     return typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
   };
 
+  // --- Generar imagen ---
   const handleGenerar = async () => {
     const v = validar();
     if (v) {
@@ -63,14 +63,12 @@ export default function FormCamiseta() {
       return;
     }
 
-    // Normalizar userId
     const userIdRaw = normalizeUserId(user);
     if (!userIdRaw) {
       setError("Debes iniciar sesión para generar y guardar la prenda.");
       return;
     }
     if (!isValidObjectIdString(userIdRaw)) {
-      // aviso, el backend validará también. Si prefieres, puedes permitir y enviar igual.
       setError("userId inválido. Vuelve a iniciar sesión.");
       return;
     }
@@ -82,10 +80,9 @@ export default function FormCamiseta() {
     setFichaTecnica(null);
     setCosto(null);
 
-    // Payload fuera del try para poder inspeccionarlo si hay error
     const payload = {
       tipo_prenda: "camiseta",
-      userId: normalizeUserId(user),
+      userId: userIdRaw,
       atributos: {
         estilo: estilo || "deportiva",
         color1,
@@ -99,39 +96,29 @@ export default function FormCamiseta() {
       },
     };
 
-    console.log("Usuario desde AuthContext:", user);
-    console.log("Payload final enviado:", payload);
-
     try {
-      const endpoint = `${API_URL}/api/ia/generar_prendas`;
-
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_URL}/api/ia/generar_prendas`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        // intenta leer detalle del error del servidor
         let text;
-        try {
-          text = await res.text();
-        } catch (e) {
-          text = `Status ${res.status}`;
-        }
+        try { text = await res.text(); } catch (e) { text = `Status ${res.status}`; }
         throw new Error(`Error ${res.status}: ${text}`);
       }
 
       const data = await res.json();
 
-      // Backend devuelve 'imagen' (base64), 'prompt', 'ficha_tecnica', 'costo'
-      if (data.imagen) {
-        setImagen(`data:image/png;base64,${data.imagen}`);
+      // Backend ahora devuelve imageUrl (Cloudinary)
+      if (data.imageUrl) {
+        setImagen(data.imageUrl);
         setPromptResult(data.prompt || "");
         setFichaTecnica(data.ficha_tecnica || {});
         setCosto(data.costo ?? null);
       } else {
-        setError("No se recibió imagen desde el servidor");
+        setError("No se recibió URL de la imagen desde el servidor");
       }
 
     } catch (err) {
@@ -142,6 +129,7 @@ export default function FormCamiseta() {
     }
   };
 
+  // --- Descargar PDF ---
   const handleDescargarPDF = async () => {
     if (!fichaTecnica || !imagen) {
       setError("Primero genera la prenda para exportar el PDF");
@@ -149,12 +137,26 @@ export default function FormCamiseta() {
     }
 
     try {
+      let imageBase64 = null;
+
+      // Si imagen es URL (Cloudinary), convertir a base64
+      if (imagen.startsWith("http")) {
+        const resp = await fetch(imagen);
+        const blob = await resp.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        imageBase64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+        );
+      } else {
+        imageBase64 = imagen.replace("data:image/png;base64,", "");
+      }
+
       const res = await fetch(`${API_URL}/api/ia/ficha_tecnica`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ficha: fichaTecnica,
-          imagen: imagen.replace("data:image/png;base64,", ""),
+          imagen: imageBase64
         }),
       });
 
@@ -167,6 +169,7 @@ export default function FormCamiseta() {
       } else {
         setError("No se pudo generar el PDF");
       }
+
     } catch (err) {
       console.error("Error generando PDF:", err);
       setError("Error generando PDF: " + (err.message || err));
@@ -176,7 +179,6 @@ export default function FormCamiseta() {
   return (
     <div>
       <Navbar />
-
       <div className="max-w-4xl mx-auto py-10 px-6">
         <h1 className="text-3xl font-bold text-blue-900 mb-6">Generar Camiseta</h1>
 
@@ -255,7 +257,6 @@ export default function FormCamiseta() {
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );
