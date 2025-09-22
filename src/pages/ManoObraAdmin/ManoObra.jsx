@@ -30,8 +30,8 @@ function ManoCard({ mano, onEditar, onEliminar }) {
         <div className="font-bold text-lg text-gray-900">Categoría pertenece</div>
         <div className="text-gray-700 mb-1">{mano.categoria_nombre}</div>
         <div className="text-sm text-gray-500">
-          <b>Insumos:</b> ${parseFloat(mano.insumo_hilo) + parseFloat(mano.insumo_elastico) + parseFloat(mano.insumo_cierre)}<br />
-          <b>Mano de obra:</b> ${mano.insumo_mano_obra}<br />
+          <b>Insumos:</b> ${parseFloat(mano.insumosTotal)}<br />
+          <b>Mano de obra:</b> ${mano.total_mano_obra}<br />
           <b>Total:</b> ${mano.total}
         </div>
       </div>

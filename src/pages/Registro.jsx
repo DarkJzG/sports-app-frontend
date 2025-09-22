@@ -1,6 +1,7 @@
+// src/pages/Registro.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../services/registroServicio";
+import { API_URL } from "../config";
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -15,12 +16,18 @@ export default function Registro() {
     e.preventDefault();
     setMsg(null);
     try {
-      const res = await registerUser(form);
-      if (res.ok) {
-        setMsg({ text: "¡Registro exitoso! Redirigiendo...", color: "green" });
-        setTimeout(() => navigate("/login"), 1800);
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setMsg({ text: data.msg, color: "green" });
+        // Lo enviamos al login después de unos segundos
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        setMsg({ text: res.msg || "Error al registrar", color: "red" });
+        setMsg({ text: data.msg || "Error al registrar", color: "red" });
       }
     } catch (error) {
       setMsg({ text: "Error de conexión con el servidor", color: "red" });
@@ -31,11 +38,11 @@ export default function Registro() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 to-blue-300 py-10">
       <div className="relative w-full max-w-4xl min-h-[550px] flex rounded-3xl shadow-2xl overflow-hidden bg-white/90">
         {/* Panel lateral IZQUIERDA */}
-        <div className="flex flex-col w-1/2 justify-center items-center bg-gradient-to-br from-blue-900 to-blue-500 text-white rounded-l-3xl p-8 transition-all duration-700 order-1">
+        <div className="flex flex-col w-1/2 justify-center items-center bg-gradient-to-br from-blue-900 to-blue-500 text-white rounded-l-3xl p-8 order-1">
           <h1 className="text-2xl font-bold font-rubik mb-2">¡Bienvenido de nuevo!</h1>
           <p className="mb-6 text-center">Introduce tus credenciales para utilizar todas las funciones del sitio</p>
           <button
-            className="border border-white px-6 py-2 rounded-lg hover:bg-white hover:text-blue-700 transition pointer-events-auto"
+            className="border border-white px-6 py-2 rounded-lg hover:bg-white hover:text-blue-700 transition"
             onClick={() => navigate("/login")}
           >
             Iniciar Sesión
@@ -48,10 +55,7 @@ export default function Registro() {
             className="flex flex-col gap-2 bg-white px-10 py-14 rounded-3xl shadow-md w-full max-w-md"
           >
             <h2 className="text-center text-3xl font-bold font-rubik mb-3 text-blue-900">Crear Cuenta</h2>
-            <div className="mb-4 w-10 h-10 border rounded-full flex items-center justify-center bg-blue-800 shadow hover:bg-black cursor-pointer mx-auto">
-              <i className="fab fa-google text-xl text-white"></i>
-            </div>
-            <span className="text-gray-500 text-center text-sm mb-3">o utiliza tu correo electrónico para registrarte</span>
+
             <input
               name="nombre"
               type="text"
@@ -79,9 +83,11 @@ export default function Registro() {
               value={form.password}
               onChange={handleChange}
             />
+
             {msg && (
               <span className={`text-sm text-${msg.color}-600 mb-2 text-center`}>{msg.text}</span>
             )}
+
             <button
               className="w-full py-3 bg-blue-800 text-white font-bold font-rubik rounded-lg hover:bg-blue-600 transition mt-5"
               type="submit"

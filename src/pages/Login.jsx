@@ -1,12 +1,13 @@
+// src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../components/AuthContext"; 
+import { useAuth } from "../components/AuthContext";
 import { API_URL } from "../config";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setUser } = useAuth();
+  const { login } = useAuth(); // usamos la nueva función login(usuario, token)
 
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +19,6 @@ export default function Login() {
     const verificado = queryParams.get("verificado");
     if (verificado === "true") {
       setMensajeVerificado("✅ Tu cuenta ha sido verificada con éxito. Ya puedes iniciar sesión.");
-
       const newUrl = window.location.pathname;
       window.history.replaceState(null, "", newUrl);
     }
@@ -27,17 +27,21 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg(null);
+
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, password }),
       });
+
       const data = await res.json();
 
       if (data.ok) {
-        setUser(data.usuario);
-        localStorage.setItem("user", JSON.stringify(data.usuario));
+        // Guardar usuario y token con AuthContext
+        login(data.usuario, data.token);
+
+        // Redirigir según rol
         if (data.usuario.rol === "admin") {
           navigate("/admin");
         } else {
@@ -46,6 +50,34 @@ export default function Login() {
       } else {
         setMsg(data.msg || "Correo o contraseña incorrectos");
       }
+
+      if (!data.ok) {
+        if (data.msg === "Cuenta no verificada") {
+          setMsg(
+            <div>
+              Tu cuenta no está verificada. 
+              <button
+                onClick={async () => {
+                  const res = await fetch(`${API_URL}/auth/resend-verification`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ correo }),
+                  });
+                  const resp = await res.json();
+                  alert(resp.msg);
+                }}
+                className="ml-2 text-blue-700 underline"
+              >
+                Reenviar verificación
+              </button>
+            </div>
+          );
+        } else {
+          setMsg(data.msg || "Correo o contraseña incorrectos");
+        }
+      }
+
+
     } catch (err) {
       setMsg("Error de conexión con el servidor");
     }

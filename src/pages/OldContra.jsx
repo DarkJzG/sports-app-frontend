@@ -1,7 +1,6 @@
+// src/pages/OldContra.jsx
 import React, { useState } from "react";
 import { API_URL } from "../config";
-import { useNavigate } from "react-router-dom";
-
 
 export default function OlvidoContrasena() {
   const [correo, setCorreo] = useState("");
@@ -13,16 +12,16 @@ export default function OlvidoContrasena() {
     setMsg("");
 
     try {
-      const res = await fetch(`${API_URL}/auth/olvidar-password`, {
+      const res = await fetch(`${API_URL}/auth/reset-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo })
+        body: JSON.stringify({ correo }),
       });
 
       const data = await res.json();
       setMsg(data.msg);
       setEnviado(data.ok);
-    } catch (err) {
+    } catch {
       setMsg("Error al conectar con el servidor");
     }
   };
@@ -34,7 +33,11 @@ export default function OlvidoContrasena() {
         <p className="text-sm text-gray-600 mb-6">
           Ingresa tu correo electrónico registrado y te enviaremos un enlace para restablecer tu contraseña.
         </p>
-        {msg && <div className={`mb-4 text-sm text-center font-semibold ${enviado ? "text-green-600" : "text-red-600"}`}>{msg}</div>}
+        {msg && (
+          <div className={`mb-4 text-sm text-center font-semibold ${enviado ? "text-green-600" : "text-red-600"}`}>
+            {msg}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"

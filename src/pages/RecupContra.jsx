@@ -1,3 +1,4 @@
+// src/pages/RecupContra.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
@@ -34,10 +35,10 @@ export default function RestablecerContrasena() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/auth/restablecer-password`, {
+      const res = await fetch(`${API_URL}/auth/reset-confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password })
+        body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
@@ -46,7 +47,7 @@ export default function RestablecerContrasena() {
       if (data.ok) {
         setTimeout(() => navigate("/login"), 2000);
       }
-    } catch (error) {
+    } catch {
       setMsg("Error de conexión con el servidor");
     }
   };

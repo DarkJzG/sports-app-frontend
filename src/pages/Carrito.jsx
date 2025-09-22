@@ -40,15 +40,13 @@ export default function Carrito() {
   }, [user, navigate]);
 
   const calcularTotal = () => {
-    return carrito.reduce((total, item) => total + item.precio, 0).toFixed(2);
+    return carrito.reduce((total, item) => total + (item.precio || 0), 0).toFixed(2);
   };
 
   const eliminarProducto = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este producto del carrito?")) return;
     try {
-      const res = await fetch(`${API_URL}/carrito/delete/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`${API_URL}/carrito/delete/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.ok) {
         setCarrito(carrito.filter(p => p._id !== id));
@@ -76,54 +74,52 @@ export default function Carrito() {
           <>
             <div className="space-y-4">
               {carrito.map((item) => {
-
-                console.log("ID del item:", item._id);
+                const id = typeof item._id === "object" && item._id.$oid 
+                  ? item._id.$oid 
+                  : item._id?.toString();
 
                 return (
-                  <div
-                    key={item._id}
-                  className="border rounded-lg p-4 flex gap-4 items-center bg-white shadow"
-                >
-                <img
-                    src={item.imageUrl}
-                    alt={item.nombre}
-                    className="w-24 h-24 object-cover rounded"
-                />
-                <div className="flex-1">
-                    <p className="font-bold text-blue-900 hover:underline cursor-pointer"
-                    onClick={() => {
-                      const id = typeof item._id === "object" && item._id.$oid 
-                      ? item._id.$oid 
-                      : item._id?.toString();
-                      navigate(`/carrito/detalle/${id}`)
-                    }}
+                  <div key={id} className="border rounded-lg p-4 flex gap-4 items-center bg-white shadow">
+                    <img
+                      src={item.imagen_url}
+                      alt={item.nombre}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <p
+                        className="font-bold text-blue-900 hover:underline cursor-pointer"
+                        onClick={() => navigate(`/carrito/detalle/${id}`)}
+                      >
+                        {item.nombre}
+                      </p>
+                      <p><b>Categoría:</b> {item.categoria_nombre}</p>
+                      <p><b>Tela:</b> {item.tela_nombre}</p>
+                      <p><b>Color:</b> {item.color?.color}</p>
+                      <p><b>Talla:</b> {item.talla}</p>
+                      <p><b>Cantidad:</b> {item.cantidad}</p>
+                      <p><b>Precio Unitario:</b> ${parseFloat(item.precio_unitario || 0).toFixed(2)}</p>
+                      <p className="text-blue-900 font-semibold">
+                        Subtotal: ${parseFloat(item.precio || 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => eliminarProducto(id)}
+                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                     >
-                    {item.nombre}
-                    </p>
-                    <p>Talla: {item.talla} | Color: {item.color}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                    <p>Subtotal: ${parseFloat(item.precio).toFixed(2)}</p>
-                </div>
-                  <button
-                    onClick={() => eliminarProducto(item._id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              )
-
-          
-            })}
+                      Eliminar
+                    </button>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="mt-8 text-right">
               <h2 className="text-xl font-semibold">Total: ${calcularTotal()}</h2>
               <button
-                onClick={() => navigate("/transferencia")}
+                onClick={() => navigate("/checkout")}
                 className="mt-4 bg-blue-900 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold"
               >
-                Realizar Transferencia
+                Confirmar Pedido
               </button>
             </div>
           </>

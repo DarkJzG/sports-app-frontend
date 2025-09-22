@@ -1,3 +1,4 @@
+// src/pages/Perfil.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
@@ -6,17 +7,15 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 export default function PerfilUsuario() {
-  const { setUser } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
-    const handleLogout = () => {
-    localStorage.removeItem("user"); // Borra el usuario del localStorage
-    setUser(null); // Borra el usuario del contexto
-    navigate("/"); // Redirige al home o a la ruta que prefieras
-    };
+  const handleLogout = () => {
+    logout(); // usamos la función centralizada
+    navigate("/");
+  };
 
   return (
-    
     <div className="min-h-screen flex flex-col bg-[#f7f7f7]">
       {/* NAVBAR */}
       <Navbar />
@@ -30,14 +29,13 @@ export default function PerfilUsuario() {
             <path d="M4 19c0-2.2 3.6-4 8-4s8 1.8 8 4" />
           </svg>
         </div>
-         <button
-        onClick={handleLogout}
-        className="ml-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 shadow transition"
-      >
-        Cerrar Sesión
-      </button>
+        <button
+          onClick={handleLogout}
+          className="ml-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 shadow transition"
+        >
+          Cerrar Sesión
+        </button>
       </section>
-
 
       {/* Información */}
       <main className="flex-1 px-8 py-10 max-w-5xl mx-auto">
@@ -45,7 +43,6 @@ export default function PerfilUsuario() {
           <h3 className="text-2xl font-bold mb-6">Información</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
             <div className="bg-white rounded-xl shadow p-4">
-                
               <span className="text-xs text-gray-500">Nombre</span>
               <div className="font-semibold text-gray-900">Johan</div>
             </div>
@@ -116,7 +113,6 @@ export default function PerfilUsuario() {
                   <td className="py-2 px-4">Conjunto Invierno</td>
                   <td className="py-2 px-4 text-green-600">Finalizado</td>
                 </tr>
-                {/* Agrega más filas de ejemplo si quieres */}
               </tbody>
             </table>
           </div>
@@ -128,4 +124,3 @@ export default function PerfilUsuario() {
     </div>
   );
 }
-

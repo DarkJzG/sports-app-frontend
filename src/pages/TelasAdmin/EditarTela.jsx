@@ -1,177 +1,180 @@
+// src/pages/TelasAdmin/EditarTela.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function EditarTela() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [nombre, setNombre] = useState("");
-  const [colores, setColores] = useState([{ nombre: "", codigo: "#000000" }]);
-  const [cantidad, setCantidad] = useState("");
-  const [precioMetro, setPrecioMetro] = useState("");
-  const [imagenUrl, setImagenUrl] = useState("");
-  const [cargando, setCargando] = useState(false);
+  const [estado, setEstado] = useState("activo");
+  const [categoria, setCategoria] = useState("");
+  const [categorias, setCategorias] = useState([]);
+  const [relacionProd, setRelacionProd] = useState([]);
+  const [catgProd, setCatgProd] = useState([]);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/tela/get/${id}`)
+    // 🔹 Obtener datos de la tela
+    fetch(`${API_URL}/tela/get/${id}`)
       .then(res => res.json())
       .then(tela => {
         setNombre(tela.nombre);
-        setColores(tela.colores || [{ nombre: "", codigo: "#000000" }]);
-        setCantidad(tela.cantidad);
-        setPrecioMetro(tela.precio_metro);
-        setImagenUrl(tela.imagen_url);
+        setEstado(tela.estado);
+        setCategoria(tela.categoria_tela);
+        setRelacionProd(tela.relacion_catg_prod || []);
       });
-  }, [id]);
 
-  // Subir imagen automáticamente al seleccionar archivo
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setCargando(true);
-    const data = new FormData();
-    data.append('file', file);
-    data.append('upload_preset', 'telas_folder'); // TU UPLOAD PRESET
-    data.append('folder', 'telas');
-    const res = await fetch("https://api.cloudinary.com/v1_1/dcn5d4wbo/image/upload", {
-      method: "POST",
-      body: data
-    });
-    const img = await res.json();
-    setImagenUrl(img.secure_url);
-    setCargando(false);
-  };
+    // 🔹 Cargar categorías de tela
+    fetch(`${API_URL}/catg_tela/all`)
+      .then(res => res.json())
+      .then(setCategorias);
+
+    // 🔹 Cargar categorías de producto
+    fetch(`${API_URL}/catg_prod/all`)
+      .then(res => res.json())
+      .then(setCatgProd);
+  }, [id]);
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!nombre || !colores || !cantidad || !precioMetro || !imagenUrl) {
-      setMsg("Todos los campos e imagen son requeridos");
+    if (!nombre || !categoria) {
+      setMsg("Nombre y categoría son obligatorios");
       return;
     }
+
     const data = {
       nombre,
-      colores,
-      cantidad,
-      precio_metro: precioMetro,
-      imagen_url: imagenUrl
+      categoria_tela: categoria,
+      estado,
+      relacion_catg_prod: relacionProd,
     };
-    const res = await fetch(`http://localhost:5000/tela/update/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const resData = await res.json();
-    setMsg(resData.msg);
-    if (resData.ok) setTimeout(() => navigate("/telas"), 1200);
-  };
 
-  const actualizarColor = (index, campo, valor) => {
-    const nuevosColores = [...colores];
-    nuevosColores[index][campo] = valor;
-    setColores(nuevosColores);
-  };
+    try {
+      const res = await fetch(`${API_URL}/tela/update/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-  const agregarColor = () => {
-    setColores([...colores, { nombre: "", codigo: "#000000" }]);
-  };
+      if (!res.ok) {
+        throw new Error("Error en el servidor");
+      }
 
-  const eliminarColor = (index) => {
-    const nuevosColores = colores.filter((_, i) => i !== index);
-    setColores(nuevosColores);
+      const resData = await res.json();
+      setMsg(resData.msg);
+      if (resData.ok) setTimeout(() => navigate("/telas"), 1200);
+    } catch (error) {
+      setMsg("Error de conexión con el servidor");
+    }
   };
-
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <h1 className="text-4xl font-bold mb-2">Editar Tela</h1>
-      <p className="mb-8 text-gray-600">Complete los campos solicitados para modificar la tela</p>
-      <form className="max-w-3xl mx-auto flex flex-col md:flex-row gap-8" onSubmit={handleSubmit}>
-        <div className="flex flex-col items-center">
-          <div className="w-64 h-64 bg-[#f4f4f4] rounded-xl flex items-center justify-center shadow mb-5">
-            {imagenUrl
-              ? <img src={imagenUrl} alt="img-tela" className="h-36 w-36 object-contain" />
-              : <span className="text-4xl">📷</span>
-            }
-          </div>
+      <p className="mb-8 text-gray-600">Modifica los campos de la tela seleccionada</p>
+      <form className="max-w-3xl mx-auto flex flex-col gap-6" onSubmit={handleSubmit}>
+        
+        {/* Nombre */}
+        <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+          <label className="font-bold">Nombre Tela</label>
           <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            disabled={cargando}
+            className="w-full bg-transparent outline-none mt-1 border-none"
+            value={nombre}
+            onChange={e => setNombre(e.target.value)}
           />
-          {cargando && <div className="text-blue-800 mt-2 font-semibold">Subiendo imagen...</div>}
         </div>
-        {/* Campos */}
-        <div className="flex-1 flex flex-col gap-6 justify-center">
-          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
-            <label className="font-bold">Nombre Tela</label>
-            <input className="w-full bg-transparent outline-none mt-1 border-none"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)} />
-          </div>
 
-          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
-            <label className="font-bold">Colores</label>
-            {colores.map((c, i) => (
-              <div key={i} className="flex gap-2 items-center mt-2">
-                <input
-                  type="text"
-                  placeholder="Nombre del color"
-                  value={c.nombre}
-                  onChange={e => actualizarColor(i, "nombre", e.target.value)}
-                  className="flex-1 bg-white border px-2 py-1 rounded"
-                />
-                <input
-                  type="color"
-                  value={c.codigo}
-                  onChange={e => actualizarColor(i, "codigo", e.target.value)}
-                  className="w-10 h-10 rounded"
-                />
-                {colores.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => eliminarColor(i)}
-                    className="text-red-500 font-bold"
-                  >
-                    ✖
-                  </button>
-                )}
-              </div>
+        {/* Categoría de Tela */}
+        <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+          <label className="font-bold">Categoría de Tela</label>
+          <select
+            className="w-full bg-white border rounded px-3 py-2 mt-1"
+            value={categoria}
+            onChange={e => setCategoria(e.target.value)}
+          >
+            <option value="">Seleccione categoría...</option>
+            {categorias.map(cat => (
+              <option key={cat._id} value={cat._id}>{cat.nombre}</option>
             ))}
-            <button
-              type="button"
-              onClick={agregarColor}
-              className="mt-3 text-sm text-blue-900 font-semibold"
-            >
-              + Agregar otro color
-            </button>
-          </div>
+          </select>
+        </div>
 
-          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
-            <label className="font-bold">Cantidad en metros</label>
-            <input className="w-full bg-transparent outline-none mt-1 border-none"
-              value={cantidad}
-              onChange={e => setCantidad(e.target.value)}
-              type="number"
-              min={0} />
+        {/* Relación con categorías de producto */}
+        <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+          <label className="font-bold">Relación con Categorías de Producto</label>
+          <div className="flex flex-wrap gap-3 mt-3">
+            {catgProd.map(cat => {
+              const seleccionado = relacionProd.includes(cat._id);
+              return (
+                <div
+                  key={cat._id}
+                  className={`flex items-center gap-2 border px-3 py-2 rounded-lg cursor-pointer shadow-sm 
+                    ${seleccionado ? "border-blue-700 bg-blue-100" : "border-gray-300"}`}
+                  onClick={() => {
+                    if (seleccionado) {
+                      setRelacionProd(relacionProd.filter(id => id !== cat._id));
+                    } else {
+                      setRelacionProd([...relacionProd, cat._id]);
+                    }
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={seleccionado}
+                    readOnly
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">{cat.nombre}</span>
+                </div>
+              );
+            })}
           </div>
-          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
-            <label className="font-bold">Precio x metro</label>
-            <input className="w-full bg-transparent outline-none mt-1 border-none"
-              value={precioMetro}
-              onChange={e => setPrecioMetro(e.target.value)}
-              type="number"
-              min={0} />
-          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            Marca una o varias categorías relacionadas.
+          </p>
+        </div>
+
+        {/* Estado */}
+        <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+          <label className="font-bold">Estado</label>
+          <select
+            className="w-full bg-white border rounded px-3 py-2 mt-1"
+            value={estado}
+            onChange={e => setEstado(e.target.value)}
+          >
+            <option value="activo">Activo</option>
+            <option value="descontinuado">Descontinuado</option>
+          </select>
+        </div>
+
+        {/* Botones */}
+        <div className="flex gap-4">
           <button
             type="submit"
-            className="bg-blue-900 text-white font-bold text-xl px-8 py-4 rounded-xl mt-6 shadow hover:bg-blue-700 w-full"
-            disabled={cargando}
-          >Actualizar Cambios</button>
-          {msg && (
-            <div className="text-center text-lg mt-2 font-bold text-blue-900">{msg}</div>
-          )}
+            className="bg-blue-900 text-white font-bold text-xl px-8 py-4 rounded-xl shadow hover:bg-blue-700 w-full"
+          >
+            Actualizar Cambios
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/telas")}
+            className="bg-gray-300 text-gray-800 font-bold text-xl px-8 py-4 rounded-xl shadow hover:bg-gray-400 w-full"
+          >
+            Cancelar
+          </button>
         </div>
+
+        {/* Mensajes */}
+        {msg && (
+          <div
+            className={`text-center text-lg mt-2 font-bold ${
+              msg.toLowerCase().includes("error") ? "text-red-600" : "text-blue-900"
+            }`}
+          >
+            {msg}
+          </div>
+        )}
       </form>
     </div>
   );

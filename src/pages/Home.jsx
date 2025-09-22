@@ -42,7 +42,7 @@ export default function Home() {
             <Link to="/listar-prendasIA" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
               Ver Prenda
             </Link>
-            <Link to="/modelo3d/camiseta3d" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
+            <Link to="/modelo3d/camiseta3d/vista" className="btn btn--outline border border-blue-900 text-blue-900 rounded-lg px-6 py-3 hover:bg-blue-900 hover:text-white">
               Diseñar
             </Link>
           </div>
