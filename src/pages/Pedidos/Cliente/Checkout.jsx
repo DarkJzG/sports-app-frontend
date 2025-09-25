@@ -1,4 +1,4 @@
-// src/pages/Checkout.jsx
+// src/pages/Pedidos/Cliente/Checkout.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../components/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -13,30 +13,50 @@ export default function Checkout() {
   const [carrito, setCarrito] = useState([]);
   const [direccion, setDireccion] = useState({
     nombre: "",
-    direccion: "",
+    direccion_principal: "",
+    direccion_secundaria: "",
     ciudad: "",
     provincia: "",
     pais: "",
     telefono: "",
-    zip: "",
+    codigo_postal: "",
+    tipoEnvio: "domicilio", // default domicilio
   });
   const [tipoPago, setTipoPago] = useState("completo"); // completo | anticipo
   const [referenciaPago, setReferenciaPago] = useState("");
+  const [guardarDatos, setGuardarDatos] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [msg, setMsg] = useState("");
 
-  // Cargar carrito del usuario
+  // Cargar carrito y perfil del usuario
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
+
     const cargar = async () => {
       try {
-        const res = await fetch(`${API_URL}/carrito/${user.id}`);
-        const data = await res.json();
-        if (data.ok) {
-          setCarrito(data.carrito || []);
+        // carrito
+        const resCarrito = await fetch(`${API_URL}/carrito/${user.id}`);
+        const dataCarrito = await resCarrito.json();
+        if (dataCarrito.ok) setCarrito(dataCarrito.carrito || []);
+
+        // perfil
+        const resPerfil = await fetch(`${API_URL}/usuario/perfil/${user.id}`);
+        const dataPerfil = await resPerfil.json();
+        if (dataPerfil.ok) {
+          setDireccion((prev) => ({
+            ...prev,
+            nombre: `${dataPerfil.usuario.nombre || ""} ${dataPerfil.usuario.apellido || ""}`,
+            direccion_principal: dataPerfil.usuario.direccion_principal || "",
+            direccion_secundaria: dataPerfil.usuario.direccion_secundaria || "",
+            ciudad: dataPerfil.usuario.ciudad || "",
+            provincia: dataPerfil.usuario.provincia || "",
+            pais: dataPerfil.usuario.pais || "",
+            telefono: dataPerfil.usuario.telefono || "",
+            codigo_postal: dataPerfil.usuario.codigo_postal || "",
+          }));
         }
       } catch (e) {
         console.error(e);
@@ -49,20 +69,28 @@ export default function Checkout() {
 
   // Calcular totales
   const subtotal = carrito.reduce((acc, it) => acc + (it.precio || 0), 0);
-  const envio = 0; // opcional
-  const impuestos = 0; // opcional
+  const envio = direccion.tipoEnvio === "domicilio" ? 3 : 0;
+  const impuestos = 0;
   const total = subtotal + envio + impuestos;
-
   const anticipo = (total * 0.5).toFixed(2);
 
+  // Confirmar pedido
   const handleConfirmar = async () => {
     if (!referenciaPago) {
       setMsg("Por favor ingresa la referencia de la transferencia");
       return;
     }
-    if (!direccion.nombre || !direccion.direccion || !direccion.ciudad) {
-      setMsg("Completa la dirección de envío");
-      return;
+
+    // Validar dirección solo si es envío a domicilio
+    if (direccion.tipoEnvio === "domicilio") {
+      if (
+        !direccion.nombre ||
+        !direccion.direccion_principal ||
+        !direccion.ciudad
+      ) {
+        setMsg("Completa la dirección de envío");
+        return;
+      }
     }
 
     const items = carrito.map((it) => ({
@@ -77,10 +105,12 @@ export default function Checkout() {
 
     const payload = {
       items,
-      direccionEnvio: direccion,
+      direccionEnvio: direccion.tipoEnvio === "domicilio" 
+        ? direccion 
+        : { tipoEnvio: "retiro", detalle: "Retiro en Tienda" },
       metodoPago: "transferencia",
       tipoPago,
-      costos: { subtotal, envio, impuestos, total },
+      costos: { subtotal, envio, total, impuestos },
       referenciaPago,
     };
 
@@ -94,8 +124,27 @@ export default function Checkout() {
         }
       );
       const data = await res.json();
+
       if (data.ok) {
         setMsg("✅ Pedido confirmado con éxito");
+
+        // Guardar dirección si el usuario lo marcó y eligió domicilio
+        if (guardarDatos && direccion.tipoEnvio === "domicilio") {
+          await fetch(`${API_URL}/usuario/perfil/${user.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              telefono: direccion.telefono,
+              direccion_principal: direccion.direccion_principal,
+              direccion_secundaria: direccion.direccion_secundaria,
+              ciudad: direccion.ciudad,
+              provincia: direccion.provincia,
+              pais: direccion.pais,
+              codigo_postal: direccion.codigo_postal,
+            }),
+          });
+        }
+
         // Vaciar carrito del usuario
         await fetch(`${API_URL}/carrito/vaciar/${user.id}`, { method: "DELETE" });
         setTimeout(() => navigate("/mis-pedidos"), 1500);
@@ -113,151 +162,186 @@ export default function Checkout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <main className="flex-1 max-w-5xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold text-blue-900 mb-6">Finalizar Pedido</h1>
+      <main className="flex-1 max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8">
+        
+        {/* Formulario de envío y pago */}
+        <div className="md:col-span-2 space-y-8">
 
-        {/* Lista carrito */}
-        <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Resumen del Carrito</h2>
-          {carrito.length === 0 ? (
-            <p className="text-gray-600">Tu carrito está vacío</p>
-          ) : (
-            <div className="space-y-3">
-              {carrito.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex justify-between items-center border-b pb-2"
-                >
-                  <div>
-                    <p className="font-bold text-blue-900">{item.nombre}</p>
-                    <p className="text-sm">
-                      {item.talla} - {item.color?.color}
-                    </p>
-                    <p className="text-sm">
-                      Cantidad: {item.cantidad} × ${item.precio_unitario}
-                    </p>
-                  </div>
-                  <p className="font-semibold text-blue-900">
-                    ${parseFloat(item.precio).toFixed(2)}
-                  </p>
-                </div>
-              ))}
-              <div className="mt-4 text-right">
-                <p>Subtotal: ${subtotal.toFixed(2)}</p>
-                <p>Envío: ${envio.toFixed(2)}</p>
-                <p>Impuestos: ${impuestos.toFixed(2)}</p>
-                <p className="font-bold text-lg text-blue-900">
-                  Total: ${total.toFixed(2)}
-                </p>
+          {/* Método de envío */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Método de Envío</h2>
+            <label className="flex items-center gap-2 mb-2">
+              <input
+                type="radio"
+                checked={direccion.tipoEnvio === "domicilio"}
+                onChange={() => setDireccion({ ...direccion, tipoEnvio: "domicilio" })}
+              />
+              Envío a domicilio (+$3)
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                checked={direccion.tipoEnvio === "retiro"}
+                onChange={() => setDireccion({ ...direccion, tipoEnvio: "retiro" })}
+              />
+              Retiro en tienda (Sin costo adicional)
+            </label>
+          </div>
+
+          {/* Dirección de envío - solo si es domicilio */}
+          {direccion.tipoEnvio === "domicilio" && (
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">Dirección de Envío</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Nombre completo"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.nombre}
+                  onChange={(e) => setDireccion({ ...direccion, nombre: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Teléfono"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.telefono}
+                  onChange={(e) => setDireccion({ ...direccion, telefono: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Dirección Principal"
+                  className="px-4 py-2 border rounded col-span-2"
+                  value={direccion.direccion_principal}
+                  onChange={(e) => setDireccion({ ...direccion, direccion_principal: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Dirección Secundaria"
+                  className="px-4 py-2 border rounded col-span-2"
+                  value={direccion.direccion_secundaria}
+                  onChange={(e) => setDireccion({ ...direccion, direccion_secundaria: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Ciudad"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.ciudad}
+                  onChange={(e) => setDireccion({ ...direccion, ciudad: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Provincia"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.provincia}
+                  onChange={(e) => setDireccion({ ...direccion, provincia: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="País"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.pais}
+                  onChange={(e) => setDireccion({ ...direccion, pais: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Código Postal"
+                  className="px-4 py-2 border rounded"
+                  value={direccion.codigo_postal}
+                  onChange={(e) => setDireccion({ ...direccion, codigo_postal: e.target.value })}
+                />
               </div>
+
+              <label className="flex items-center gap-2 mt-4">
+                <input
+                  type="checkbox"
+                  checked={guardarDatos}
+                  onChange={() => setGuardarDatos(!guardarDatos)}
+                />
+                Guardar esta dirección para futuras compras
+              </label>
             </div>
           )}
-        </div>
 
-        {/* Dirección de envío */}
-        <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Dirección de Envío</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Nombre completo"
-              className="px-4 py-2 border rounded"
-              value={direccion.nombre}
-              onChange={(e) => setDireccion({ ...direccion, nombre: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Teléfono"
-              className="px-4 py-2 border rounded"
-              value={direccion.telefono}
-              onChange={(e) => setDireccion({ ...direccion, telefono: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Dirección"
-              className="px-4 py-2 border rounded col-span-2"
-              value={direccion.direccion}
-              onChange={(e) => setDireccion({ ...direccion, direccion: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Ciudad"
-              className="px-4 py-2 border rounded"
-              value={direccion.ciudad}
-              onChange={(e) => setDireccion({ ...direccion, ciudad: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Provincia"
-              className="px-4 py-2 border rounded"
-              value={direccion.provincia}
-              onChange={(e) =>
-                setDireccion({ ...direccion, provincia: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="País"
-              className="px-4 py-2 border rounded"
-              value={direccion.pais}
-              onChange={(e) => setDireccion({ ...direccion, pais: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Código Postal"
-              className="px-4 py-2 border rounded"
-              value={direccion.zip}
-              onChange={(e) => setDireccion({ ...direccion, zip: e.target.value })}
-            />
-          </div>
-        </div>
+          {/* Método de Pago */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Método de Pago</h2>
+            <div className="flex gap-6 mb-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="completo"
+                  checked={tipoPago === "completo"}
+                  onChange={() => setTipoPago("completo")}
+                />
+                Pago Completo (${total.toFixed(2)})
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="anticipo"
+                  checked={tipoPago === "anticipo"}
+                  onChange={() => setTipoPago("anticipo")}
+                />
+                Anticipo 50% (${anticipo})
+              </label>
+            </div>
 
-        {/* Pago */}
-        <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Método de Pago</h2>
-          <div className="flex gap-6 mb-4">
-            <label className="flex items-center gap-2">
+            <div>
+              <label className="font-semibold">Referencia de Transferencia</label>
               <input
-                type="radio"
-                value="completo"
-                checked={tipoPago === "completo"}
-                onChange={() => setTipoPago("completo")}
+                type="text"
+                className="w-full px-4 py-2 border rounded mt-2"
+                placeholder="Ej: BANCO-123-XYZ"
+                value={referenciaPago}
+                onChange={(e) => setReferenciaPago(e.target.value)}
               />
-              Pago Completo (${total.toFixed(2)})
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="anticipo"
-                checked={tipoPago === "anticipo"}
-                onChange={() => setTipoPago("anticipo")}
-              />
-              Anticipo 50% (${anticipo})
-            </label>
-          </div>
-
-          <div>
-            <label className="font-semibold">Referencia de Transferencia</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded mt-2"
-              placeholder="Ej: BANCO-123-XYZ"
-              value={referenciaPago}
-              onChange={(e) => setReferenciaPago(e.target.value)}
-            />
+            </div>
           </div>
         </div>
 
-        {msg && (
-          <div className="mb-4 text-center font-bold text-blue-900">{msg}</div>
-        )}
+        {/* Resumen del pedido */}
+        <div className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Resumen del Pedido</h2>
+          <div className="space-y-4">
+            {carrito.map((item) => (
+              <div key={item._id} className="flex gap-4 border-b pb-4">
+                <img
+                  src={item.imagen_url}
+                  alt={item.nombre}
+                  className="w-20 h-20 object-cover rounded"
+                />
+                <div className="flex-1">
+                  <p className="font-bold text-blue-900">{item.nombre}</p>
+                  <p className="text-sm">Talla: {item.talla} | Color: {item.color?.color}</p>
+                  <p className="text-sm">Cantidad: {item.cantidad}</p>
+                </div>
+                <p className="font-semibold text-blue-900">
+                  ${(item.precio_unitario * item.cantidad).toFixed(2)}
+                </p>
+              </div>
+            ))}
+          </div>
 
-        <button
-          onClick={handleConfirmar}
-          className="w-full py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-700 shadow"
-        >
-          Confirmar Pedido
-        </button>
+          <div className="mt-6 space-y-2 text-right">
+            <p>Subtotal: ${subtotal.toFixed(2)}</p>
+            <p>Envío: ${envio.toFixed(2)}</p>
+            <p>Impuestos: ${impuestos.toFixed(2)}</p> 
+            <p className="font-bold text-lg text-blue-900">
+              Total: ${total.toFixed(2)}
+            </p>
+          </div>
+
+          {msg && (
+            <div className="mb-4 text-center font-bold text-blue-900">{msg}</div>
+          )}
+
+          <button
+            onClick={handleConfirmar}
+            className="w-full mt-6 py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-700 shadow"
+          >
+            Confirmar Pedido
+          </button>
+        </div>
       </main>
       <Footer />
     </div>

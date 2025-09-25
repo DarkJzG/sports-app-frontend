@@ -107,7 +107,11 @@ export default function FormCamiseta() {
         let text;
         try { text = await res.text(); } catch (e) { text = `Status ${res.status}`; }
         throw new Error(`Error ${res.status}: ${text}`);
+
       }
+
+      
+
 
       const data = await res.json();
 

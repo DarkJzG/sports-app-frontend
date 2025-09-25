@@ -1,34 +1,68 @@
 // src/pages/Perfil.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
-
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { API_URL } from "../config";
 
 export default function PerfilUsuario() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [perfil, setPerfil] = useState({});
+  const [editando, setEditando] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  // cargar datos del usuario
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    const cargarPerfil = async () => {
+      try {
+        const res = await fetch(`${API_URL}/usuario/perfil/${user.id}`);
+        const data = await res.json();
+        if (data.ok) setPerfil(data.usuario);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    cargarPerfil();
+  }, [user, navigate]);
+
   const handleLogout = () => {
-    logout(); // usamos la función centralizada
+    logout();
     navigate("/");
+  };
+
+  const handleGuardar = async () => {
+    try {
+      const res = await fetch(`${API_URL}/usuario/perfil/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(perfil),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setMsg("✅ Perfil actualizado");
+        setEditando(false);
+      } else {
+        setMsg("❌ " + (data.msg || "Error al guardar"));
+      }
+    } catch (e) {
+      setMsg("Error de conexión");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f7f7f7]">
-      {/* NAVBAR */}
       <Navbar />
 
       {/* Banner Perfil */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
         <h2 className="text-3xl font-semibold flex-1">Perfil</h2>
-        <div className="rounded-full bg-blue-200 p-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <circle cx="12" cy="9" r="4" />
-            <path d="M4 19c0-2.2 3.6-4 8-4s8 1.8 8 4" />
-          </svg>
-        </div>
         <button
           onClick={handleLogout}
           className="ml-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 shadow transition"
@@ -37,89 +71,53 @@ export default function PerfilUsuario() {
         </button>
       </section>
 
-      {/* Información */}
       <main className="flex-1 px-8 py-10 max-w-5xl mx-auto">
-        <section>
-          <h3 className="text-2xl font-bold mb-6">Información</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Nombre</span>
-              <div className="font-semibold text-gray-900">Johan</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Apellido</span>
-              <div className="font-semibold text-gray-900">Burbano España</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4 col-span-1 sm:col-span-2">
-              <span className="text-xs text-gray-500">Correo electrónico</span>
-              <div className="font-semibold text-gray-900">johanburbano@gmail.com</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Localidad</span>
-              <div className="font-semibold text-gray-900">Tulcán</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Código postal</span>
-              <div className="font-semibold text-gray-900">xxxxxx</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Dirección principal</span>
-              <div className="font-semibold text-gray-900">Pedro Moncayo</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Dirección secundaria</span>
-              <div className="font-semibold text-gray-900">Gaspar de Villarroel</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">País</span>
-              <div className="font-semibold text-gray-900">Ecuador</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4">
-              <span className="text-xs text-gray-500">Teléfono</span>
-              <div className="font-semibold text-gray-900">0959207677</div>
-            </div>
-          </div>
-        </section>
+        <h3 className="text-2xl font-bold mb-6">Información</h3>
 
-        {/* Historial de compras */}
-        <section>
-          <h3 className="text-2xl font-bold mb-6">Historial de compras</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded-xl shadow">
-              <thead>
-                <tr className="bg-blue-100 text-blue-900">
-                  <th className="py-3 px-4 text-left font-semibold">Factura</th>
-                  <th className="py-3 px-4 text-left font-semibold">Fecha</th>
-                  <th className="py-3 px-4 text-left font-semibold">Descripción</th>
-                  <th className="py-3 px-4 text-left font-semibold">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="py-2 px-4">FACT0001</td>
-                  <td className="py-2 px-4">01/07/2024</td>
-                  <td className="py-2 px-4">Camiseta Azul XL</td>
-                  <td className="py-2 px-4 text-green-600">Finalizado</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-4">FACT0002</td>
-                  <td className="py-2 px-4">15/06/2024</td>
-                  <td className="py-2 px-4">Pantaloneta</td>
-                  <td className="py-2 px-4 text-yellow-500">Pendiente</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-4">FACT0003</td>
-                  <td className="py-2 px-4">30/05/2024</td>
-                  <td className="py-2 px-4">Conjunto Invierno</td>
-                  <td className="py-2 px-4 text-green-600">Finalizado</td>
-                </tr>
-              </tbody>
-            </table>
+        {editando ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+            {["nombre","apellido","correo","telefono","codigo_postal","direccion_principal","direccion_secundaria","ciudad","provincia","pais"].map((campo) => (
+              <div key={campo} className="bg-white rounded-xl shadow p-4">
+                <span className="text-xs text-gray-500 capitalize">{campo}</span>
+                <input
+                  className="w-full mt-1 border px-3 py-2 rounded"
+                  value={perfil[campo] || ""}
+                  onChange={(e) => setPerfil({ ...perfil, [campo]: e.target.value })}
+                  disabled={campo === "correo"} // no permitir editar correo
+                />
+              </div>
+            ))}
+            <button
+              onClick={handleGuardar}
+              className="col-span-full bg-blue-900 text-white font-bold px-6 py-3 rounded-lg"
+            >
+              Guardar Cambios
+            </button>
           </div>
-        </section>
+        ) : (
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+          {Object.entries(perfil)
+            .filter(([k, v]) => !["_id", "__v", "token_verificacion", "rol"].includes(k))
+            .map(([k, v]) => (
+              <div key={k} className="bg-white rounded-xl shadow p-4">
+                <span className="text-xs text-gray-500 capitalize">{k}</span>
+                <div className="font-semibold text-gray-900">{v === true ? 'Sí' :v === false ? 'No' : v || "-"}</div>
+              </div>
+            ))}
+          <button
+            onClick={() => setEditando(true)}
+            className="col-span-full bg-blue-900 text-white font-bold px-6 py-3 rounded-lg"
+          >
+            Editar Perfil
+          </button>
+        </div>
+
+        )}
+
+        {msg && <div className="mt-4 text-blue-900 font-semibold">{msg}</div>}
       </main>
 
-      {/* FOOTER */}
       <Footer />
     </div>
   );

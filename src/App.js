@@ -54,7 +54,6 @@ import PedidosAdmin from "./pages/Pedidos/Admin/PedidosAdmin.jsx";
 
 import Modelo from "./pages/Modelo";
 
-
 import GenerarImagen from "./pages/ModeloIA/GenerarImagen";
 import GenerarImagenForm from "./pages/ModeloIA/GenerarImagenForm";
 import GenerarImagenStable from "./pages/ModeloIA/GenerarImagenStable";
@@ -67,6 +66,8 @@ import ListarPrendasIA from "./pages/ModeloIA/ListarPrendasIA";
 import SeleccionDiseno from "./pages/DisenarPrendas/SeleccionDiseno";
 import Camiseta3D from "./pages/DisenarPrendas/Camiseta3D";
 import Camiseta3DVista from "./pages/DisenarPrendas/Camiseta3DVista";
+
+import GuiaCamiseta from "./pages/ModeloIA/GuiaCamiseta.jsx"
 
 
 
@@ -232,6 +233,12 @@ function App() {
             <RutasPrivadas roles={["cliente", "admin"]}>
               <GenerarImagenStable />
             </RutasPrivadas>} />
+
+          <Route path="/guia_generar_img" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <GuiaCamiseta />
+            </RutasPrivadas>} />
+
 
           {/* Rutas Generar Prendas Imagen */} 
           <Route path="/modeloia" element={

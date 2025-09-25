@@ -45,6 +45,7 @@ export default function SeleccionPrenda() {
             >
               {p.nombre}
             </button>
+            
           ))}
         </div>
       </div>
