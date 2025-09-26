@@ -1,32 +1,31 @@
-// src/pages/ModeloIA/SeleccionPrenda.jsx
-import React, { useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../components/AuthContext";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function SeleccionPrenda() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [categorias, setCategorias] = useState([]);
 
-    // Redirigir si no está logueado
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login", { replace: true });
     }
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    fetch(`${API_URL}/catg_prod/all`)
+      .then((res) => res.json())
+      .then((data) => setCategorias(Array.isArray(data) ? data : []))
+      .catch((err) => console.error("Error cargando categorías:", err));
+  }, []);
+
   if (loading) {
     return <div className="p-6 text-center">Verificando sesión...</div>;
   }
-
-  const prendas = [
-    { id: "camiseta", nombre: "Camiseta" },
-    { id: "pantalon", nombre: "Pantalón" },
-    { id: "chompa", nombre: "Chompa" },
-    { id: "conjunto_interno", nombre: "Conjunto Interno" },
-    { id: "conjunto_externo", nombre: "Conjunto Externo" },
-  ];
 
   return (
     <div>
@@ -37,17 +36,32 @@ export default function SeleccionPrenda() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {prendas.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => navigate(`/modeloia/${p.id}`)}
-              className="bg-blue-900 hover:bg-blue-700 text-white py-6 px-4 rounded-xl shadow-lg font-bold text-xl text-center"
+          {categorias.map((c) => (
+            <div
+              key={c._id}
+              onClick={() =>
+                navigate(`/modeloia/${c._id}`, {
+                  state: {
+                    categoria_id: c._id,
+                    categoria_prd: c.nombre,
+                  },
+                })
+              }
+              className="cursor-pointer bg-white shadow-lg hover:shadow-xl rounded-xl overflow-hidden border hover:border-blue-600 transition"
             >
-              {p.nombre}
-            </button>
-            
+              <img
+                src={c.imagen_url}
+                alt={c.nombre}
+                className="w-full h-40 object-cover"
+              />
+              <div className="p-4">
+                <h2 className="font-bold text-xl text-blue-900">{c.nombre}</h2>
+                <p className="text-gray-600 text-sm mt-2">{c.descripcion}</p>
+              </div>
+            </div>
           ))}
         </div>
+
       </div>
       <Footer />
     </div>

@@ -2,97 +2,149 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { useLocation } from "react-router-dom";
 import { API_URL } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 
 export default function FormCamiseta() {
   const { user } = useAuth();
 
-  // ----- Campos para prompt (visual) -----
+  const location = useLocation();
+  const categoria_id = location.state?.categoria_id;
+  const categoria_prd = location.state?.categoria_prd || "camiseta";
+
+  // Campos principales
   const [estilo, setEstilo] = useState("");
   const [color1, setColor1] = useState("");
   const [color2, setColor2] = useState("");
+  const [diseno, setDiseno] = useState("");
+  const [disenoOtro, setDisenoOtro] = useState("");
   const [cuello, setCuello] = useState("");
   const [manga, setManga] = useState("");
-
-  // ----- Campos para ficha técnica -----
   const [tela, setTela] = useState("");
-  const [talla, setTalla] = useState("");
-  const [diseno, setDiseno] = useState("");
   const [genero, setGenero] = useState("");
 
-  // Resultado / UI
-  const [imagen, setImagen] = useState(null); // ahora guarda la URL de Cloudinary
+
+  // Campos adicionales
+  const [estiloAvanzado, setEstiloAvanzado] = useState("");
+  const [ubicacion, setUbicacion] = useState("");
+  const [acabado, setAcabado] = useState("");
+  const [detalles, setDetalles] = useState([]);
+
+  // Resultado
+  const [imagen, setImagen] = useState(null);
   const [promptResult, setPromptResult] = useState("");
-  const [fichaTecnica, setFichaTecnica] = useState(null);
   const [costo, setCosto] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // Opciones
-  const estilos = ["deportiva", "casual", "formal", "urbana"];
-  const tallas = ["S", "M", "L", "XL", "XXL"];
-  const cuellos = ["redondo", "en V", "polo"];
-  const mangas = ["corta", "larga", "sin mangas"];
-  const telas = ["algodón", "poliéster", "mezcla algodón/poliéster", "lana"];
-  const disenos = ["estampado", "sublimado", "bordado", "sin diseño"];
-  const generos = ["hombre", "mujer", "unisex"];
+  const estilos = [
+    { es: "Deportiva", en: "sports style" },
+    { es: "Casual", en: "casual style" },
+    { es: "Urbana", en: "urban style" },
+    { es: "Retro", en: "retro style" },
+  ];
 
-  const validar = () => {
-    setError("");
-    if (!color1) return "El color principal es obligatorio";
-    if (!talla) return "Selecciona una talla";
-    if (!tela) return "Indica la tela";
-    return null;
-  };
+  const colores = [
+    { es: "Negro", en: "black", hex: "#000000" },
+    { es: "Blanco", en: "white", hex: "#ffffff" },
+    { es: "Rojo", en: "red", hex: "#ff0000" },
+    { es: "Azul", en: "blue", hex: "#0000ff" },
+    { es: "Verde", en: "green", hex: "#008000" },
+    { es: "Amarillo", en: "yellow", hex: "#ffff00" },
+    { es: "Gris", en: "gray", hex: "#808080" },
+    { es: "Naranja", en: "orange", hex: "#ffa500" },
+    { es: "Morado", en: "purple", hex: "#800080" },
+    { es: "Celeste", en: "sky blue", hex: "#87ceeb" },
+  ];
 
-  const normalizeUserId = (user) => {
-    if (!user) return null;
-    return user.id || user._id || null;
-  };
+  const disenos = [
+    { es: "Rayas", en: "striped" },
+    { es: "Líneas", en: "lined" },
+    { es: "Geométrico", en: "geometric" },
+    { es: "Abstracto", en: "abstract" },
+    { es: "Manchas de pintura", en: "paint splatter" },
+    { es: "Degradado", en: "gradient" },
+    { es: "Otros", en: "other" },
+  ];
 
-  const isValidObjectIdString = (id) => {
-    return typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
-  };
+  const cuellos = [
+    { es: "Redondo", en: "round neck" },
+    { es: "En V", en: "V-neck" },
+    { es: "Polo", en: "polo collar" },
+  ];
 
-  // --- Generar imagen ---
+  const mangas = [
+    { es: "Corta", en: "short sleeves" },
+    { es: "Larga", en: "long sleeves" },
+  ];
+
+  const telas = [
+    { es: "Algodón", en: "cotton" },
+    { es: "Poliéster", en: "polyester" },
+    { es: "Mezcla Algodón/Poliéster", en: "cotton/polyester blend" },
+  ];
+
+  const generos = [
+    { es: "Hombre", en: "male" },
+    { es: "Mujer", en: "female" },
+    { es: "Unisex", en: "unisex" },
+  ];
+
+
+
+  const estilosAvanzados = [
+    { es: "Brochazos", en: "brush strokes" },
+    { es: "Salpicaduras", en: "splatter" },
+    { es: "Minimalista", en: "minimalist" },
+    { es: "Futurista", en: "futuristic" },
+    { es: "Camuflaje", en: "camouflage" },
+  ];
+
+  const ubicaciones = [
+    { es: "Completo", en: "full print" },
+    { es: "Pecho/frontal", en: "chest only" },
+    { es: "Superior o inferior", en: "upper or lower half" },
+    { es: "Diagonal", en: "diagonal" },
+    { es: "Laterales", en: "side stripes" },
+  ];
+
+  const detallesAcabados = [
+    { es: "Ribetes en cuello y mangas", en: "ribbed details on collar and sleeves" },
+    { es: "Bicolor en mangas/cuello", en: "bicolor sleeves and collar" },
+    { es: "Costuras visibles", en: "visible seams" },
+  ];
+
+  const acabados = [
+    { es: "Mate", en: "matte finish" },
+    { es: "Brillante", en: "glossy finish" },
+    { es: "Texturizado", en: "textured finish" },
+  ];
+
+
+
   const handleGenerar = async () => {
-    const v = validar();
-    if (v) {
-      setError(v);
-      return;
-    }
-
-    const userIdRaw = normalizeUserId(user);
-    if (!userIdRaw) {
-      setError("Debes iniciar sesión para generar y guardar la prenda.");
-      return;
-    }
-    if (!isValidObjectIdString(userIdRaw)) {
-      setError("userId inválido. Vuelve a iniciar sesión.");
-      return;
-    }
-
     setLoading(true);
-    setError("");
     setImagen(null);
     setPromptResult("");
-    setFichaTecnica(null);
-    setCosto(null);
 
     const payload = {
-      tipo_prenda: "camiseta",
-      userId: userIdRaw,
+      categoria_id,
+      categoria_prd,
+      userId: user?.id,
       atributos: {
-        estilo: estilo || "deportiva",
+        estilo,
         color1,
-        color2: color2 || null,
-        cuello: cuello || null,
-        manga: manga || null,
-        tela: tela || null,
-        talla: talla || null,
-        diseno: diseno || null,
-        genero: genero || null,
+        color2,
+        diseno: diseno === "other" ? disenoOtro : diseno,
+        cuello,
+        manga,
+        tela,
+        genero,
+        estiloAvanzado,
+        ubicacion,
+        detalles,
+        acabado,
       },
     };
 
@@ -102,164 +154,265 @@ export default function FormCamiseta() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      if (!res.ok) {
-        let text;
-        try { text = await res.text(); } catch (e) { text = `Status ${res.status}`; }
-        throw new Error(`Error ${res.status}: ${text}`);
-
-      }
-
-      
-
-
       const data = await res.json();
-
-      // Backend ahora devuelve imageUrl (Cloudinary)
-      if (data.imageUrl) {
-        setImagen(data.imageUrl);
-        setPromptResult(data.prompt || "");
-        setFichaTecnica(data.ficha_tecnica || {});
-        setCosto(data.costo ?? null);
-      } else {
-        setError("No se recibió URL de la imagen desde el servidor");
-      }
-
-    } catch (err) {
-      console.error("Error al generar prenda:", err);
-      setError(String(err.message || err));
+      setImagen(data.imageUrl);
+      setPromptResult(data.descripcion || "");
+      setCosto(data.costo);
+    } catch (e) {
+      console.error("Error:", e);
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Descargar PDF ---
-  const handleDescargarPDF = async () => {
-    if (!fichaTecnica || !imagen) {
-      setError("Primero genera la prenda para exportar el PDF");
-      return;
-    }
-
-    try {
-      let imageBase64 = null;
-
-      // Si imagen es URL (Cloudinary), convertir a base64
-      if (imagen.startsWith("http")) {
-        const resp = await fetch(imagen);
-        const blob = await resp.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        imageBase64 = btoa(
-          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-        );
-      } else {
-        imageBase64 = imagen.replace("data:image/png;base64,", "");
-      }
-
-      const res = await fetch(`${API_URL}/api/ia/ficha_tecnica`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ficha: fichaTecnica,
-          imagen: imageBase64
-        }),
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        const link = document.createElement("a");
-        link.href = `data:application/pdf;base64,${data.pdf_base64}`;
-        link.download = "ficha_tecnica.pdf";
-        link.click();
-      } else {
-        setError("No se pudo generar el PDF");
-      }
-
-    } catch (err) {
-      console.error("Error generando PDF:", err);
-      setError("Error generando PDF: " + (err.message || err));
-    }
-  };
-
+  // --- Render ---
   return (
     <div>
       <Navbar />
-      <div className="max-w-4xl mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold text-blue-900 mb-6">Generar Camiseta</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Formulario */}
-          <div className="flex flex-col gap-4">
-            <label className="font-bold text-gray-700">Estilo:</label>
-            <select value={estilo} onChange={(e) => setEstilo(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona estilo</option>
-              {estilos.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Color principal:</label>
-            <input type="text" value={color1} onChange={(e) => setColor1(e.target.value)} placeholder="Ej: rojo" className="w-full border rounded px-3 py-2 mt-1" />
-
-            <label className="font-bold text-gray-700">Color secundario:</label>
-            <input type="text" value={color2} onChange={(e) => setColor2(e.target.value)} placeholder="Ej: blanco" className="w-full border rounded px-3 py-2 mt-1" />
-
-            <label className="font-bold text-gray-700">Cuello:</label>
-            <select value={cuello} onChange={(e) => setCuello(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona un cuello</option>
-              {cuellos.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Manga:</label>
-            <select value={manga} onChange={(e) => setManga(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona tipo de manga</option>
-              {mangas.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Tela:</label>
-            <select value={tela} onChange={(e) => setTela(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona tela</option>
-              {telas.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Talla:</label>
-            <select value={talla} onChange={(e) => setTalla(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona talla</option>
-              {tallas.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Diseño:</label>
-            <select value={diseno} onChange={(e) => setDiseno(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona diseño</option>
-              {disenos.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-
-            <label className="font-bold text-gray-700">Género:</label>
-            <select value={genero} onChange={(e) => setGenero(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
-              <option value="">Selecciona género</option>
-              {generos.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-
-            <button onClick={handleGenerar} disabled={loading} className="mt-4 bg-blue-900 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold">
-              {loading ? "Generando..." : "Generar Imagen"}
-            </button>
-
-            {error && <p className="text-red-600 mt-2">{error}</p>}
-          </div>
-
-          {/* Resultado */}
-          <div className="flex flex-col items-center justify-center gap-4">
-            {imagen ? (
-              <>
-                <img src={imagen} alt="Camiseta generada" className="rounded-xl shadow-lg w-80 h-auto" />
-                <p className="text-sm text-gray-600"><strong>Prompt usado:</strong> {promptResult}</p>
-                {costo && <p className="text-lg font-bold text-blue-900">Costo estimado: ${costo}</p>}
-                <button onClick={handleDescargarPDF} className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold">
-                  Descargar ficha técnica (PDF)
-                </button>
-              </>
-            ) : (
-              <p className="text-gray-500">La imagen generada aparecerá aquí</p>
-            )}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-blue-900 font-bold text-lg">Generando tu diseño...</p>
           </div>
         </div>
+      )}
+
+      <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
+        <h1 className="text-3xl font-bold text-blue-900 text-center">Diseña tu camiseta</h1>
+
+        {/* 🔹 Estilo */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">¿Qué estilo prefieres?</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {estilos.map((s) => (
+              <button
+                key={s.en}
+                onClick={() => setEstilo(s.en)}
+                className={`p-4 rounded-lg border ${
+                  estilo === s.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {s.es}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Colores */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">Escoge el color principal</h2>
+          <div className="flex flex-wrap gap-3">
+            {colores.map((c) => (
+              <div
+                key={c.en}
+                onClick={() => setColor1(c.en)}
+                className={`w-10 h-10 rounded-full cursor-pointer border-2 ${
+                  color1 === c.en ? "border-blue-600" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
+
+          <h2 className="font-bold text-lg mt-6 mb-4">Escoge el color secundario</h2>
+          <div className="flex flex-wrap gap-3">
+            {colores.map((c) => (
+              <div
+                key={c.en}
+                onClick={() => setColor2(c.en)}
+                className={`w-10 h-10 rounded-full cursor-pointer border-2 ${
+                  color2 === c.en ? "border-blue-600" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Diseño */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">¿Qué diseño te gusta más?</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {disenos.map((d) => (
+              <button
+                key={d.en}
+                onClick={() => setDiseno(d.en)}
+                className={`p-3 rounded-lg border ${
+                  diseno === d.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {d.es}
+              </button>
+            ))}
+          </div>
+          {diseno === "other" && (
+            <input
+              type="text"
+              placeholder="Describe tu diseño"
+              value={disenoOtro}
+              onChange={(e) => setDisenoOtro(e.target.value)}
+              className="mt-3 w-full border px-3 py-2 rounded-lg"
+            />
+          )}
+        </div>
+
+        {/* 🔹 Estilo avanzado */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">Estilo de diseño avanzado</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {estilosAvanzados.map((ea) => (
+              <button
+                key={ea.en}
+                onClick={() => setEstiloAvanzado(ea.en)}
+                className={`p-3 rounded-lg border ${
+                  estiloAvanzado === ea.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {ea.es}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Ubicación del diseño */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">Ubicación del diseño</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {ubicaciones.map((u) => (
+              <button
+                key={u.en}
+                onClick={() => setUbicacion(u.en)}
+                className={`p-3 rounded-lg border ${
+                  ubicacion === u.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {u.es}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Detalles de acabados */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">Detalles de acabados</h2>
+          <div className="flex flex-wrap gap-3">
+            {detallesAcabados.map((d) => (
+              <button
+                key={d.en}
+                onClick={() =>
+                  setDetalles((prev) =>
+                    prev.includes(d.en)
+                      ? prev.filter((x) => x !== d.en)
+                      : [...prev, d.en]
+                  )
+                }
+                className={`px-4 py-2 rounded-lg border ${
+                  detalles.includes(d.en) ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {d.es}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Acabado visual */}
+        <div className="bg-white shadow-md p-6 rounded-xl">
+          <h2 className="font-bold text-lg mb-4">Acabado visual</h2>
+          <div className="flex gap-3 flex-wrap">
+            {acabados.map((a) => (
+              <button
+                key={a.en}
+                onClick={() => setAcabado(a.en)}
+                className={`px-4 py-2 rounded-lg border ${
+                  acabado === a.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {a.es}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🔹 Otros campos (cuello, manga, tela, género) */}
+        {[{ label: "Tipo de cuello", options: cuellos, state: cuello, setState: setCuello },
+          { label: "Mangas", options: mangas, state: manga, setState: setManga },
+          { label: "Tela", options: telas, state: tela, setState: setTela },
+          { label: "Género", options: generos, state: genero, setState: setGenero }].map((field) => (
+          <div key={field.label} className="bg-white shadow-md p-6 rounded-xl">
+            <h2 className="font-bold text-lg mb-4">{field.label}</h2>
+            <div className="flex gap-3 flex-wrap">
+              {field.options.map((o) => (
+                <button
+                  key={o.en}
+                  onClick={() => field.setState(o.en)}
+                  className={`px-4 py-2 rounded-lg border ${
+                    field.state === o.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  }`}
+                >
+                  {o.es}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+
+
+        {/* 🔹 Confirmación */}
+        {!imagen && (
+          <div className="text-center">
+            <button
+              onClick={handleGenerar}
+              disabled={loading}
+              className="mt-6 bg-blue-900 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold"
+            >
+              {loading ? "Generando..." : "Generar Imagen"}
+            </button>
+          </div>
+        )}
+
+        {/* 🔹 Resultado */}
+        {imagen && (
+          <div className="text-center mt-10 space-y-6">
+            <p className="text-green-700 font-bold text-lg">
+              ✅ Prenda agregada a tu colección de prendas
+            </p>
+
+            <img
+              src={imagen}
+              alt="Camiseta generada"
+              className="mx-auto rounded-lg shadow-lg w-80"
+            />
+
+            {promptResult && (
+              <p className="mt-4 text-gray-700 text-lg">
+                <strong>Descripción:</strong> {promptResult}
+              </p>
+            )}
+
+            <div className="flex justify-center gap-6 mt-6">
+              <button
+                onClick={() => {
+                  setImagen(null);
+                  setPromptResult("");
+                  setCosto(null);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold"
+              >
+                Volver a Generar
+              </button>
+
+              <button
+                onClick={() => (window.location.href = "/listar-prendasIA")}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold"
+              >
+                Ir a mi Colección
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
       <Footer />
     </div>

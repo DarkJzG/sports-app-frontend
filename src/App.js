@@ -62,6 +62,7 @@ import SeleccionPrenda from "./pages/ModeloIA/SeleccionPrenda";
 import FormCamiseta from "./pages/ModeloIA/FormCamiseta";
 import PrendasIA from "./pages/PrendasIA";
 import ListarPrendasIA from "./pages/ModeloIA/ListarPrendasIA";
+import DetallePrdIA from "./pages/DetallesPrendas/DetallePrd_IA.jsx";
 
 import SeleccionDiseno from "./pages/DisenarPrendas/SeleccionDiseno";
 import Camiseta3D from "./pages/DisenarPrendas/Camiseta3D";
@@ -245,7 +246,7 @@ function App() {
             <RutasPrivadas roles={["cliente", "admin"]}>
               <SeleccionPrenda />
             </RutasPrivadas>} />
-          <Route path="/modeloia/camiseta" element={
+          <Route path="/modeloia/:id" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <FormCamiseta />
             </RutasPrivadas>} />
@@ -256,6 +257,11 @@ function App() {
           <Route path="/listar-prendasIA" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <ListarPrendasIA />
+            </RutasPrivadas>} />
+
+          <Route path="/prendaIA/:id" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <DetallePrdIA />
             </RutasPrivadas>} />
 
           {/* Rutas Modelo 3D Camiseta */} 

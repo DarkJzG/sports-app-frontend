@@ -15,7 +15,7 @@ export default function ListarPrendasIA() {
       return;
     }
 
-    fetch(`http://localhost:5000/prendas_ia/listar?user_id=${user.id}`)
+    fetch(`http://localhost:5000/api/ia/prendas/listar?user_id=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setPrendas(data.prendas || []);
@@ -23,6 +23,25 @@ export default function ListarPrendasIA() {
       .catch((err) => console.error("Error cargando prendas:", err));
   }, [user, navigate]);
 
+  // 🔹 Función para eliminar prenda
+  const handleEliminar = async (id) => {
+    if (!window.confirm("¿Estás seguro de eliminar esta prenda?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/ia/prendas/eliminar/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        setPrendas((prev) => prev.filter((p) => p._id !== id));
+      } else {
+        alert("Error al eliminar la prenda.");
+      }
+    } catch (err) {
+      console.error("Error eliminando prenda:", err);
+    }
+  };
 
   return (
     <div>
@@ -45,28 +64,35 @@ export default function ListarPrendasIA() {
                   key={prenda._id}
                   className="bg-white rounded-xl shadow p-4 flex flex-col items-center"
                 >
-                  {/* ✅ Ahora usamos la URL de Cloudinary */}
                   <img
                     src={prenda.imageUrl}
                     alt={prenda.tipo_prenda}
                     className="h-40 object-contain mb-3 rounded"
                   />
                   <h3 className="font-semibold text-lg text-center">
-                    {prenda.tipo_prenda}
+                    {prenda.categoria_prd}
                   </h3>
                   <p className="text-gray-500 text-sm text-center">
                     {prenda.atributos?.tela || "Sin tela"}
                   </p>
                   <span className="text-blue-900 font-bold text-xl mb-2">
-                  ${prenda.costo || prenda.ficha_tecnica?.costo || "N/A"}
+                    ${prenda.precio_venta || prenda.ficha_tecnica?.costo || "N/A"}
                   </span>
 
-                  <Link
-                    to={`/prendaIA/${prenda._id}`}
-                    className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700 text-center w-full"
-                  >
-                    Ver Detalles
-                  </Link>
+                  <div className="flex gap-2 w-full">
+                    <Link
+                      to={`/prendaIA/${prenda._id}`}
+                      className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700 text-center flex-1"
+                    >
+                      Detalles
+                    </Link>
+                    <button
+                      onClick={() => handleEliminar(prenda._id)}
+                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex-1"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
