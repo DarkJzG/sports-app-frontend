@@ -59,7 +59,12 @@ import GenerarImagenForm from "./pages/ModeloIA/GenerarImagenForm";
 import GenerarImagenStable from "./pages/ModeloIA/GenerarImagenStable";
 
 import SeleccionPrenda from "./pages/ModeloIA/SeleccionPrenda";
-import FormCamiseta from "./pages/ModeloIA/FormCamiseta";
+
+import FormSeleccionP from "./pages/ModeloIA/FormSeleccionP.jsx";
+
+
+
+
 import PrendasIA from "./pages/PrendasIA";
 import ListarPrendasIA from "./pages/ModeloIA/ListarPrendasIA";
 import DetallePrdIA from "./pages/DetallesPrendas/DetallePrd_IA.jsx";
@@ -246,10 +251,14 @@ function App() {
             <RutasPrivadas roles={["cliente", "admin"]}>
               <SeleccionPrenda />
             </RutasPrivadas>} />
+
+
           <Route path="/modeloia/:id" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
-              <FormCamiseta />
+              <FormSeleccionP />
             </RutasPrivadas>} />
+
+
           <Route path="/ver-prendaIA" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <PrendasIA />

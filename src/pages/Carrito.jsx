@@ -23,13 +23,33 @@ export default function Carrito() {
       try {
         const res = await fetch(`${API_URL}/carrito/${user.id}`);
         const data = await res.json();
+        console.log('Datos del carrito recibidos:', JSON.parse(JSON.stringify(data.carrito))); // <-- AQUÍ
+        
         if (data.ok) {
-          setCarrito(data.carrito || []);
+          const carritoValidado = data.carrito.map(item => {
+            console.log('Procesando ítem:', { 
+              id: item._id, 
+              precio_unitario_original: item.precio_unitario, 
+              cantidad_original: item.cantidad,
+              tipo_precio: typeof item.precio_unitario,
+              tipo_cantidad: typeof item.cantidad
+            });
+            
+            return {
+              ...item,
+              precio_unitario: Number(item.precio_unitario) || 0,
+              cantidad: Math.max(1, Math.floor(Number(item.cantidad) || 1)),
+              precio: (Number(item.precio_unitario) || 0) * Math.max(1, Math.floor(Number(item.cantidad) || 1))
+            };
+          });
+          
+          console.log('Carrito validado:', JSON.parse(JSON.stringify(carritoValidado)));
+          setCarrito(carritoValidado);
         } else {
           setError("No se pudo obtener el carrito");
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error al cargar el carrito:', err);
         setError("Error de conexión");
       } finally {
         setCargando(false);
@@ -37,10 +57,15 @@ export default function Carrito() {
     };
 
     cargarCarrito();
+    
   }, [user, navigate]);
 
   const calcularTotal = () => {
-    return carrito.reduce((total, item) => total + (item.precio || 0), 0).toFixed(2);
+    return carrito.reduce((total, item) => {
+      const precio = Number(item.precio_unitario || 0);
+      const cantidad = Number(item.cantidad || 0);
+      return total + (precio * cantidad);
+    }, 0).toFixed(2);
   };
 
   const eliminarProducto = async (id) => {
@@ -99,7 +124,7 @@ export default function Carrito() {
                       <p><b>Cantidad:</b> {item.cantidad}</p>
                       <p><b>Precio Unitario:</b> ${parseFloat(item.precio_unitario || 0).toFixed(2)}</p>
                       <p className="text-blue-900 font-semibold">
-                        Subtotal: ${parseFloat(item.precio || 0).toFixed(2)}
+                        Subtotal: ${(Number(item.precio_unitario || 0) * Number(item.cantidad || 1)).toFixed(2)}
                       </p>
                     </div>
                     <button
@@ -115,11 +140,12 @@ export default function Carrito() {
 
             <div className="mt-8 text-right">
               <h2 className="text-xl font-semibold">Total: ${calcularTotal()}</h2>
+              
               <button
                 onClick={() => navigate("/checkout")}
                 className="mt-4 bg-blue-900 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold"
               >
-                Confirmar Pedido
+                Completar el Pago
               </button>
             </div>
           </>
