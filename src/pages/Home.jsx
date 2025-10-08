@@ -53,6 +53,18 @@ export default function Home() {
             >
               🎨 Diseñar en 3D
             </Link>
+            <Link
+              to="/form-camiseta-v2"
+              className="bg-blue-900 text-white font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-700 transition-all"
+            >
+              🚀 Probar V2
+            </Link>
+            <Link
+              to="/modelo3d/camiseta3d/vista/:id"
+              className="bg-blue-900 text-white font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-700 transition-all"
+            >
+              🚀 Probar Prototipo
+            </Link>
           </div>
         </div>
       </section>

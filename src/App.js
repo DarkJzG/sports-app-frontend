@@ -74,6 +74,11 @@ import Camiseta3D from "./pages/DisenarPrendas/Camiseta3D";
 import Camiseta3DVista from "./pages/DisenarPrendas/Camiseta3DVista";
 
 import GuiaCamiseta from "./pages/ModeloIA/GuiaCamiseta.jsx"
+import FormCamiseta_V2 from "./pages/ModeloIA/FormCamiseta_V2.jsx"
+
+import CamisetaViewer from "./pages/DisenarPrendas/CamisetaViewer";
+import ListarPrendas3D from "./pages/DisenarPrendas/ListarPrendas3D.jsx";
+import DetallePrd3D from "./pages/DetallesPrendas/DetallePrd_3D.jsx";
 
 
 
@@ -252,6 +257,11 @@ function App() {
               <SeleccionPrenda />
             </RutasPrivadas>} />
 
+          <Route path="/form-camiseta-v2" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <FormCamiseta_V2 />
+            </RutasPrivadas>} />
+
 
           <Route path="/modeloia/:id" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
@@ -285,6 +295,21 @@ function App() {
           <Route path="/modelo3d/camiseta3d/vista" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <Camiseta3DVista />
+            </RutasPrivadas>} />
+            
+          <Route path="/modelo3d/camiseta3d/vista/:id" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <CamisetaViewer />
+            </RutasPrivadas>} />
+          
+          <Route path="/modelo3d/listar-prendas3d" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <ListarPrendas3D />
+            </RutasPrivadas>} />
+          
+          <Route path="/prenda3d/:id" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <DetallePrd3D />
             </RutasPrivadas>} />
 
         </Routes>

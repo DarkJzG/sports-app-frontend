@@ -73,7 +73,7 @@ export default function ListarPrendasIA() {
                     {prenda.categoria_prd}
                   </h3>
                   <p className="text-gray-500 text-sm text-center">
-                    {prenda.atributos?.tela || "Sin tela"}
+                    {prenda.atributos_es?.tela || "Sin tela"}
                   </p>
                   <span className="text-blue-900 font-bold text-xl mb-2">
                     ${prenda.precio_venta || prenda.ficha_tecnica?.costo || "N/A"}

@@ -31,7 +31,7 @@ export default function DetalleCarrito() {
           <h1 className="text-3xl font-bold text-blue-900">{item.nombre}</h1>
           <p><strong>Categoría:</strong> {item.categoria_nombre}</p>
           <p><strong>Tela:</strong> {item.tela_nombre}</p>
-          <p><strong>Color:</strong> {item.color?.color}</p>
+          <p><strong>Color:</strong> {item.color?.color1}</p>
           <p><strong>Talla:</strong> {item.talla}</p>
           <p><strong>Cantidad:</strong> {item.cantidad}</p>
           <p><strong>Precio total:</strong> ${Number(item.precio || 0).toFixed(2)}</p>

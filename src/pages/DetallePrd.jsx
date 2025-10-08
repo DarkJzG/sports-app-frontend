@@ -62,6 +62,7 @@ export default function DetallePrd() {
     const productoCarrito = {
       userId: user.id,
       productoId: producto._id,
+      tipo: "producto",
       nombre: producto.nombre,
       categoria_nombre: producto.categoria_nombre,
       tela_nombre: producto.tela_nombre,

@@ -128,7 +128,7 @@ export default function Checkout() {
   };
 
   // Manejar envío del formulario
-  const handleSubmit = async (e) => {
+  const handleConfirmar = async (e) => {
     e.preventDefault();
     setCargando(true);
     setMsg("");
@@ -147,6 +147,22 @@ export default function Checkout() {
       return;
     }
 
+    const camposRequeridos = {
+      'nombre': 'Nombre completo',
+      'direccion_principal': 'Dirección principal',
+      'ciudad': 'Ciudad',
+      'provincia': 'Provincia',
+      'telefono': 'Teléfono'
+    };
+
+    for (const [campo, nombre] of Object.entries(camposRequeridos)) {
+      if (!direccion[campo]?.trim()) {
+        setMsg(`Por favor, completa el campo: ${nombre}`);
+        setCargando(false);
+        return;
+      }
+    }
+
     try {
       // Crear FormData para enviar el archivo
       const formData = new FormData();
@@ -160,15 +176,17 @@ export default function Checkout() {
       const pedidoData = {
         items: carrito.map((item) => ({
           productId: item._id || item.productId,
+          tipo: item.tipo,
           nombre: item.nombre,
           cantidad: item.cantidad || 1,
           precioUnitario: item.precio_unitario || item.precio,
           precioTotal: item.precio_total || item.precio,
           talla: item.talla,
-          color: item.color,
-          imagen: item.imagen_url,
+          color: typeof item.color === "string" ? item.color : (item.color?.color || "N/A"),
+          imagen: item.imagen_url || item.imagen || "",
           categoria_nombre: item.categoria_nombre,
           tela_nombre: item.tela_nombre,
+          ficha_id: item.ficha_id || null,
           estado: "pendiente"
         })),
         direccionEnvio: {
@@ -210,33 +228,33 @@ export default function Checkout() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Mostrar mensaje de éxito
-        toast.success("¡Pedido creado exitosamente!");
-        
-        // Limpiar carrito
-        // Nota: Asegúrate de que tu API tenga un endpoint para limpiar el carrito
-        try {
-          await fetch(`${API_URL}/carrito/vaciar/${user.id}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-            
-          });
-        } catch (error) {
-          console.error("Error al limpiar el carrito:", error);
-        }
-        
-        // Redirigir a la página de éxito
-        navigate(`/mis-pedidos/${data.pedidoId}`);
-      } else {
-        throw new Error(data.msg || "Error al procesar el pedido");
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al procesar el pedido');
       }
+  
+      // Limpiar carrito
+      try {
+        await fetch(`${API_URL}/carrito/vaciar/${user.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${user.token}`
+          }
+        });
+      } catch (error) {
+        console.error('Error al vaciar el carrito:', error);
+        // Continuar aunque falle el vaciado del carrito
+      }
+  
+      // Mostrar mensaje de éxito
+      toast.success("¡Pedido creado exitosamente!");
+      
+      // Redirigir a la página de confirmación o historial de pedidos
+      navigate('/mis-pedidos');
+  
     } catch (error) {
-      console.error("Error al procesar el pedido:", error);
-      setMsg(error.message || "Ocurrió un error al procesar el pedido");
-      toast.error(error.message || "Ocurrió un error al procesar el pedido");
+      console.error('Error en handleConfirmar:', error);
+      setMsg(error.message || 'Ocurrió un error al procesar tu pedido');
+      toast.error(error.message || 'Error al procesar el pedido');
     } finally {
       setCargando(false);
     }
@@ -261,7 +279,7 @@ export default function Checkout() {
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
         
-        <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-2 lg:gap-8">
+        <form onSubmit={handleConfirmar} className="lg:grid lg:grid-cols-2 lg:gap-8">
           {/* Columna izquierda - Datos de envío y pago */}
           <div className="space-y-6">
             {/* Sección de dirección de envío */}

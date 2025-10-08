@@ -151,19 +151,31 @@ export default function DetallePedidoAdmin() {
 
   const handleActualizarEstado = async () => {
     try {
+      let fechaEntregaFinal = fechaEntrega;
+  
+      if (fechaEntrega) {
+        // Crear un Date con la fecha seleccionada
+        const fecha = new Date(fechaEntrega);
+        // Forzar hora a 16:00
+        fecha.setHours(16, 0, 0, 0);
+        // Convertir a ISO string
+        fechaEntregaFinal = fecha.toISOString();
+      }
+  
       const res = await fetch(`${API_URL}/pedido/${pedido._id}/estado`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           estado: nuevoEstado,
           nota,
-          fechaEntrega: fechaEntrega || null,
+          ...(fechaEntregaFinal ? { fechaEntrega: fechaEntregaFinal } : {})
         }),
       });
+  
       const data = await res.json();
       if (data.ok) {
         setMsg("✅ Estado actualizado correctamente");
-        setTimeout(() => window.location.reload(), 1200);
+        setPedido(prev => ({ ...prev, estado: nuevoEstado, fechaEntrega: fechaEntregaFinal }));
       } else {
         setMsg("❌ " + (data.msg || "Error al actualizar"));
       }
@@ -172,6 +184,7 @@ export default function DetallePedidoAdmin() {
       setMsg("Error de conexión con el servidor");
     }
   };
+  
 
   if (cargando) return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -293,6 +306,18 @@ export default function DetallePedidoAdmin() {
                     <p className="font-medium">
                       {formatDateSafe(pedido.fechaEntrega)}
                     </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {(() => {
+                        const fin = new Date(pedido.fechaEntrega);
+                        const diff = fin - new Date();
+                        if (diff > 0) {
+                          const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                          const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                          return `Faltan ${dias} días y ${horas} horas para la entrega`;
+                        }
+                        return "Fecha de entrega vencida";
+                      })()}
+                    </p>
                   </div>
                 )}
                 <div>
@@ -339,7 +364,7 @@ export default function DetallePedidoAdmin() {
                     <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                       {item.imagen ? (
                         <img 
-                          src={item.imagen} 
+                          src={item.imagen || item.imagen_url}
                           alt={item.nombre} 
                           className="w-full h-full object-cover"
                         />
@@ -370,6 +395,7 @@ export default function DetallePedidoAdmin() {
                             )}
                           </div>
                         )}
+
                       </div>
                     </div>
                     <div className="text-right">
@@ -379,10 +405,41 @@ export default function DetallePedidoAdmin() {
                       <p className="text-sm text-gray-500">
                         ${item.precioUnitario.toFixed(2)} c/u
                       </p>
+                      <p className="text-sm text-gray-500">
+                      {item.tipo === "ia_prenda" && item.ficha_id && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              console.log("📄 Descargando ficha técnica con ID:", item.ficha_id);
+                              const res = await fetch(`${API_URL}/api/ficha/${item.ficha_id}/pdf`);
+                              const data = await res.json();
+                              if (data.ok) {
+                                console.log("📄 Respuesta ficha técnica:", data);
+                                const link = document.createElement("a");
+                                link.href = "data:application/pdf;base64," + data.pdf_base64;
+                                link.download = `Ficha_${item.nombre}.pdf`;
+                                link.click();
+                              } else {
+                                alert("❌ No se pudo generar la ficha técnica.");
+                              }
+                            } catch (error) {
+                              console.error(error);
+                              alert("Error al descargar la ficha técnica.");
+                            }
+                          }}
+                          className="mt-2 text-xs text-blue-600 hover:underline"
+                        >
+                          Descargar Ficha Técnica
+                        </button>
+                      )}
+
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
+
+              
               <div className="mt-4 pt-4 border-t">
                 <div className="flex justify-between py-1">
                   <span className="text-gray-600">Subtotal:</span>
@@ -497,7 +554,7 @@ export default function DetallePedidoAdmin() {
           {/* Columna derecha */}
           <div className="space-y-6">
             {/* Gestión de estado */}
-            <InfoCard className="w-1/2" title="Gestión de Estado">
+            <InfoCard className="w-2/2" title="Gestión de Estado">
               <select
                 value={nuevoEstado}
                 onChange={(e) => setNuevoEstado(e.target.value)}
@@ -512,7 +569,7 @@ export default function DetallePedidoAdmin() {
                 <option value="cancelado">Cancelado</option>
               </select>
 
-              {nuevoEstado === "pagado_total" && (
+              {["pagado_total", "en_produccion", "listo", "enviado"].includes(nuevoEstado) && (
                 <div className="mb-4">
                   <label className="block mb-2 font-medium">Fecha de entrega</label>
                   <input
@@ -523,6 +580,7 @@ export default function DetallePedidoAdmin() {
                   />
                 </div>
               )}
+
 
               <textarea
                 className="w-full border rounded px-3 py-2 mb-3"

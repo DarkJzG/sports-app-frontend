@@ -62,15 +62,19 @@ export default function DetallePrdIA() {
     const productoCarrito = {
       userId: user.id,
       productoId: prenda._id,
+      tipo: "ia_prenda",              
       nombre: prenda.descripcion || "Prenda IA",
       categoria_nombre: prenda.categoria_prd || "Prenda IA",
-      tela_nombre: prenda.atributos?.tela || "N/A",
-      color: prenda.atributos?.color1 || "N/A",
+      tela_nombre: prenda.atributos_es?.tela || "N/A",
+      color: prenda.atributos_es?.color2 
+              ? `${prenda.atributos_es.color1}, ${prenda.atributos_es.color2}`
+              : prenda.atributos_es?.color1 || "N/A",
       talla: tallaSeleccionada,
       cantidad,
       precio_unitario: parseFloat(precioUnitario.toFixed(2)),
       precio: parseFloat(subtotal.toFixed(2)),
       imagen_url: prenda.imageUrl,
+      ficha_id: prenda.ficha_id,
       estado: "pendiente",
     };
 
@@ -117,36 +121,38 @@ export default function DetallePrdIA() {
           </h1>
 
           <p>
-            <strong>Tela:</strong> {prenda.atributos?.tela || "N/A"}
+            <strong>Tela:</strong> {prenda.atributos_es?.tela || "N/A"}
           </p>
           <p>
-            <strong>Color principal:</strong> {prenda.atributos?.color1 || "N/A"}
+            <strong>Color principal:</strong> {prenda.atributos_es?.color1 || "N/A"}
           </p>
-          {prenda.atributos?.color2 && (
+          {prenda.atributos_es?.color2 && (
             <p>
-              <strong>Color secundario:</strong> {prenda.atributos?.color2}
+              <strong>Color secundario:</strong> {prenda.atributos_es?.color2}
             </p>
           )}
           <p>
-            <strong>Género:</strong> {prenda.atributos?.genero || "Unisex"}
+            <strong>Género:</strong> {prenda.atributos_es?.genero || "Unisex"}
           </p>
 
           {/* Tallas */}
-          <div>
-            <label className="font-bold text-gray-700">Selecciona una talla:</label>
-            <select
-              className="w-full bg-white border mt-1 rounded px-3 py-2"
-              value={tallaSeleccionada}
-              onChange={(e) => setTallaSeleccionada(e.target.value)}
-            >
-              <option value="">Selecciona una talla</option>
-              {["S", "M", "L", "XL", "XXL"].map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+          <div className="mb-4">
+            <h3 className="font-semibold mb-2">Selecciona tu talla</h3>
+            {["S", "M", "L", "XL"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setTallaSeleccionada(t)}
+                className={`px-3 py-2 rounded-lg border mr-2 ${
+                  tallaSeleccionada === t
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
+
 
           {/* Cantidad */}
           <div>

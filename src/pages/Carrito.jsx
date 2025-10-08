@@ -119,7 +119,7 @@ export default function Carrito() {
                       </p>
                       <p><b>Categoría:</b> {item.categoria_nombre}</p>
                       <p><b>Tela:</b> {item.tela_nombre}</p>
-                      <p><b>Color:</b> {item.color?.color}</p>
+                      <p><b>Color:</b> {item.color}</p>
                       <p><b>Talla:</b> {item.talla}</p>
                       <p><b>Cantidad:</b> {item.cantidad}</p>
                       <p><b>Precio Unitario:</b> ${parseFloat(item.precio_unitario || 0).toFixed(2)}</p>

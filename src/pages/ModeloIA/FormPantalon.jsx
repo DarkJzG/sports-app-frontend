@@ -19,7 +19,6 @@ export default function FormPantalon() {
   const [diseno, setDiseno] = useState("");
   const [disenoOtro, setDisenoOtro] = useState("");
   const [pretina, setPretina] = useState("");
-  const [largo, setLargo] = useState("");
   const [ajuste, setAjuste] = useState("");
   const [tela, setTela] = useState("");
   const [genero, setGenero] = useState("");
@@ -70,12 +69,6 @@ export default function FormPantalon() {
     { es: "Con cordón", en: "drawstring waistband" },
     { es: "Ajustable", en: "adjustable waistband" },
     { es: "Estándar", en: "standard waistband" },
-  ];
-
-  const largos = [
-    { es: "Corto", en: "shorts" },
-    { es: "3/4", en: "three quarter length" },
-    { es: "Largo", en: "full length" },
   ];
 
   const ajustes = [
@@ -137,7 +130,6 @@ export default function FormPantalon() {
         color2,
         diseno: diseno === "other" ? disenoOtro : diseno,
         pretina,
-        largo,
         ajuste,
         tela,
         genero,
@@ -279,24 +271,6 @@ export default function FormPantalon() {
           </div>
         </div>
 
-        {/* 🔹 Largo */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Largos</h2>
-          <div className="flex flex-wrap gap-3">
-            {largos.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setLargo(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  largos === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* 🔹 Ajuste */}
 
@@ -308,7 +282,7 @@ export default function FormPantalon() {
                 key={p.en}
                 onClick={() => setAjuste(p.en)}
                 className={`px-4 py-2 rounded-lg border ${
-                  largos === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  ajuste === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -326,7 +300,7 @@ export default function FormPantalon() {
                 key={p.en}
                 onClick={() => setTela(p.en)}
                 className={`px-4 py-2 rounded-lg border ${
-                  telas === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  tela === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -345,7 +319,7 @@ export default function FormPantalon() {
                 key={p.en}
                 onClick={() => setGenero(p.en)}
                 className={`px-4 py-2 rounded-lg border ${
-                  generos === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  genero === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -364,9 +338,13 @@ export default function FormPantalon() {
             {opcionesBolsillos.map((p) => (
               <button
                 key={p.en}
-                onClick={() => setBolsillos(p.en)}
+                onClick={() =>
+                  setBolsillos(prev =>
+                    prev.includes(p.en) ? prev.filter(x => x !== p.en) : [...prev, p.en]
+                  )
+                }
                 className={`px-4 py-2 rounded-lg border ${
-                  opcionesBolsillos === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  bolsillos.includes(p.en) ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -384,7 +362,7 @@ export default function FormPantalon() {
                 key={p.en}
                 onClick={() => setEstiloAvanzado(p.en)}
                 className={`px-4 py-2 rounded-lg border ${
-                  estilosAvanzados === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  estiloAvanzado === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -400,9 +378,13 @@ export default function FormPantalon() {
             {detallesExtras.map((p) => (
               <button
                 key={p.en}
-                onClick={() => setDetalles(p.en)}
+                onClick={() =>
+                  setDetalles(prev =>
+                    prev.includes(p.en) ? prev.filter(x => x !== p.en) : [...prev, p.en]
+                  )
+                }
                 className={`px-4 py-2 rounded-lg border ${
-                  detallesExtras === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  detalles.includes(p.en) ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
@@ -419,7 +401,7 @@ export default function FormPantalon() {
                 key={p.en}
                 onClick={() => setAcabado(p.en)}
                 className={`px-4 py-2 rounded-lg border ${
-                  acabados === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
+                  acabado === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {p.es}
