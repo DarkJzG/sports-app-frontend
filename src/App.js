@@ -1,15 +1,19 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
 
 import RutasPrivadas from "./components/RutasPrivadas.jsx";
 
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
-import VerificarCuenta from "./pages/VerificarCuenta..jsx";
-import Perfil from "./pages/Perfil";
+import VerificarCuenta from "./pages/VerificarCuenta";
+import Perfil from "./pages/Perfil/Perfil.jsx";
 import RestContra from "./pages/RecupContra";
 import OldContra from "./pages/OldContra"; 
+
+import SobreNosotros from "./pages/SobreNosotros";
+import Contacto from "./pages/Contacto";
 
 import HomeAdmin from "./pages/Home_admin";
 
@@ -75,16 +79,18 @@ import Camiseta3DVista from "./pages/DisenarPrendas/Camiseta3DVista";
 
 import GuiaCamiseta from "./pages/ModeloIA/GuiaCamiseta.jsx"
 import FormCamiseta_V2 from "./pages/ModeloIA/FormCamiseta_V2.jsx"
+import FormCamiseta_V3 from "./pages/ModeloIA/FormCamiseta_V3.jsx"
 
 import CamisetaViewer from "./pages/DisenarPrendas/CamisetaViewer";
-import ListarPrendas3D from "./pages/DisenarPrendas/ListarPrendas3D.jsx";
+import ListarPrendas3D from "./pages/DisenarPrendas/ListarPrendas3D.jsx"
 import DetallePrd3D from "./pages/DetallesPrendas/DetallePrd_3D.jsx";
 
 
 
 function App() {
   return (
-    
+    <>
+
       <Router>
         <Routes>
           
@@ -93,13 +99,18 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
-          <Route path="/verificar/:token" element={<VerificarCuenta />} />
+          <Route path="/verificar" element={<VerificarCuenta />} />
           <Route path="/restablecer-contrasena" element={<RestContra />} />
           <Route path="/olvido-contrasena" element={<OldContra />} />
           <Route path="/catalogo" element={<Catalogo />} />
+          <Route path="/catalogo/:categoriaId" element={<Catalogo />} />
           <Route path="/producto/:id" element={<DetallePrd />} />
           <Route path="/carrito" element={<Carrito />} />
           <Route path="/carrito/detalle/:itemId" element={<DetalleCarrito />} />
+
+
+          <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+          <Route path="/contacto" element={<Contacto />} />
 
 
           {/* Cliente Iniciado Sesión */}
@@ -261,6 +272,11 @@ function App() {
             <RutasPrivadas roles={["cliente", "admin"]}>
               <FormCamiseta_V2 />
             </RutasPrivadas>} />
+          
+          <Route path="/form-camiseta-v3" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <FormCamiseta_V3 />
+            </RutasPrivadas>} />
 
 
           <Route path="/modeloia/:id" element={
@@ -314,7 +330,16 @@ function App() {
 
         </Routes>
       </Router>
-    
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
+    </>
   );
 }
 

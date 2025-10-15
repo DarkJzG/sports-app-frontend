@@ -79,7 +79,7 @@ export default function ListarPrendas3D() {
                 className="bg-white rounded-xl shadow-lg p-4 flex flex-col"
               >
                 <img
-                  src={p.render_final}
+                  src={p.renders?.render_frente || p.renders?.render_espalda || p.renders?.render_lado_izq || p.renders?.render_lado_der}
                   alt={p.modelo}
                   className="rounded-lg object-cover h-56 w-full"
                 />

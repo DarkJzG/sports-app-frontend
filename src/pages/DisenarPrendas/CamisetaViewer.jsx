@@ -18,8 +18,10 @@ import PanelEstilosRGB from "../../components/Prenda3D/PanelEstilosRGB";
 import { useChannelMaskTexture } from "../../components/useChannelMaskTexture";
 import { PerformanceMonitor } from "@react-three/drei";
 
+import { Matrix4, Vector2, Vector3 } from "three";
+
 /* Cambia la profundidad a la que agrego el texto y los logos */
-const toDecalScale = (s, thickness = 2) =>
+const toDecalScale = (s, thickness = 1) =>
   Array.isArray(s) ? s : [s, s, thickness];
 
 /* ========= 1) Catálogo de diseños ========= */
@@ -49,6 +51,55 @@ const CATALOG = {
     },
   },
 };
+
+// Devuelve tamaño en UV (0-1) equivalente a un tamaño en mundo "worldSize"
+function worldScaleToUvScale(e, worldSize) {
+  const obj = e.object;
+  const geom = obj.geometry;
+  const idx = geom.index;
+  const pos = geom.attributes.position;
+  const uv  = geom.attributes.uv;
+  const faceIndex = e.faceIndex ?? 0;
+
+  if (!uv || !pos || !idx) return worldSize * 0.001; // fallback
+
+  // Índices del triángulo impactado
+  const ia = idx.array[faceIndex * 3 + 0];
+  const ib = idx.array[faceIndex * 3 + 1];
+  const ic = idx.array[faceIndex * 3 + 2];
+
+  // Vértices del triángulo en local
+  const va = new Vector3().fromBufferAttribute(pos, ia);
+  const vb = new Vector3().fromBufferAttribute(pos, ib);
+  const vc = new Vector3().fromBufferAttribute(pos, ic);
+
+  // Llevar a mundo
+  const m = new Matrix4().copy(obj.matrixWorld);
+  va.applyMatrix4(m); vb.applyMatrix4(m); vc.applyMatrix4(m);
+
+  // Área del triángulo en mundo
+  const ab = new Vector3().subVectors(vb, va);
+  const ac = new Vector3().subVectors(vc, va);
+  const areaWorld = ab.clone().cross(ac).length() * 0.5;
+
+  // UVs del triángulo
+  const uva = new Vector2().fromBufferAttribute(uv, ia);
+  const uvb = new Vector2().fromBufferAttribute(uv, ib);
+  const uvc = new Vector2().fromBufferAttribute(uv, ic);
+
+  // Área del triángulo en UV (2D)
+  const e1 = uvb.clone().sub(uva);
+  const e2 = uvc.clone().sub(uva);
+  const areaUV = Math.abs(e1.x * e2.y - e1.y * e2.x) * 0.5;
+
+  if (areaWorld <= 1e-8 || areaUV <= 1e-8) return worldSize * 0.001;
+
+  // Ratio local: (unidades UV / unidades Mundo)
+  const ratio = Math.sqrt(areaUV / areaWorld);
+
+  // "worldSize" (tu scale en 3D) → tamaño en UV (0–1)
+  return worldSize * ratio;
+}
 
 function makeTextTexture(txt, { font = "900 128px Inter", fill = "#000000", outline = "#000", outlineW = 10 } = {}) {
   const c = document.createElement("canvas");
@@ -143,6 +194,7 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
 
   const handlePointerDown = (e) => {
     e.stopPropagation();
+
     const p = e.point.clone();
     const n = (e.face?.normal || new THREE.Vector3(0, 0, 1))
       .clone()
@@ -150,19 +202,33 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
     const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
     const eul = new THREE.Euler().setFromQuaternion(q);
     const idxMesh = e.object.userData.meshIndex ?? 0;
-  
+
+    const uv = e.uv ? [e.uv.x, e.uv.y] : [0.5, 0.5];
+    const faceIndex = e.faceIndex ?? 0;
+    const worldScale = e.object.scale.clone().length();
+    const uvSize = worldScaleToUvScale(e, worldScale);
+
+    
     if (!activeElement) return;
-  
+
     const { type, index } = activeElement;
     if (type === "text") {
       setTextDecals((prev) => {
         const copy = [...prev];
         const prevZ = copy[index]?.rotation?.[2] ?? 0; 
+        const worldScale = copy[index]?.scale ?? 1.0;
+        const uvSize = worldScaleToUvScale(e, worldScale);
+
         copy[index] = { 
           ...copy[index], 
           position: p.toArray(), 
           rotation: [eul.x, eul.y, prevZ], 
-          meshIndex: idxMesh 
+          meshIndex: idxMesh,
+          faceIndex,
+          uv,
+          uvSize,         
+          rotationZ: prevZ,
+          scale: worldScale,
         };
         return copy;
       });
@@ -170,11 +236,22 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
       setDecals((prev) => {
         const copy = [...prev];
         const prevZ = copy[index]?.rotation?.[2] ?? 0; 
+        const worldScale = copy[index]?.scale ?? 1.0;
+        const uvSize = worldScaleToUvScale(e, worldScale);
+
         copy[index] = { 
           ...copy[index], 
           position: p.toArray(), 
           rotation: [eul.x, eul.y, prevZ], 
-          meshIndex: idxMesh };
+          meshIndex: idxMesh,
+          faceIndex,
+          uv,
+          uvSize,         
+          rotationZ: prevZ,
+          scale: worldScale,
+
+          
+        };
         return copy;
       });
     }
@@ -290,21 +367,31 @@ export default function CamisetaViewer() {
   // ---- mutadores
   const updateActiveElement = (patch) => {
     if (!activeElement) return;
-    if (activeElement.type === "logo") {
-      setDecals(arr => {
+    const { type, index } = activeElement;
+  
+    const update = (arrSetter) => {
+      arrSetter(arr => {
         const copy = [...arr];
-        copy[activeElement.index] = { ...copy[activeElement.index], ...patch };
+        const current = copy[index];
+        if (!current) return arr;
+  
+        const merged = { ...current, ...patch };
+  
+        // ⚙️ recalcular uvSize si se cambia scale
+        if (patch.scale !== undefined && current.uvSize && current.scale) {
+          const ratio = current.uvSize / current.scale;
+          merged.uvSize = patch.scale * ratio;
+        }
+  
+        copy[index] = merged;
         return copy;
       });
-    } else if (activeElement.type === "text") {
-      setTextDecals(arr => {
-        const copy = [...arr];
-        copy[activeElement.index] = { ...copy[activeElement.index], ...patch };
-        return copy;
-      });
-    }
+    };
+  
+    if (type === "logo") update(setDecals);
+    if (type === "text") update(setTextDecals);
   };
-
+  
 
   // Reset TOTAL al cambiar de PRENDA
   useEffect(() => {
@@ -485,26 +572,31 @@ export default function CamisetaViewer() {
       // 1️⃣ Asegurar que la escena se haya renderizado antes de capturar
       await new Promise((resolve) => requestAnimationFrame(resolve));
 
-      // 2️⃣ Forzar un render manual por si frameloop está en "demand"
 
       gl.render(scene, camera);
 
-
       // 3️⃣ Capturar versión normal (con fondo gris)
-      const dataURL = gl.domElement.toDataURL("image/png");
-      const blob = await (await fetch(dataURL)).blob();
+      const angles = [
+        { name: "espalda", rotationY: Math.PI },
+        { name: "lado_izq", rotationY: Math.PI / 2 },
+        { name: "lado_der", rotationY: -Math.PI / 2 },
+        { name: "frente", rotationY: 0 },
+      ];
+      
+      const renders = {};
+      
+      for (const a of angles) {
+        camera.position.set(Math.sin(a.rotationY) * 5, -0.5, Math.cos(a.rotationY) * 5);
+        camera.lookAt(0, 1, 0);
+        gl.render(scene, camera);
+        await new Promise((r) => requestAnimationFrame(r));
+      
+        const dataURL = gl.domElement.toDataURL("image/png");
+        renders[a.name] = await (await fetch(dataURL)).blob();
+      }
 
-      // 3️⃣.5️⃣ Capturar versión sin fondo (para sublimación)
-      const originalBg = glRef.current.scene.background;
-      glRef.current.scene.background = null;
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      const subDataURL = gl.domElement.toDataURL("image/png");
-      glRef.current.scene.background = originalBg;
-
-  
       // 2️⃣ Crear el FormData DESPUÉS de tener el blob
       const formData = new FormData();
-      formData.append("file", blob, "render_final.png");
       formData.append("user_id", user.id);
       formData.append("categoria", productId || "camiseta");
       formData.append("modelo", `CA-${Date.now()}`);
@@ -513,7 +605,12 @@ export default function CamisetaViewer() {
       formData.append("textures", JSON.stringify(textures));
       formData.append("decals", JSON.stringify(decals));
       formData.append("textDecals", JSON.stringify(textDecals));
-      formData.append("render_sublimacion", subDataURL);
+      formData.append("render_frente", renders.frente, "frente.png");
+      formData.append("render_espalda", renders.espalda, "espalda.png");
+      formData.append("render_lado_izq", renders.lado_izq, "lado_izq.png");
+      formData.append("render_lado_der", renders.lado_der, "lado_der.png");
+      const UV_RES = [2048, 2048];
+      formData.append("uv_resolution", JSON.stringify(UV_RES));   
 
       console.log("📤 Enviando diseño al backend...");
   

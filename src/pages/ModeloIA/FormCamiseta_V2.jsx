@@ -52,11 +52,12 @@ export default function FormCamiseta_V2() {
             { key: 'style', label: 'Tipo de degradado', type: 'select', options: [
             { label: 'Lineal', value: 'linear' },
             { label: 'Radial', value: 'radial' }
+            //Borrar lineas horizontales
             ], default: 'linear' },
             { key: 'direction', label: 'Dirección', type: 'select', options: [
-            { label: 'Vertical', value: 'vertical' },
-            { label: 'Horizontal', value: 'horizontal' },
-            { label: 'Diagonal', value: 'diagonal' }
+            { label: 'Vertical', value: 'vertical' , img: '/img/opciones/degradado_vertical.png' },
+            { label: 'Horizontal', value: 'horizontal' , img: '/img/opciones/degradado_horizontal.png' },
+            { label: 'Diagonal', value: 'diagonal' , img: '/img/opciones/degradado_diagonal.png' }
             ], default: 'vertical' },
             { key: 'softness', label: 'Suavidad de transición', type: 'select', options: [
             { label: 'Suave', value: 'soft' },
@@ -136,7 +137,8 @@ export default function FormCamiseta_V2() {
             { label: 'Sutil', value: 'subtle' },
             { label: 'Equilibrado', value: 'balanced' },
             { label: 'Marcado', value: 'bold' }
-            ], default: 'balanced' },{ key: 'coverage', label: 'Cobertura', type: 'select', options: [
+            ], default: 'balanced' },
+            { key: 'coverage', label: 'Cobertura', type: 'select', options: [
                 { label: 'Completa', value: 'all-over full coverage' },
                 { label: 'Parcial', value: 'partial central area' },
                 { label: 'Distribución sutil', value: 'subtly dispersed elements' }
@@ -159,7 +161,7 @@ export default function FormCamiseta_V2() {
             requiresSecondaryColor: true,
             allowExtraColors: true,
             fields: [
-                { key: 'direction', label: 'Dirección', type: 'select', options: [ // NUEVO CAMPO
+                { key: 'direction', label: 'Dirección', type: 'select', options: [ 
                     { label: 'Horizontal', value: 'horizontal' },
                     { label: 'Vertical', value: 'vertical' },
                     { label: 'Diagonal (45°)', value: 'diagonal' }
@@ -178,7 +180,7 @@ export default function FormCamiseta_V2() {
                     { label: 'Definido', value: 'hard edge' },
                     { label: 'Difuminado', value: 'soft edge' }
                 ], default: 'hard edge' },
-                { key: 'style', label: 'Estilo de raya', type: 'select', options: [ // NUEVO CAMPO
+                { key: 'style', label: 'Estilo de raya', type: 'select', options: [ 
                     { label: 'Uniforme', value: 'uniform and continuous' },
                     { label: 'Bloques', value: 'thick block segments' },
                     { label: 'Desfasado', value: 'staggered and offset' },
@@ -550,19 +552,23 @@ export default function FormCamiseta_V2() {
         const setOpt = (key, value) => setOpcionesDiseno(prev => ({ ...prev, [key]: value }));
 
         const Field = ({ f }) => {
-          if (f.type === 'select') {
+          if (f.type === 'select' && f.options[0]?.img) {
             return (
-              <div className="flex flex-col gap-1">
-                <label className="font-medium">{f.label}</label>
-                <select
-                  className="border p-2 rounded"
-                  value={opcionesDiseno[f.key] ?? f.default ?? ''}
-                  onChange={(e) => setOpt(f.key, e.target.value)}
-                >
-                  {(f.options || []).map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+              <div className="flex flex-col gap-2">
+                <label className="font-semibold">{f.label}</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {f.options.map(o => (
+                    <div
+                      key={o.value}
+                      onClick={() => setOpt(f.key, o.value)}
+                      className={`cursor-pointer border-2 rounded-lg overflow-hidden shadow-md hover:scale-105 transition 
+                        ${opcionesDiseno[f.key] === o.value ? 'border-blue-600 ring-2 ring-blue-400' : 'border-gray-300'}`}
+                    >
+                      <img src={o.img} alt={o.label} className="w-center h-center object-cover" />
+                      <p className="text-center py-1 font-medium">{o.label}</p>
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
             );
           }

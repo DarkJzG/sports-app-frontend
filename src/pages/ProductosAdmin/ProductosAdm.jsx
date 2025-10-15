@@ -80,6 +80,9 @@ export default function ProductosAdmin() {
                     <b>Color:</b> {p.color?.color || "N/A"}
                   </div>
                   <div className="text-sm text-gray-700">
+                    <b>Género:</b> {p.genero || "N/A"}
+                  </div>
+                  <div className="text-sm text-gray-700">
                     <b>Mano de Obra:</b> ${p.mano_obra_prenda}{" "}
                     <b>Diseños:</b>{" "}
                     {Object.entries(p.cantDisenos || {}).map(([k, v]) =>

@@ -16,6 +16,7 @@ export default function EditarProducto() {
   const [tela, setTela] = useState(null);
   const [lotes, setLotes] = useState([]);
   const [color, setColor] = useState(null);
+  const [genero, setGenero] = useState("");
 
   const [manoObra, setManoObra] = useState(null);
   const [insumos, setInsumos] = useState([]);
@@ -66,6 +67,7 @@ export default function EditarProducto() {
         setCategoria({ _id: prod.categoria_id, nombre: prod.categoria_nombre });
         setTela({ _id: prod.tela_id, nombre: prod.tela_nombre });
         setColor(prod.color || null);
+        setGenero(prod.genero || "");
         setTallasSeleccionadas(prod.tallas_disponibles || []);
         setMetros(prod.costos?.metros || 1);
         setPrecioVenta(prod.precio_venta || 0);
@@ -184,6 +186,7 @@ export default function EditarProducto() {
       tela_nombre: tela.nombre,
       color,
       tallas_disponibles: tallasSeleccionadas,
+      genero,
       mano_obra_id: manoObra?._id || null,
       mano_obra_prenda: manoObra?.mano_obra_prenda || 0,
       insumos: manoObra?.insumos || [],
@@ -302,6 +305,23 @@ export default function EditarProducto() {
               ))}
             </div>
           </div>
+
+          {/* Género */}
+          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+            <label className="font-bold">Género</label>
+            <select
+              className="w-full bg-transparent mt-1"
+              value={genero}
+              onChange={(e) => setGenero(e.target.value)}
+            >
+              <option value="">Selecciona...</option>
+              <option value="Hombre">Hombre</option>
+              <option value="Mujer">Mujer</option>
+              <option value="Niño">Niño</option>
+              <option value="Unisex">Unisex</option>
+            </select>
+          </div>
+
 
           {/* Metros y precio venta */}
           <div className="flex gap-3">

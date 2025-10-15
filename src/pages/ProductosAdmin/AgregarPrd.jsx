@@ -20,6 +20,7 @@ export default function AgregarProducto() {
 
   const [metros, setMetros] = useState(1);
   const [precioVenta, setPrecioVenta] = useState(0);
+  const [genero, setGenero] = useState("");
 
   const [costos, setCostos] = useState({
     tela: 0,
@@ -154,10 +155,11 @@ export default function AgregarProducto() {
       tela_nombre: tela.nombre,
       color,
       tallas_disponibles: tallasSeleccionadas,
+      genero,
       mano_obra_id: manoObra?._id || null,
       mano_obra_prenda: manoObra?.mano_obra_prenda || 0,
       insumos: manoObra?.insumos || [],
-      cantDisenos, // guardamos las cantidades elegidas
+      cantDisenos, 
       costos,
       precio_venta: precioVenta,
       ganancia_menor: gananciaMenor,
@@ -272,6 +274,22 @@ export default function AgregarProducto() {
                 </label>
               ))}
             </div>
+          </div>
+
+
+          <div className="bg-[#f7f7f7] rounded-xl shadow px-6 py-4">
+            <label className="font-bold">Género</label>
+            <select
+              className="w-full bg-transparent mt-1"
+              value={genero}
+              onChange={(e) => setGenero(e.target.value)}
+            >
+              <option value="">Selecciona...</option>
+              <option value="Hombre">Hombre</option>
+              <option value="Mujer">Mujer</option>
+              <option value="Niño">Niño</option>
+              <option value="Unisex">Unisex</option>
+            </select>
           </div>
 
 

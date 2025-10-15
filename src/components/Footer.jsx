@@ -24,7 +24,7 @@ export default function Footer() {
         <div>
           <h3 className="font-bold text-lg mb-2">Más</h3>
           <ul className="flex flex-col gap-2">
-            <li><a href="#" className="hover:underline">Acerca de Nosotros</a></li>
+            <li><a href="/sobre-nosotros" className="hover:underline">Acerca de Nosotros</a></li>
             <li><a href="#" className="hover:underline">Políticas de Privacidad</a></li>
             <li><a href="#" className="hover:underline">Términos y Condiciones</a></li>
             <li><a href="#" className="hover:underline">Contáctanos</a></li>

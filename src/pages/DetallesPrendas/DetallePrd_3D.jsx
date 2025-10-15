@@ -38,7 +38,7 @@ export default function DetallePrd3D() {
         {/* Imagen principal */}
         <div className="flex justify-center items-center">
           <img
-            src={prenda.render_final}
+            src={prenda.renders?.render_frente || prenda.renders?.render_espalda || prenda.renders?.render_lado_izq || prenda.renders?.render_lado_der}
             alt={prenda.modelo}
             className="rounded-xl shadow-xl w-96 h-auto"
           />

@@ -3,15 +3,17 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { API_URL } from "../config";
 
 export default function Home() {
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/producto/all")
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
-      .catch((err) => console.error("Error cargando productos:", err));
+    fetch("http://localhost:5000/catg_prod/all")
+      .then(res => res.json())
+      .then(data => setCategorias(data))
+      .catch(err => console.error("Error cargando categorías:", err));
   }, []);
 
   return (
@@ -78,103 +80,158 @@ export default function Home() {
           <p className="text-gray-600 mb-10">
             Explora los diseños de prendas deportivas que tenemos disponibles.
           </p>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {[
-              { img: "/img/category-1.jpg", label: "Camisetas" },
-              { img: "/img/category-2.jpg", label: "Pantalones" },
-              { img: "/img/category-3.jpg", label: "Zapatos" },
-              { img: "/img/category-4.jpg", label: "Accesorios" },
-            ].map((cat, idx) => (
-              <div
-                key={idx}
-                className="group bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+            {categorias.map((cat) => (
+              <Link
+              key={cat._id}
+              to={`/catalogo/${cat._id}`}
+              className="group bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
               >
-                <img
-                  src={cat.img}
-                  alt={cat.label}
-                  className="h-32 w-full object-cover group-hover:scale-110 transition-transform"
-                />
-                <h3 className="font-semibold text-center py-3 text-blue-900">
-                  {cat.label}
-                </h3>
+                <img src={cat.imagen_url} alt={cat.nombre} className="h-32 w-center object-cover group-hover:scale-210 transition-transform" />
+                              <h3 className="font-semibold text-center py-3 text-blue-900">{cat.nombre}</h3>
+              </Link>
+
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCTOS DESTACADOS mejorado */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-2 text-center">
+            Productos <span className="text-blue-900">Destacados</span>
+          </h2>
+          <p className="text-gray-600 mb-10 text-center max-w-2xl mx-auto">
+            Descubre nuestras prendas más populares y mejor valoradas.
+          </p>
+          
+          {/* Pestañas de filtrado */}
+          <div className="flex gap-6 mb-8 justify-center">
+            {['⭐ Destacados', '🔥 Popular', '🆕 Recién llegados'].map((tab, index) => (
+              <button
+                key={index}
+                className={`px-4 py-2 rounded-full font-medium transition-colors ${
+                  index === 0 
+                    ? 'bg-blue-900 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {productos.length === 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-md p-4 animate-pulse">
+                  <div className="h-40 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                  <div className="h-10 bg-gray-200 rounded-lg"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              {productos.map((prod) => (
+                <div
+                  key={prod._id}
+                  className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
+                >
+                  <div className="h-48 overflow-hidden bg-gray-50">
+                    <img
+                      src={prod.imagen_url}
+                      alt={prod.nombre}
+                      className="h-full w-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = '/img/placeholder-product.png';
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-1 text-gray-900 line-clamp-1">
+                      {prod.nombre}
+                    </h3>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-blue-700 font-bold text-xl">
+                        ${prod.precio_venta?.toFixed(2) || "0.00"}
+                      </span>
+                      <Link
+                        to={`/producto/${prod._id}`}
+                        className="text-blue-900 hover:text-blue-700 font-medium flex items-center gap-1"
+                      >
+                        Ver más <span>→</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* BENEFICIOS */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            ¿Por qué elegirnos?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: "🚀",
+                title: "Diseño Personalizado",
+                description: "Crea tu propia prenda única con nuestro diseñador 3D."
+              },
+              {
+                icon: "✨",
+                title: "Tecnología de Vanguardia",
+                description: "Utilizamos IA para ofrecerte los mejores diseños."
+              },
+              {
+                icon: "🎨",
+                title: "Variedad de Estilos",
+                description: "Amplia gama de colores, telas y diseños disponibles."
+              }
+            ].map((benefit, index) => (
+              <div key={index} className="text-center p-6 bg-gray-50 rounded-xl hover:shadow-lg transition-shadow">
+                <div className="text-4xl mb-4">{benefit.icon}</div>
+                <h3 className="text-xl font-semibold mb-2 text-blue-900">{benefit.title}</h3>
+                <p className="text-gray-600">{benefit.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* PRODUCTOS DESTACADOS */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex gap-6 mb-8 justify-center">
-            <span className="tab__btn active-tab text-blue-900 font-bold cursor-pointer border-b-2 border-blue-900 pb-1">
-              ⭐ Destacados
-            </span>
-            <span className="tab__btn text-gray-500 hover:text-blue-900 cursor-pointer">
-              🔥 Popular
-            </span>
-            <span className="tab__btn text-gray-500 hover:text-blue-900 cursor-pointer">
-              🆕 Recién Agregados
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {productos.length === 0 ? (
-              <p className="text-gray-500">Cargando productos...</p>
-            ) : (
-              productos.map((prod) => (
-                <div
-                  key={prod._id}
-                  className="bg-white rounded-2xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:-translate-y-2 transition-all"
-                >
-                  <img
-                    src={prod.imagen_url}
-                    alt={prod.nombre}
-                    className="h-32 object-contain mb-3"
-                  />
-                  <h3 className="font-semibold text-lg mb-1 text-center text-blue-900">
-                    {prod.nombre}
-                  </h3>
-                  <span className="text-blue-700 font-bold text-xl mb-3">
-                    ${prod.precio_venta?.toFixed(2) || "0.00"}
-                  </span>
-                  <Link
-                    to={`/producto/${prod._id}`}
-                    className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:scale-105 hover:bg-blue-700 transition w-full text-center font-medium"
-                  >
-                    Ver Detalles
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* NEWSLETTER / REDES */}
-      <section className="bg-gradient-to-r from-blue-800 to-blue-900 py-14 text-white">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center">
-          <h3 className="text-2xl font-bold mb-6">
-            Síguenos y mantente actualizado
-          </h3>
-          <div className="flex gap-8">
-            <button className="hover:scale-125 transition">
-              <img src="/img/icon-youtube.svg" alt="YouTube" className="w-8" />
+      <section className="bg-gradient-to-r from-blue-800 to-blue-900 py-16 text-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-bold mb-4">¡Mantente actualizado!</h3>
+          <p className="mb-8 text-blue-100 max-w-2xl mx-auto">
+            Suscríbete a nuestro boletín para recibir ofertas exclusivas y novedades.
+          </p>
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Tu correo electrónico"
+              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-yellow-400 text-blue-900 font-semibold px-6 py-3 rounded-lg hover:bg-yellow-300 transition-colors"
+            >
+              Suscribirse
             </button>
-            <button className="hover:scale-125 transition">
-              <img
-                src="/img/icon-instagram.svg"
-                alt="Instagram"
-                className="w-8"
-              />
-            </button>
-            <button className="hover:scale-125 transition">
-              <img
-                src="/img/icon-facebook.svg"
-                alt="Facebook"
-                className="w-8"
-              />
-            </button>
-          </div>
+          </form>
+          <p className="text-sm text-blue-200 mt-4">
+            Respetamos tu privacidad. Nunca compartiremos tu correo electrónico.
+          </p>
         </div>
       </section>
 
