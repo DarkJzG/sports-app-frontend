@@ -4,3 +4,4 @@ export const BACKEND_URL =
 
 
 export const API_URL = BACKEND_URL;
+export const API_URL_GEMINI = `${BACKEND_URL}/api/ia/generar_camiseta_gemini_v3`;

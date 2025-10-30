@@ -102,6 +102,8 @@ export default function Carrito() {
                 const id = typeof item._id === "object" && item._id.$oid 
                   ? item._id.$oid 
                   : item._id?.toString();
+                
+                const tallaEstandar = [ "S", "M", "L", "XL", "XXL"];
 
                 return (
                   <div key={id} className="border rounded-lg p-4 flex gap-4 items-center bg-white shadow">
@@ -119,8 +121,8 @@ export default function Carrito() {
                       </p>
                       <p><b>Categoría:</b> {item.categoria_nombre}</p>
                       <p><b>Tela:</b> {item.tela_nombre}</p>
-                      <p><b>Color:</b> {item.color}</p>
-                      <p><b>Talla:</b> {item.talla}</p>
+                      <p><b>Color:</b> {typeof item.color === 'object' ? item.color.color : item.color}</p>
+                      <p><b>Talla:</b> {tallaEstandar.some(stdSize => stdSize.toLowerCase() === item.talla.toLowerCase()) ? item.talla : "Personalizada"}</p>
                       <p><b>Cantidad:</b> {item.cantidad}</p>
                       <p><b>Precio Unitario:</b> ${parseFloat(item.precio_unitario || 0).toFixed(2)}</p>
                       <p className="text-blue-900 font-semibold">

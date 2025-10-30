@@ -1,10 +1,13 @@
 // src/pages/Perfil.jsx
 import React, { useState } from "react";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import SidebarPerfil from "../Perfil/SlidebarPerfil";
-import PanelDatos from "../Perfil/PanelDatos";
-import PanelDirecciones from "../Perfil/PanelDirecciones";
+import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/Footer";
+import SidebarPerfil from "./SlidebarPerfil";
+import PanelDatos from "./PanelDatos";
+import PanelDirecciones from "./PanelDirecciones";
+import PanelPedidos from "./PanelPedidos";
+import PanelPrendaIA from "./PanelPrendaIA";
+import PanelPrenda3D from "./PanelPrenda3D";
 
 export default function Perfil() {
   const [activePanel, setActivePanel] = useState("datos"); // valores: datos | direcciones | pedidos
@@ -21,6 +24,9 @@ export default function Perfil() {
 
           {activePanel === "direcciones" && <PanelDirecciones />}
           {activePanel === "datos" && <PanelDatos />}
+          {activePanel === "pedidos" && <PanelPedidos />}
+          {activePanel === "prendasIA" && <PanelPrendaIA />}
+          {activePanel === "prendas3D" && <PanelPrenda3D />}
         </div>
       </div>
       <Footer />

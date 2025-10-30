@@ -1,10 +1,10 @@
 // src/pages/Perfil/PanelDatos.jsx
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../components/AuthContext";
-import { API_URL } from "../../config";
+import { useAuth } from "../../../components/AuthContext";
+import { API_URL } from "../../../config";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
-import PantallaCarga from "../../components/PantallaCarga";
+import PantallaCarga from "../../../components/PantallaCarga";
 
 export default function PanelDatos() {
   const { user, token } = useAuth();
@@ -14,7 +14,7 @@ export default function PanelDatos() {
   const [modalPassword, setModalPassword] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
 
-  const [form, setForm] = useState({ nombre: "", apellido: "", telefono: "" });
+  const [form, setForm] = useState({ nombre: "", apellido: "", cedula: "" });
   const [pass, setPass] = useState({ actual: "", nueva: "", confirmar: "" });
   const [showPasswords, setShowPasswords] = useState({
     actual: false,
@@ -34,7 +34,8 @@ export default function PanelDatos() {
           setForm({
             nombre: data.usuario.nombre || "",
             apellido: data.usuario.apellido || "",
-            telefono: data.usuario.telefono || "",
+            cedula: data.usuario.cedula || "",
+
           });
         }
       } catch (err) {
@@ -118,9 +119,9 @@ export default function PanelDatos() {
       <div className="border rounded-lg p-5 bg-white shadow-sm">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">Detalles</h2>
         <p className="text-gray-700">
-          {usuario.nombre} {usuario.apellido}
+          <span className="font-semibold">Nombre:</span> {usuario.nombre} {usuario.apellido} <br />
+          <span className="font-semibold">Cédula:</span> {usuario.cedula}
         </p>
-        {usuario.telefono && <p className="text-gray-600 text-sm">{usuario.telefono}</p>}
         <button
           onClick={() => setModalEditar(true)}
           className="mt-3 px-4 py-2 border rounded text-sm font-medium hover:bg-gray-100 transition"
@@ -165,10 +166,10 @@ export default function PanelDatos() {
               ✕
             </button>
             <div className="space-y-4">
-              {["nombre", "apellido", "telefono"].map((field, idx) => (
+              {["nombre", "apellido", "cedula"].map((field, idx) => (
                 <div key={idx}>
                   <label className="block text-sm font-medium mb-1 capitalize">
-                    {field === "telefono" ? "Número de teléfono (opcional)" : `${field} *`}
+                    {field === "cedula" ? "Cédula" : `${field} *`}
                   </label>
                   <input
                     value={form[field]}

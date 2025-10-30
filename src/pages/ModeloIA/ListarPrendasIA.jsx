@@ -76,7 +76,7 @@ export default function ListarPrendasIA() {
                     {prenda.atributos_es?.tela || "Sin tela"}
                   </p>
                   <span className="text-blue-900 font-bold text-xl mb-2">
-                    ${prenda.precio_venta || prenda.ficha_tecnica?.costo || "N/A"}
+                    ${prenda.costo.precio_venta || prenda.costo.precio_costo || "N/A"}
                   </span>
 
                   <div className="flex gap-2 w-full">

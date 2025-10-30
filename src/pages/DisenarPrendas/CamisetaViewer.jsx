@@ -8,6 +8,11 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../components/AuthContext";
 import PantallaCarga from "../../components/PantallaCarga";
 import {useNavigate} from "react-router-dom";
+import { Shirt, Palette, Type, Image, Layers, Sparkles } from "lucide-react";
+
+
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 import PanelColoresRGB from "../../components/Prenda3D/PanelColoresRGB";
 import PanelTexturasRGB from "../../components/Prenda3D/PanelTexturasRGB";
@@ -355,14 +360,19 @@ export default function CamisetaViewer() {
     setSelectedElement(null);
   }, [activeSection]);
 
-  const navItems = [
-    { id: "prenda",   label: "Prenda" },
-    { id: "estilos",  label: "Estilos" },
-    { id: "colores",  label: "Colores" },
-    { id: "texto",    label: "Texto" },
-    { id: "logos",    label: "Logos" },
-    { id: "texturas", label: "Texturas IA" },
-  ];
+<NavPanelesRGB
+  items={[
+    { id: "prenda",   label: "Prenda",   icon: <Shirt size={22} /> },
+    { id: "estilos",  label: "Estilos",  icon: <Layers size={22} /> },
+    { id: "colores",  label: "Colores",  icon: <Palette size={22} /> },
+    { id: "texto",    label: "Texto",    icon: <Type size={22} /> },
+    { id: "logos",    label: "Logos",    icon: <Image size={22} /> },
+    { id: "texturas", label: "Texturas IA", icon: <Sparkles size={22} /> },
+  ]}
+  activeId={activeSection}
+  onChange={setActiveSection}
+/>
+
 
   // ---- mutadores
   const updateActiveElement = (patch) => {
@@ -640,6 +650,8 @@ export default function CamisetaViewer() {
   
 
   return (
+    <>
+    <Navbar />
     <div className="flex h-[90vh] bg-gray-100">
       {/* izquierda: navegación vertical */}
       <div className="p-4">
@@ -702,16 +714,18 @@ export default function CamisetaViewer() {
             !glRef.current ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          💾 Guardar Diseño
+           Guardar Diseño
         </button>
         <div className="absolute top-4 left-4 bg-black/70 p-3 rounded-lg text-white text-sm">
           <h3 className="font-bold mb-1">Controles</h3>
-          <p>• Click izquierdo: Colocar elemento</p>
+          <p>• Click izquierdo sobre la prenda: Colocar elemento</p>
           <p>• Rueda del ratón: Zoom</p>
-          <p>• Click derecho + arrastrar: Rotar vista</p>
+          <p>• Click izquierdo + arrastrar: Rotar vista</p>
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
 

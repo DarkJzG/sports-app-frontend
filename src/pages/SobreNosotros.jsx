@@ -177,8 +177,8 @@ const SobreNosotros = () => {
         </div>
       </section>
 
-      {/* Nuestro Equipo */}
-      <section className="py-20">
+
+      {/* <section className="py-20">
         <div className="container mx-auto px-6">
           <motion.div 
             initial="hidden"
@@ -217,9 +217,9 @@ const SobreNosotros = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Llamado a la acción */}
+
       <section className="bg-gradient-to-r from-blue-900 to-blue-600 text-white py-16">
         <div className="container mx-auto px-6 text-center">
           <motion.div
@@ -233,7 +233,7 @@ const SobreNosotros = () => {
               Únete a miles de clientes satisfechos que ya han creado sus prendas personalizadas con nosotros.
             </p>
             <Link
-              to="/disenar"
+              to="/form-camiseta-v3"
               className="inline-block bg-white text-blue-900 font-bold px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-300"
             >
               Comenzar a Diseñar

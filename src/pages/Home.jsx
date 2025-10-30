@@ -18,11 +18,71 @@ export default function Home() {
 
   return (
     <div className="bg-white text-gray-800">
-      {/* NAVBAR */}
+
       <Navbar />
 
-      {/* HERO principal */}
-      <section className="relative bg-gradient-to-br from-blue-50 to-blue-200 py-16 md:py-24">
+      {/*BANNER*/}
+        <section className="flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-blue-900 via-white-700 to-white-500 text-white py-20 md:py-28">
+
+          <img
+            src="/img/banner_sport.svg"
+            alt="Banner deportivo"
+            className="absolute inset-0 w-full h-full object-cover opacity-10"
+          />
+
+          <div className="relative z-10 max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
+            {/* Lado izquierdo: texto */}
+            <div className="text-center md:text-left md:w-1/2 space-y-6 animate-fadeIn">
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight drop-shadow-lg">
+                Diseña tu <span className="text-blue-900">prenda deportiva</span><br />
+                con estilo y tecnología
+              </h1>
+              <p className="text-lg md:text-xl text-blue-100 max-w-md mx-auto md:mx-0">
+                Personaliza camisetas con ayuda de la IA
+              </p>
+
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4">
+                <Link
+                  to="/form-camiseta-v3"
+                  className="bg-white text-blue-900 font-semibold rounded-xl px-8 py-3 shadow hover:scale-105 hover:bg-blue-300 transition-all"
+                >
+                  Probar V3
+                </Link>
+
+                <Link
+                  to="/modelo3d/camiseta3d/vista/:id"
+                  className="bg-blue-900 text-white-900 font-semibold rounded-xl px-8 py-3 shadow hover:scale-105 hover:bg-white-100 transition-all"
+                >
+                  Probar Modelo
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-10 md:mt-0 md:w-1/2 flex justify-center">
+              <img
+                src="/img/CamisetJ.png"
+                alt="Diseño deportivo IA"
+                className="w-120 md:w-[400px] drop-shadow-2xl animate-bounce-slow"
+              />
+            </div>
+          </div>
+
+
+          <svg
+            className="absolute bottom-0 left-0 w-full"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+          >
+            <path
+              fill="#fff"
+              fillOpacity="1"
+              d="M0,288L80,272C160,256,320,224,480,213.3C640,203,800,213,960,208C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+            ></path>
+          </svg>
+        </section>
+
+
+      {/* <section className="relative bg-gradient-to-br from-blue-50 to-blue-200 py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center relative z-10">
           <img
             src="/img/img_inicio_costura.png"
@@ -41,35 +101,35 @@ export default function Home() {
               to="/modeloia"
               className="bg-blue-900 text-white font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-700 transition-all"
             >
-              🚀 Probar SplArt
+              Probar SplArt
             </Link>
             <Link
               to="/guia_generar_img"
               className="border border-blue-900 text-blue-900 font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-900 hover:text-white transition-all"
             >
-              📖 Ver Catálogo
+              Ver Catálogo
             </Link>
             <Link
               to="/modelo3d/camiseta3d/vista"
               className="border border-blue-900 text-blue-900 font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-900 hover:text-white transition-all"
             >
-              🎨 Diseñar en 3D
+              Diseñar en 3D
             </Link>
             <Link
               to="/form-camiseta-v2"
               className="bg-blue-900 text-white font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-700 transition-all"
             >
-              🚀 Probar V2
+              Probar V2
             </Link>
             <Link
               to="/modelo3d/camiseta3d/vista/:id"
               className="bg-blue-900 text-white font-semibold rounded-xl px-6 py-3 shadow hover:scale-105 hover:bg-blue-700 transition-all"
             >
-              🚀 Probar Prototipo
+              Probar Prototipo
             </Link>
           </div>
         </div>
-      </section>
+      </section>  */}
 
       {/* CATEGORÍAS */}
       <section className="py-14 bg-white">
@@ -97,7 +157,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRODUCTOS DESTACADOS mejorado */}
+      { /* PRODUCTOS DESTACADOS 
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold mb-2 text-center">
@@ -107,9 +167,8 @@ export default function Home() {
             Descubre nuestras prendas más populares y mejor valoradas.
           </p>
           
-          {/* Pestañas de filtrado */}
           <div className="flex gap-6 mb-8 justify-center">
-            {['⭐ Destacados', '🔥 Popular', '🆕 Recién llegados'].map((tab, index) => (
+            {['Destacados', 'Popular', 'Recién llegados'].map((tab, index) => (
               <button
                 key={index}
                 className={`px-4 py-2 rounded-full font-medium transition-colors ${
@@ -172,10 +231,10 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+      </section> */}
 
       {/* BENEFICIOS */}
-      <section className="py-16 bg-white">
+      <section className="bg-gradient-to-r from-blue-800 to-blue-900 py-16 text-white">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold mb-12 text-center">
             ¿Por qué elegirnos?
@@ -183,17 +242,17 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: "🚀",
+                icon: "",
                 title: "Diseño Personalizado",
                 description: "Crea tu propia prenda única con nuestro diseñador 3D."
               },
               {
-                icon: "✨",
+                icon: "",
                 title: "Tecnología de Vanguardia",
                 description: "Utilizamos IA para ofrecerte los mejores diseños."
               },
               {
-                icon: "🎨",
+                icon: "",
                 title: "Variedad de Estilos",
                 description: "Amplia gama de colores, telas y diseños disponibles."
               }
@@ -208,8 +267,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NEWSLETTER / REDES */}
-      <section className="bg-gradient-to-r from-blue-800 to-blue-900 py-16 text-white">
+
+      {/* <section className="bg-gradient-to-r from-blue-800 to-blue-900 py-16 text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h3 className="text-3xl font-bold mb-4">¡Mantente actualizado!</h3>
           <p className="mb-8 text-blue-100 max-w-2xl mx-auto">
@@ -233,9 +292,9 @@ export default function Home() {
             Respetamos tu privacidad. Nunca compartiremos tu correo electrónico.
           </p>
         </div>
-      </section>
+      </section> */}
 
-      {/* FOOTER */}
+
       <Footer />
     </div>
   );

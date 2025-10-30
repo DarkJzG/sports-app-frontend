@@ -28,7 +28,7 @@ const Contacto = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simular envío del formulario
+    // Falta conectar al backend
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       setSubmitStatus({
@@ -60,19 +60,19 @@ const Contacto = () => {
     {
       icon: <FaMapMarkerAlt className="text-2xl text-blue-600" />,
       title: "Dirección",
-      content: "Av. Principal #123, Col. Centro, Ciudad de México, CDMX, 06000",
+      content: "Pedro Moncayo y Gaspar de Villarroel",
       link: "https://maps.google.com"
     },
     {
       icon: <FaPhone className="text-2xl text-blue-600" />,
       title: "Teléfono",
-      content: "+52 55 1234 5678",
-      link: "tel:+525512345678"
+      content: "+593 0959207677",
+      link: "tel:+5930959207677"
     },
     {
       icon: <FaEnvelope className="text-2xl text-blue-600" />,
       title: "Correo Electrónico",
-      content: "contacto@johansports.com",
+      content: "johan@sports.com",
       link: "mailto:contacto@johansports.com"
     },
     {

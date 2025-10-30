@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Range } from "react-range";
 import { parseColor } from "../components/colorParser";
+import { motion } from "framer-motion";
 
 const PRECIO_MIN = 1;
 const PRECIO_MAX = 100;
@@ -56,9 +57,24 @@ export default function Catalogo() {
       <Navbar />
 
       {/* Encabezado */}
-      <section className="bg-blue-900 text-white py-10 text-center">
-        <h1 className="text-4xl font-bold">Catálogo de Productos</h1>
-        <p className="text-blue-100 mt-2">Explora nuestra colección completa de prendas deportivas</p>
+      <section className="bg-gradient-to-r from-blue-900 to-blue-600 text-white py-16">
+        <div className="container mx-auto px-6 text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+          >
+            Catálogo de Producto
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-xl max-w-3xl mx-auto"
+          >
+            Explora nuestra colección completa de prendas deportivas
+          </motion.p>
+        </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-10">

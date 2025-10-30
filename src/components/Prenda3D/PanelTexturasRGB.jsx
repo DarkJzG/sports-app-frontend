@@ -1,15 +1,11 @@
-// src/components/Prenda3D/PanelTexturas.jsx
+// src/components/Prenda3D/PanelTexturasRGB.jsx
 import React, { useState } from "react";
 import { API_URL } from "../../config";
 import PantallaCarga from "../../components/PantallaCarga";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-/**
- * Este PanelTexturas está adaptado al sistema de máscaras RGB del CamisetaViewer.jsx.
- * Trabaja por zonas (neck, sleeves, torso, etc.), no por partes fijas (delantera, trasera).
- * Cada zona puede generar una textura o color base IA, que se aplica al mapa RGB.
- */
-
-const COLORES = [
+const COLORES_BASE = [
   { nombre: "Negro", hex: "#000000" },
   { nombre: "Blanco", hex: "#FFFFFF" },
   { nombre: "Gris", hex: "#808080" },
@@ -23,80 +19,70 @@ const COLORES = [
   { nombre: "Naranja", hex: "#FFA500" },
 ];
 
-const PATRONES = [
-  "rayas diagonales",
-  "cuadros",
-  "degradado suave",
-  "ondas",
-  "camuflaje",
-  "líneas finas",
-  "textura tejida",
-  "patrón geométrico",
-  "mosaico artístico",
+const TIPOS_TEXTURA = [
+  { key: "moteado", label: "Moteado", img: "/img/patrones/TextMoteado.png" },
+  { key: "lineas", label: "Líneas o franjas", img: "/img/patrones/TextLineas.png" },
+  { key: "circuitos", label: "Circuitos", img: "/img/patrones/TextCircuito.png" },
+  { key: "olas", label: "Olas o flujo", img: "/img/patrones/TextFlujo.png" },
+  { key: "flores", label: "Orgánico / Flores", img: "/img/patrones/TextOrganico.png" },
+  { key: "personalizado", label: "Otro (escribir idea)", img: "/img/patrones/TextCustom.png" },
 ];
 
-const ESTILOS = [
-  "deportivo",
-  "urbano",
-  "futurista",
-  "casual",
-  "minimalista",
-];
-
-export default function PanelTexturasRGB({ designZones, colors, setColors, setTextures }) {
-
+export default function PanelTexturasRGB({ designZones, setTextures, setColors }) {
   const [selectedZone, setSelectedZone] = useState(Object.keys(designZones)[0]);
+  const [numColores, setNumColores] = useState(2);
   const [selectedColors, setSelectedColors] = useState([]);
-  const [pattern, setPattern] = useState(PATRONES[0]);
-  const [style, setStyle] = useState(ESTILOS[0]);
-  const [loading, setLoading] = useState(false);
+  const [textureType, setTextureType] = useState("moteado");
+  const [customTexture, setCustomTexture] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-
-  // 🔁 Reestablecer los colores IA generados
-  const resetColors = () => {
-    const reset = {};
-    Object.keys(colors).forEach((z) => (reset[z] = "#ffffff"));
-    setColors(reset);
-    setPreviewUrl(null);
-  };
-
-  // 🎨 Seleccionar hasta 3 colores
+  // 🎨 Cambiar selección de color (máx 4)
   const toggleColor = (hex) => {
     setSelectedColors((prev) => {
       if (prev.includes(hex)) return prev.filter((c) => c !== hex);
-      if (prev.length < 3) return [...prev, hex];
+      if (prev.length < 4) return [...prev, hex];
+      toast.info("Máximo 4 colores permitidos");
       return prev;
     });
   };
 
-  // ⚙️ Generar textura IA para una zona
-  const handleGenerarIA = async () => {
-    if (selectedColors.length === 0) {
-      alert("Selecciona al menos un color base.");
+  // 🔄 Reset
+  const resetPanel = () => {
+    setSelectedColors([]);
+    setNumColores(2);
+    setTextureType("moteado");
+    setCustomTexture("");
+    setPreviewUrl(null);
+  };
+
+  // ⚙️ Generar textura IA
+  const handleGenerarTextura = async () => {
+    if (selectedColors.length < 2) {
+      toast.error("Selecciona al menos 2 colores");
       return;
     }
+
+    const coloresTexto = selectedColors.map(
+      (hex) => COLORES_BASE.find((c) => c.hex === hex)?.nombre || hex
+    );
+
+    const tipo = textureType === "personalizado" && customTexture.trim() !== ""
+      ? customTexture.trim()
+      : textureType;
+
+    const prompt = `
+      High-quality seamless textile pattern, flat fabric surface,
+      ${tipo} pattern style, colors: ${coloresTexto.join(", ")},
+      ultra-detailed fibers, no folds, no wrinkles, tileable design,
+      perfect for sportswear fabrics, white background, no 3D render, 
+      diffuse lighting, studio view, sharp focus.
+    `;
 
     setLoading(true);
     setPreviewUrl(null);
 
     try {
-      const coloresTexto = selectedColors.map(
-        (hex) => COLORES.find((c) => c.hex === hex)?.nombre || hex
-      );
-
-      const prompt = `
-      High-quality seamless textile pattern, flat fabric surface, 
-      ${pattern} pattern in ${style} style, 
-      colors: ${coloresTexto.join(", ")}, 
-      diffuse lighting, no folds, no wrinkles, no shadows, 
-      no 3D render, no reflections, no depth, 
-      perfectly flat texture for PBR materials, white background, 
-      sharp details, tileable pattern design, ultra-realistic fibers, 
-      digital design view, not photographed fabric.
-    `;
-    
-
       const res = await fetch(`${API_URL}/api/ia/generar_textura`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,119 +95,125 @@ export default function PanelTexturasRGB({ designZones, colors, setColors, setTe
 
       const data = await res.json();
 
-      // ✅ aplicar color promedio automáticamente a la zona
-      if (data.color_promedio && selectedZone) {
-        setColors((prev) => ({ ...prev, [selectedZone]: data.color_promedio }));
-      }
-      
-      // ✅ aplicar la textura generada
+      if (data.error) throw new Error(data.error);
+
+      // 🟢 Aplicar textura y color promedio al modelo
       if (data.imageUrl && selectedZone) {
         setTextures((prev) => ({ ...prev, [selectedZone]: data.imageUrl }));
       }
-      
-      setPreviewUrl(data.imageUrl);
+      if (data.color_promedio && selectedZone) {
+        setColors((prev) => ({ ...prev, [selectedZone]: data.color_promedio }));
+      }
 
-      // 🟢 Aplicar color IA promedio (como fallback visual)
-      // Aquí simplificamos tomando el primer color seleccionado
-      const nuevoColor = selectedColors[0];
-      setColors((prev) => ({ ...prev, [selectedZone]: nuevoColor }));
+      setPreviewUrl(data.imageUrl);
+      toast.success("Textura generada con éxito");
     } catch (err) {
-      console.error("❌ Error al generar textura:", err);
-      alert(err.message || "Error al generar textura.");
+      console.error("Error al generar textura:", err);
+      toast.error("Error al generar textura");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
-          <PantallaCarga 
-            show={loading} 
-            message="Generando textura con IA, por favor espera..." 
-          />
-      {/* Encabezado */}
+    <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-5">
+      <PantallaCarga show={loading} message="Generando textura con IA..." />
+
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold text-blue-900">🎨 Generar Texturas IA</h3>
+        <h3 className="text-lg font-bold text-blue-900">🧵 Texturas IA por Zona</h3>
         <button
-          onClick={resetColors}
+          onClick={resetPanel}
           className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
         >
           Reestablecer
         </button>
       </div>
 
-      {/* Selector de zona */}
+      {/* Zona */}
       <div>
-        <label className="font-medium text-sm">Zona a personalizar:</label>
+        <label className="font-medium text-sm">Zona de la prenda:</label>
         <select
           value={selectedZone}
           onChange={(e) => setSelectedZone(e.target.value)}
           className="border rounded px-2 py-1 w-full"
         >
           {Object.entries(designZones).map(([id, z]) => (
-            <option key={id} value={id}>
-              {z.label}
-            </option>
+            <option key={id} value={id}>{z.label}</option>
           ))}
         </select>
       </div>
 
-      {/* Paleta de colores */}
+
+      {/* Colores base */}
       <div>
-        <p className="text-sm mb-2">Selecciona hasta 3 colores base:</p>
-        <div className="flex flex-wrap gap-2">
-          {COLORES.map((c) => (
+        <p className="text-sm mb-2">Selecciona los colores:</p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {COLORES_BASE.map((c) => (
             <div
               key={c.hex}
               onClick={() => toggleColor(c.hex)}
-              className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
+              className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
                 selectedColors.includes(c.hex)
-                  ? "border-blue-500"
+                  ? "border-blue-600"
                   : "border-gray-300"
               }`}
               style={{ backgroundColor: c.hex }}
               title={c.nombre}
-            ></div>
+            />
           ))}
         </div>
       </div>
 
-      {/* Patrón y estilo */}
-      <div className="flex flex-col gap-2">
-        <label className="font-medium text-sm">Patrón:</label>
-        <select
-          value={pattern}
-          onChange={(e) => setPattern(e.target.value)}
-          className="border rounded px-2 py-1 w-full"
-        >
-          {PATRONES.map((p) => (
-            <option key={p}>{p}</option>
+      {/* Tipos de textura visual */}
+      <div>
+        <h4 className="font-semibold text-center mb-3">Tipo de textura</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {TIPOS_TEXTURA.map((opt) => (
+            <div
+              key={opt.key}
+              onClick={() => setTextureType(opt.key)}
+              className={`cursor-pointer border-4 rounded-xl overflow-hidden transition ${
+                textureType === opt.key
+                  ? "border-blue-600 scale-[1.02]"
+                  : "border-gray-300 hover:scale-[1.01]"
+              }`}
+            >
+              <img
+                src={opt.img}
+                alt={opt.label}
+                className="w-full h-20 object-cover"
+              />
+              <p className="font-semibold bg-white py-1 text-sm">{opt.label}</p>
+            </div>
           ))}
-        </select>
+        </div>
 
-        <label className="font-medium text-sm">Estilo:</label>
-        <select
-          value={style}
-          onChange={(e) => setStyle(e.target.value)}
-          className="border rounded px-2 py-1 w-full"
-        >
-          {ESTILOS.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
+        {/* Textura personalizada */}
+        {textureType === "personalizado" && (
+          <div className="mt-4">
+            <input
+              type="text"
+              maxLength={15}
+              value={customTexture}
+              onChange={(e) => setCustomTexture(e.target.value)}
+              placeholder="Describe tu textura (máx. 15 letras)"
+              className="w-full border p-2 rounded-lg text-center"
+            />
+          </div>
+        )}
       </div>
 
-      {/* Botón de generación */}
+      {/* Botón generar */}
       <button
-        onClick={handleGenerarIA}
+        onClick={handleGenerarTextura}
         disabled={loading}
-        className={`px-4 py-2 rounded-lg font-medium ${
-          loading 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
+        className={`w-full py-2 rounded-lg font-semibold ${
+          loading
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
         }`}
       >
-        {loading ? 'Generando...' : 'Generar Textura'}
+        {loading ? "Generando..." : "Generar textura IA"}
       </button>
 
       {/* Vista previa */}
@@ -229,7 +221,7 @@ export default function PanelTexturasRGB({ designZones, colors, setColors, setTe
         <div className="mt-4 text-center">
           <img
             src={previewUrl}
-            alt="textura generada"
+            alt="Textura generada"
             className="w-40 h-40 object-cover mx-auto rounded border"
           />
           <a

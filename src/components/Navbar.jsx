@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { useEmpresa } from "./EmpresaContext";
 import { API_URL } from "../config";
 
 export default function Navbar() {
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [cartCount, setCartCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { empresa, loading: empresaLoading } = useEmpresa();
 
   // Fetch cart count when user is authenticated
   useEffect(() => {
@@ -45,6 +47,9 @@ export default function Navbar() {
     fetchCartCount();
   }, [isAuthenticated, user?.id]);
 
+  const logoSrc = empresa?.logo || "/img/Logopeque.png";
+  const nombreEmpresa = empresa?.nombre || "Johan Sports";
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
@@ -53,26 +58,32 @@ export default function Navbar() {
           <Link to="/" className="flex items-center space-x-2 text-2xl font-bold text-blue-900">
           <img
             className="h-8"
-            src="/img/Logopeque.png"
+            src={logoSrc}
             alt="website logo"
+            onError={(e) => {
+              // Fallback si la imagen no carga
+              e.target.src = "/img/Logopeque.png";
+            }}
           />
-          <span className="font-bold text-xl text-blue-900 sm:block">Johan Sports</span>
-          </Link>
-          <div className="hidden md:flex space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors">
-              Inicio
+            <span className="font-bold text-xl text-blue-900 sm:block">
+              {nombreEmpresa}
+            </span>
             </Link>
-            <Link to="/catalogo" className="text-gray-700 hover:text-blue-900 transition-colors">
-              Catálogo
-            </Link>
-            <Link to="/sobre-nosotros" className="text-gray-700 hover:text-blue-900 transition-colors">
-              Sobre Nosotros
-            </Link>
-            <Link to="/contacto" className="text-gray-700 hover:text-blue-900 transition-colors">
-              Contacto
-            </Link>
-          </div>
-        </div>
+            <div className="hidden md:flex space-x-6">
+                <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors">
+                  Inicio
+                </Link>
+                <Link to="/catalogo" className="text-gray-700 hover:text-blue-900 transition-colors">
+                  Catálogo
+                </Link>
+                <Link to="/sobre-nosotros" className="text-gray-700 hover:text-blue-900 transition-colors">
+                  Sobre Nosotros
+                </Link>
+                <Link to="/contacto" className="text-gray-700 hover:text-blue-900 transition-colors">
+                  Contacto
+                </Link>
+              </div>
+            </div>
 
         {/* User actions */}
         <div className="flex items-center space-x-4">

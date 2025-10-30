@@ -43,7 +43,7 @@ export default function PanelTextoRGB({
         Edita el contenido directamente en cada fila del listado.
       </p>
 
-      {/* 📜 Lista de textos */}
+      {/* Lista de textos */}
       <div>
         <h4 className="font-bold text-blue-900 flex items-center gap-2">
           <Type size={18} /> Textos agregados
@@ -51,7 +51,7 @@ export default function PanelTextoRGB({
 
         {texts.length === 0 ? (
           <p className="text-sm text-gray-500 mt-2">
-            No hay textos aún. Añade uno con el botón de arriba 👆
+            No hay textos aún. Añade uno con el botón de arriba 
           </p>
         ) : (
           <ul className="flex flex-col gap-2 mt-2">
@@ -66,7 +66,7 @@ export default function PanelTextoRGB({
                   setActiveElement?.({ type: "text", index: i });
                 }}
               >
-                {/* ✏️ Edición inline del contenido */}
+                {/* Edición inline del contenido */}
                 <input
                   className="flex-1 bg-transparent outline-none text-sm"
                   style={{ color: "black", fontFamily: t.fontFamily || "Inter" }}
@@ -194,7 +194,7 @@ export default function PanelTextoRGB({
       )}
 
       <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
-        👉 Haz <strong>clic en la camiseta 3D</strong> para colocar o mover el elemento seleccionado.
+        Haz <strong>clic en la camiseta 3D</strong> para colocar o mover el elemento seleccionado.
       </div>
     </div>
   );

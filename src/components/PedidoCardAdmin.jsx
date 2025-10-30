@@ -10,11 +10,21 @@ export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions =
   const getEstadoLabel = (estado) => {
     switch (estado) {
       case "pendiente_pago":
-        return { label: "Pago sin completar", color: "bg-red-100 text-red-700" };
+        return { label: "Pago sin completar", color: "bg-yellow-100 text-yellow-700" };
       case "pagado_total":
         return { label: "Pago completado", color: "bg-green-100 text-green-700" };
       case "pagado_parcial":
-        return { label: "Pago parcial", color: "bg-yellow-100 text-yellow-700" };
+        return { label: "Pago parcial", color: "bg-orange-100 text-orange-700" };
+      case "en_produccion":
+        return { label: "En producción", color: "bg-purple-100 text-purple-900" };
+      case "listo":
+        return { label: "Listo", color: "bg-teal-100 text-teal-700" };
+      case "enviado":
+        return { label: "Enviado/Retiro", color: "bg-sky-100 text-sky-900" };
+      case "entregado":
+        return { label: "Entregado", color: "bg-emerald-100 text-emerald-700" };
+      case "cancelado":
+        return { label: "Cancelado", color: "bg-red-100 text-red-700" };
       default:
         return { label: estado, color: "bg-blue-100 text-blue-900" };
     }
@@ -39,7 +49,7 @@ export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions =
   return (
     <div className="bg-white shadow rounded-xl p-6 mb-6 border-l-4 border-blue-900">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-blue-900">
+        <h2 className="text-x1 font-semibold text-blue-900">
           Pedido #{pedido._id.slice(-6)}
         </h2>
         <span
@@ -104,7 +114,7 @@ export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions =
       )}
 
       {/* Timeline */}
-      {pedido.timeline && pedido.timeline.length > 0 && (
+      {/* {pedido.timeline && pedido.timeline.length > 0 && (
         <div className="mt-4">
           <h3 className="font-semibold mb-2">Historial</h3>
           <ol className="border-l-2 border-blue-300 pl-4 space-y-2 text-sm relative">
@@ -124,7 +134,7 @@ export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions =
             ))}
           </ol>
         </div>
-      )}
+      )} */}
 
       {/* Botón acción */}
       {showActions && (

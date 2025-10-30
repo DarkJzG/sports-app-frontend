@@ -1,7 +1,7 @@
 // src/components/Perfil/SidebarPerfil.jsx
 import React from "react";
-import { MapPin, User, Box, LogOut } from "lucide-react";
-import { useAuth } from "../../components/AuthContext";
+import { MapPin, User, Box, LogOut, Shirt, Bot } from "lucide-react";
+import { useAuth } from "../../../components/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function SidebarPerfil({ active, setActive }) {
@@ -9,9 +9,11 @@ export default function SidebarPerfil({ active, setActive }) {
   const navigate = useNavigate();
 
   const menu = [
-    { id: "pedidos", label: "Órdenes", icon: <Box size={20} /> },
+    { id: "pedidos", label: "Pedidos", icon: <Box size={20} /> },
     { id: "datos", label: "Datos personales", icon: <User size={20} /> },
     { id: "direcciones", label: "Direcciones", icon: <MapPin size={20} /> },
+    { id: "prendasIA", label: "Prendas IA", icon: <Bot size={20} /> },
+    { id: "prendas3D", label: "Prendas 3D", icon: <Shirt size={20} /> },
   ];
 
   return (

@@ -3,11 +3,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
+import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-  /* 🎨 Paleta base */
+  /* Paleta base */
   const coloresBase = [
     { es: "Negro", en: "black", hex: "#000000" },
     { es: "Blanco", en: "white", hex: "#ffffff" },
@@ -22,7 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
   ];
 
 /* ===============================
-   ⚙️ CONFIGURACIÓN DE PATRONES
+  CONFIGURACIÓN DE PATRONES
    =============================== */
 const CONFIG_PATRONES = {
   gradient: {label: "Degradado"},
@@ -43,8 +44,8 @@ const BloqueTipoDiseno = ({ tipoFullPrint, setTipoFullPrint }) => (
     <h2 className="text-xl font-bold mb-4">Tipo de diseño completo</h2>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {[
-        { key: "objects", label: "Por objetos o elementos", img: "/img/patrones/FullAnimado.png" },
-        { key: "textures", label: "Por texturas o patrones", img: "/img/patrones/FullRealista.png" },
+        { key: "objetos", label: "Por objetos o elementos", img: "/img/patrones/FullAnimado.png" },
+        { key: "texturas", label: "Por texturas o patrones", img: "/img/patrones/FullRealista.png" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -128,16 +129,16 @@ const BloqueObjetosPaso2 = ({ numObjetos, coloresObjetos, setColoresObjetos, col
         <div className="flex flex-wrap justify-center gap-2">
           {coloresBase.map((c) => (
             <div
-              key={c.en}
+              key={c.es}
               onClick={() =>
                 setColoresObjetos((prev) => {
                   const next = [...prev];
-                  next[i] = c.en;
+                  next[i] = c.es;
                   return next;
                 })
               }
               className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                coloresObjetos[i] === c.en ? "border-blue-600" : "border-gray-300"
+                coloresObjetos[i] === c.es ? "border-blue-600" : "border-gray-300"
               }`}
               style={{ backgroundColor: c.hex }}
             />
@@ -157,11 +158,11 @@ const BloqueObjetosPaso3 = ({ styleFP, setStyleFP, distributionFP, setDistributi
         <h3 className="font-semibold mb-2">Estilo visual</h3>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { key: "cartoon style", label: "Animado", img: "/img/patrones/FullAnime.png" },
-            { key: "realistic style", label: "Realista", img: "/img/patrones/FullReal.png" },
-            { key: "futuristic style", label: "Futurista", img: "/img/patrones/FullRealista.png" },
-            { key: "minimalist style", label: "Minimalista", img: "/img/patrones/FullFuturista.png" },
-            { key: "abstract artistic style", label: "Abstracto", img: "/img/patrones/FullAbstracto.png" },
+            { key: "Estilo animado", label: "Animado", img: "/img/patrones/FullAnime.png" },
+            { key: "Estilo realista", label: "Realista", img: "/img/patrones/FullReal.png" },
+            { key: "Estilo futurista", label: "Futurista", img: "/img/patrones/FullRealista.png" },
+            { key: "Estilo minimalista", label: "Minimalista", img: "/img/patrones/FullFuturista.png" },
+            { key: "Estilo abstracto", label: "Abstracto", img: "/img/patrones/FullAbstracto.png" },
           ].map((opt) => (
             <div
               key={opt.key}
@@ -182,9 +183,9 @@ const BloqueObjetosPaso3 = ({ styleFP, setStyleFP, distributionFP, setDistributi
         <h3 className="font-semibold mb-2">Distribución</h3>
         <div className="grid grid-cols-1 gap-2">
           {[
-            { val: "random scattered", label: "Aleatoria", img: "/img/patrones/FullRandom.png" },
-            { val: "spaced layout", label: "Dispersos", img: "/img/patrones/FullMinimalista.png" },
-            { val: "no repetition", label: "Sin repetición", img: "/img/patrones/FullSinRepeticiones.png" },
+            { val: "aleatorio disperso", label: "Aleatoria", img: "/img/patrones/FullRandom.png" },
+            { val: "dispersos", label: "Dispersos", img: "/img/patrones/FullMinimalista.png" },
+            { val: "sin repetición", label: "Sin repetición", img: "/img/patrones/FullSinRepeticiones.png" },
           ].map((opt) => (
             <div
               key={opt.val}
@@ -235,16 +236,16 @@ const BloqueTexturasPaso1 = ({
         <div className="flex flex-wrap justify-center gap-2">
           {coloresBase.map((c) => (
             <div
-              key={c.en}
+              key={c.es}
               onClick={() =>
                 setColoresExtraFP((prev) => {
                   const next = [...prev];
-                  next[i] = c.en;
+                  next[i] = c.es;
                   return next;
                 })
               }
               className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                coloresExtraFP[i] === c.en ? "border-blue-600" : "border-gray-300"
+                coloresExtraFP[i] === c.es ? "border-blue-600" : "border-gray-300"
               }`}
               style={{ backgroundColor: c.hex }}
             />
@@ -265,12 +266,12 @@ const BloqueTexturasPaso2 = ({
     <h2 className="text-xl font-bold mb-4">2️⃣ Tipo de textura o patrón</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {[ 
-        { key: "speckled texture", label: "Moteado", img: "/img/patrones/TextMoteado.png" }, 
-        { key: "striped linear pattern", label: "Líneas o franjas", img: "/img/patrones/TextLineas.png" }, 
-        { key: "tech circuit pattern", label: "Circuitos", img: "/img/patrones/TextCircuito.png" }, 
-        { key: "wave pattern", label: "Olas o flujo", img: "/img/patrones/TextFlujo.png" }, 
-        { key: "floral organic pattern", label: "Flores u orgánico", img: "/img/patrones/TextOrganico.png" }, 
-        { key: "custom", label: "Otro (escribir idea)", img: "/img/patrones/TextCustom.png" }, 
+        { key: "moteado", label: "Moteado", img: "/img/patrones/TextMoteado.png" }, 
+        { key: "lineas", label: "Líneas o franjas", img: "/img/patrones/TextLineas.png" }, 
+        { key: "circuitos", label: "Circuitos", img: "/img/patrones/TextCircuito.png" }, 
+        { key: "olas", label: "Olas o flujo", img: "/img/patrones/TextFlujo.png" }, 
+        { key: "flores", label: "Flores u orgánico", img: "/img/patrones/TextOrganico.png" }, 
+        { key: "personalizado", label: "Otro (escribir idea)", img: "/img/patrones/TextCustom.png" }, 
         
     ].map((opt) => (
         <div
@@ -286,7 +287,7 @@ const BloqueTexturasPaso2 = ({
       ))}
     </div>
 
-    {textureType === "custom" && (
+    {textureType === "personalizado" && (
       <div className="mt-6">
         <input
           type="text"
@@ -303,7 +304,7 @@ const BloqueTexturasPaso2 = ({
 
 
 /* ===============================
-   ⚙️ COMPONENTE AUXILIAR FIGURA GEOMÉTRICA
+   COMPONENTE AUXILIAR FIGURA GEOMÉTRICA
    =============================== */
 function PasoGeometricFigura({ figura, setFigura }) {
   const figuras = [
@@ -330,11 +331,10 @@ function PasoGeometricFigura({ figura, setFigura }) {
   );
 }
 
-// En el componente principal FormCamiseta_V3
 
 
 /* ===============================
-   🧩 COMPONENTE PRINCIPAL
+   COMPONENTE PRINCIPAL
    =============================== */
 export default function FormCamiseta_V3() {
   const { user } = useAuth();
@@ -373,16 +373,16 @@ export default function FormCamiseta_V3() {
 
     // Propiedades para patrón Dos Tonos
   const [division, setDivision] = useState("");
-  const [color1TwoTone, setColor1TwoTone] = useState("white");
-  const [color2TwoTone, setColor2TwoTone] = useState("black");
+  const [color1TwoTone, setColor1TwoTone] = useState("blanco");
+  const [color2TwoTone, setColor2TwoTone] = useState("negro");
 
   // Sólido
-  const [color1, setColor1] = useState("white");
+  const [color1, setColor1] = useState("blanco");
   const [usarColorUnicoCuello, setUsarColorUnicoCuello] = useState(true);
-  const [colorCuello, setColorCuello] = useState("black");
+  const [colorCuello, setColorCuello] = useState("negro");
 
   // Patrón Personalizado (Diseño Completo)
-  const [tipoFullPrint, setTipoFullPrint] = useState("objects"); // 'objects', 'textures', 'reference'
+  const [tipoFullPrint, setTipoFullPrint] = useState("objetos"); // 'objects', 'textures', 'reference'
   const [motifs, setMotifs] = useState("");
   const [colorBaseFP, setColorBaseFP] = useState("");
   const [colorSecFP, setColorSecFP] = useState("");
@@ -397,235 +397,236 @@ export default function FormCamiseta_V3() {
   const [motif2, setMotif2] = useState("");
   const [coloresObjetos, setColoresObjetos] = useState(["", "", ""]);
   const [numColoresFP, setNumColoresFP] = useState(2);
+
+  const [modeloIA, setModeloIA] = useState("stable");
   
-const validarPasoActual = () => {
-  const pasoActual = pasosActuales[paso - 1];
+  const validarPasoActual = () => {
+    const pasoActual = pasosActuales[paso - 1];
 
-  // Validar según el tipo de diseño
-  switch (diseno) {
-    case "gradient":
-      if (paso === 2 && !numColores) {
-        toast.warning("Selecciona el número de colores para el degradado.");
-        return false;
-      }
-      if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
-        toast.warning("Selecciona todos los colores requeridos.");
-        return false;
-      }
-      if (paso === 4 && !tipoGradiente) {
-        toast.warning("Selecciona un tipo de degradado.");
-        return false;
-      }
-      break;
+    switch (diseno) {
+      case "degradado":
+        if (paso === 2 && !numColores) {
+          toast.warning("Selecciona el número de colores para el degradado.");
+          return false;
+        }
+        if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
+          toast.warning("Selecciona todos los colores requeridos.");
+          return false;
+        }
+        if (paso === 4 && !tipoGradiente) {
+          toast.warning("Selecciona un tipo de degradado.");
+          return false;
+        }
+        break;
 
-    case "geometric":
-      if (paso === 2 && !numColores) {
-        toast.warning("Selecciona el número de colores para el patrón.");
-        return false;
-      }
-      if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
-        toast.warning("Selecciona todos los colores requeridos.");
-        return false;
-      }
-      if (paso === 4 && !figura) {
-        toast.warning("Selecciona una figura principal.");
-        return false;
-      }
-      if (paso === 5 && (!escala || !espaciado)) {
-        toast.warning("Selecciona una escala y espaciado.");
-        return false;
-      }
-      if (paso === 6 && !superposicion) {
-        toast.warning("Selecciona una superposicion.");
-        return false;
-      }
-
-      break;
-
-    case "abstract":
-      if (paso === 2 && !estiloArtistico) {
-        toast.warning("Selecciona un estilo artístico.");
-        return false;
-      }
-      if (paso === 3 && !numColores) {
-        toast.warning("Selecciona el número de colores para el patrón.");
-        return false;
-      }
-      if (paso === 4 && colores.some((c, i) => i < numColores && !c)) {
-        toast.warning("Selecciona todos los colores requeridos.");
-        return false;
-      }
-      if (paso === 5 && !intensidad) {
-        toast.warning("Selecciona la intensidad del patrón.");
-        return false;
-      }
-      if (paso === 6 && !cobertura) {
-        toast.warning("Selecciona la cobertura del patrón.");
-        return false;
-      }
-      break;
-
-    case "stripes":
-      if (paso === 2 && !direccion) {
-        toast.warning("Selecciona la dirección de las rayas.");
-        return false;
-      }
-      if (paso === 3 && !grosor) {
-        toast.warning("Selecciona el grosor de las rayas.");
-        return false;
-      }
-      if (paso === 4 && !numRayas) {
-        toast.warning("Selecciona el número de rayas.");
-        return false;
-      }
-      if (paso === 5 && !coberturaRayas) {
-        toast.warning("Selecciona la cobertura de las rayas.");
-        return false;
-      }
-      if (paso === 6 && (!colores[0] || !colores[1])) {
-        toast.warning("Selecciona ambos colores para las rayas.");
-        return false;
-      }
-      break;
-
-      case "camouflage":
-        // Paso 2: Selección de paleta
-        if (paso === 2 && !paletaCamuflaje) {
-          toast.warning("Selecciona una paleta de camuflaje.");
+      case "geometrico":
+        if (paso === 2 && !numColores) {
+          toast.warning("Selecciona el número de colores para el patrón.");
+          return false;
+        }
+        if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
+          toast.warning("Selecciona todos los colores requeridos.");
+          return false;
+        }
+        if (paso === 4 && !figura) {
+          toast.warning("Selecciona una figura principal.");
+          return false;
+        }
+        if (paso === 5 && (!escala || !espaciado)) {
+          toast.warning("Selecciona una escala y espaciado.");
+          return false;
+        }
+        if (paso === 6 && !superposicion) {
+          toast.warning("Selecciona una superposicion.");
           return false;
         }
 
-        // 🔹 Si la paleta es personalizada
-        if (paletaCamuflaje === "custom") {
+        break;
+
+      case "abstracto":
+        if (paso === 2 && !estiloArtistico) {
+          toast.warning("Selecciona un estilo artístico.");
+          return false;
+        }
+        if (paso === 3 && !numColores) {
+          toast.warning("Selecciona el número de colores para el patrón.");
+          return false;
+        }
+        if (paso === 4 && colores.some((c, i) => i < numColores && !c)) {
+          toast.warning("Selecciona todos los colores requeridos.");
+          return false;
+        }
+        if (paso === 5 && !intensidad) {
+          toast.warning("Selecciona la intensidad del patrón.");
+          return false;
+        }
+        if (paso === 6 && !cobertura) {
+          toast.warning("Selecciona la cobertura del patrón.");
+          return false;
+        }
+        break;
+
+      case "rayas":
+        if (paso === 2 && !direccion) {
+          toast.warning("Selecciona la dirección de las rayas.");
+          return false;
+        }
+        if (paso === 3 && !grosor) {
+          toast.warning("Selecciona el grosor de las rayas.");
+          return false;
+        }
+        if (paso === 4 && !numRayas) {
+          toast.warning("Selecciona el número de rayas.");
+          return false;
+        }
+        if (paso === 5 && !coberturaRayas) {
+          toast.warning("Selecciona la cobertura de las rayas.");
+          return false;
+        }
+        if (paso === 6 && (!colores[0] || !colores[1])) {
+          toast.warning("Selecciona ambos colores para las rayas.");
+          return false;
+        }
+        break;
+
+        case "camuflaje":
+          // Paso 2: Selección de paleta
+          if (paso === 2 && !paletaCamuflaje) {
+            toast.warning("Selecciona una paleta de camuflaje.");
+            return false;
+          }
+
+          // Si la paleta es personalizada
+          if (paletaCamuflaje === "personalizado") {
+            if (paso === 3) {
+              // Validar que los dos primeros colores sean obligatorios
+              if (!colores[0] || !colores[1]) {
+                toast.warning("Debes seleccionar al menos los colores 1 y 2 (base y manchas principales).");
+                return false;
+              }
+
+              // Validar que si el usuario selecciona color 4 sin seleccionar el 3, no lo permita
+              if (colores[3] && !colores[2]) {
+                toast.warning("Completa los colores en orden, no dejes huecos intermedios.");
+                return false;
+              }
+            }
+
+            if (paso === 4 && !tamanoCamo) {
+              toast.warning("Selecciona el tamaño del camuflaje.");
+              return false;
+            }
+
+            if (paso === 5 && !estiloCamo) {
+              toast.warning("Selecciona el estilo del camuflaje.");
+              return false;
+            }
+          } 
+
+          else {
+            if (paso === 3 && !tamanoCamo) {
+              toast.warning("Selecciona el tamaño del camuflaje.");
+              return false;
+            }
+            if (paso === 4 && !estiloCamo) {
+              toast.warning("Selecciona el estilo del camuflaje.");
+              return false;
+            }
+          }
+          break;
+
+
+      case "dos_tonos":
+        if (paso === 2 && !division) {
+          toast.warning("Selecciona un tipo de división.");
+          return false;
+        }
+        if (paso === 3 && (!color1TwoTone || !color2TwoTone)) {
+          toast.warning("Selecciona ambos colores.");
+          return false;
+        }
+          break;
+
+      case "solido":
+        if (paso === 2 && !color1) {
+          toast.warning("Selecciona un color base para la camiseta.");
+          return false;
+        }
+        if (paso === 2 && !usarColorUnicoCuello && !colorCuello) {
+          toast.warning("Selecciona un color para el cuello y puños.");
+          return false;
+        }
+        break;
+
+      case "diseño_completo":
+        if (tipoFullPrint === "objetos") {
+          if (paso === 2 && !tipoFullPrint) {
+            toast.warning("Selecciona un tipo de diseño completo.");
+            return false;
+          }
+          if (paso === 3 && (!motif1 || (numObjetos === 2 && !motif2))) {
+            toast.warning("Completa los campos de objetos.");
+            return false;
+          }
+          if (paso === 4) {
+            if (!coloresObjetos[0] || !coloresObjetos[1] || (numObjetos === 2 && !coloresObjetos[2])) {
+              toast.warning("Selecciona los colores requeridos.");
+              return false;
+            }
+          }
+          if (paso === 5 && (!styleFP || !distributionFP)) {
+            toast.warning("Selecciona el estilo y la distribución del diseño completo.");
+            return false;
+          }
+        } else if (tipoFullPrint === "texturas") {
           if (paso === 3) {
-            // Validar que los dos primeros colores sean obligatorios
-            if (!colores[0] || !colores[1]) {
-              toast.warning("Debes seleccionar al menos los colores 1 y 2 (base y manchas principales).");
+            if (numColoresFP === 2 && (!coloresExtraFP[0] || !coloresExtraFP[1])) {
+              toast.warning("Selecciona el número de colores.");
               return false;
             }
-
-            // Validar que si el usuario selecciona color 4 sin seleccionar el 3, no lo permita
-            if (colores[3] && !colores[2]) {
-              toast.warning("Completa los colores en orden, no dejes huecos intermedios.");
+            if (numColoresFP === 3 && (!coloresExtraFP[0] || !coloresExtraFP[1] || !coloresExtraFP[2])) {
+              toast.warning("Selecciona el número de colores.");
               return false;
             }
           }
-
-          if (paso === 4 && !tamanoCamo) {
-            toast.warning("Selecciona el tamaño del camuflaje.");
-            return false;
-          }
-
-          if (paso === 5 && !estiloCamo) {
-            toast.warning("Selecciona el estilo del camuflaje.");
-            return false;
-          }
-        } 
-        // 🔹 Si la paleta es predefinida (forest, desert, urban)
-        else {
-          if (paso === 3 && !tamanoCamo) {
-            toast.warning("Selecciona el tamaño del camuflaje.");
-            return false;
-          }
-          if (paso === 4 && !estiloCamo) {
-            toast.warning("Selecciona el estilo del camuflaje.");
-            return false;
+          if (paso === 4) {
+            if (!textureType) {
+              toast.warning("Selecciona un tipo de textura.");
+              return false;
+            }
+            if (textureType === "personalizado" && !customTexture) {
+              toast.warning("Describe la textura personalizada.");
+              return false;
+            }
           }
         }
         break;
-
-
-    case "two_tone":
-      if (paso === 2 && !division) {
-        toast.warning("Selecciona un tipo de división.");
-        return false;
-      }
-      if (paso === 3 && (!color1TwoTone || !color2TwoTone)) {
-        toast.warning("Selecciona ambos colores.");
-        return false;
-      }
-        break;
-
-    case "solid":
-      if (paso === 2 && !color1) {
-        toast.warning("Selecciona un color base para la camiseta.");
-        return false;
-      }
-      if (paso === 2 && !usarColorUnicoCuello && !colorCuello) {
-        toast.warning("Selecciona un color para el cuello y puños.");
-        return false;
-      }
-      break;
-
-    case "full_print":
-      if (tipoFullPrint === "objects") {
-        if (paso === 2 && !tipoFullPrint) {
-          toast.warning("Selecciona un tipo de diseño completo.");
-          return false;
-        }
-        if (paso === 3 && (!motif1 || (numObjetos === 2 && !motif2))) {
-          toast.warning("Completa los campos de objetos.");
-          return false;
-        }
-        if (paso === 4) {
-          if (!coloresObjetos[0] || !coloresObjetos[1] || (numObjetos === 2 && !coloresObjetos[2])) {
-            toast.warning("Selecciona los colores requeridos.");
-            return false;
-          }
-        }
-        if (paso === 5 && (!styleFP || !distributionFP)) {
-          toast.warning("Selecciona el estilo y la distribución del diseño completo.");
-          return false;
-        }
-      } else if (tipoFullPrint === "textures") {
-        if (paso === 3) {
-          if (numColoresFP === 2 && (!coloresExtraFP[0] || !coloresExtraFP[1])) {
-            toast.warning("Selecciona el número de colores.");
-            return false;
-          }
-          if (numColoresFP === 3 && (!coloresExtraFP[0] || !coloresExtraFP[1] || !coloresExtraFP[2])) {
-            toast.warning("Selecciona el número de colores.");
-            return false;
-          }
-        }
-        if (paso === 4) {
-          if (!textureType) {
-            toast.warning("Selecciona un tipo de textura.");
-            return false;
-          }
-          if (textureType === "custom" && !customTexture) {
-            toast.warning("Describe la textura personalizada.");
-            return false;
-          }
-        }
-      }
-      break;
-  }
-
-  // Validar opciones generales (último paso)
-  if (pasoActual === pasoOpciones) {
-    if (!cuello || !manga || !tela || !genero) {
-      toast.warning("Completa todas las opciones generales antes de continuar.");
-      return false;
     }
-  }
 
-  return true;
-};
+
+    if (pasoActual === pasoOpciones) {
+      if (!cuello || !manga || !tela || !genero) {
+        toast.warning("Completa todas las opciones generales antes de continuar.");
+        return false;
+      }
+    }
+
+    return true;
+  };
 
 
 
  useEffect(() => {
-  // Al cambiar de diseño, limpiar colores específicos de los demás patrones
-  if (diseno !== "two_tone") {
+
+  if (diseno !== "dos_tonos") {
     setColor1TwoTone("");
     setColor2TwoTone("");
   }
-  if (diseno !== "solid") {
-    setColor1("white");
-    setColorCuello("black");
+  if (diseno !== "solido") {
+    setColor1("blanco");
+    setColorCuello("negro");
   }
-  if (diseno !== "full_print") {
+  if (diseno !== "diseño_completo") {
     setTextureType("");
     setCustomTexture("");
   }
@@ -663,7 +664,7 @@ const validarPasoActual = () => {
     setEscala("");
     setEspaciado("");
     setSuperposicion("");
-    setTipoFullPrint("objects");
+    setTipoFullPrint("objetos");
     setMotif1("");
     setMotif2("");
     setStyleFP("");
@@ -676,12 +677,12 @@ const validarPasoActual = () => {
     setManga("");
     setTela("");
     setGenero("");
-    if (diseno === "gradient") setNumColores(2);
-    if (diseno === "geometric") setNumColores(3);
-    if (diseno === "abstract") setNumColores(2);
-    if (diseno === "stripes") setNumColores(2);
-    if (diseno === "camouflage") setNumColores(5);
-    if (diseno === "two_tone") setNumColores(2);
+    if (diseno === "degradado") setNumColores(2);
+    if (diseno === "geometrico") setNumColores(3);
+    if (diseno === "abstracto") setNumColores(2);
+    if (diseno === "rayas") setNumColores(2);
+    if (diseno === "camuflaje") setNumColores(5);
+    if (diseno === "dos_tonos") setNumColores(2);
       }, [diseno]);
 
   const handleColorChange = (index, color) => {
@@ -693,17 +694,17 @@ const validarPasoActual = () => {
   };
 
   /* ===============================
-     📤 Envío de datos al backend
+      Envío de datos al backend
      =============================== */
   const handleGenerar = async () => {
     setLoading(true);
     setImagen(null);
 
-    const validColors = coloresBase.map(c => c.en);
-    if (!validColors.includes(color1)) setColor1("white");
-    if (!validColors.includes(colorCuello)) setColorCuello("black");
-    if (!validColors.includes(color1TwoTone)) setColor1TwoTone("white");
-    if (!validColors.includes(color2TwoTone)) setColor2TwoTone("black");
+    const validColors = coloresBase.map(c => c.es);
+    if (!validColors.includes(color1)) setColor1("blanco");
+    if (!validColors.includes(colorCuello)) setColorCuello("negro");
+    if (!validColors.includes(color1TwoTone)) setColor1TwoTone("blanco");
+    if (!validColors.includes(color2TwoTone)) setColor2TwoTone("negro");
 
     let payload = {
       userId: user?.id,
@@ -712,42 +713,42 @@ const validarPasoActual = () => {
       colorCuello,
       numColores,
       colores: colores.slice(0, numColores),
-      tipoGradiente: diseno === "gradient" ? tipoGradiente : undefined,
-      figura: diseno === "geometric" ? figura : undefined,
-      escala: diseno === "geometric" ? escala : undefined,
-      espaciado: diseno === "geometric" ? espaciado : undefined,
-      superposicion: diseno === "geometric" ? superposicion : undefined,
-      estiloArtistico: diseno === "abstract" ? estiloArtistico : undefined,
-      intensidad: diseno === "abstract" ? intensidad : undefined,
-      cobertura: diseno === "abstract" ? cobertura : undefined,
-      direccion: diseno === "stripes" ? direccion : undefined,
-      grosor: diseno === "stripes" ? grosor : undefined,
-      numRayas: diseno === "stripes" ? numRayas : undefined,
-      coberturaRayas: diseno === "stripes" ? coberturaRayas : undefined,
-      tamanoCamo: diseno === "camouflage" ? tamanoCamo : undefined,
-      estiloCamo: diseno === "camouflage" ? estiloCamo : undefined,
-      paletaCamuflaje: diseno === "camouflage" ? paletaCamuflaje : undefined,
-      division: diseno === "two_tone" ? division : undefined,
-      color1TwoTone: diseno === "two_tone" ? color1TwoTone : undefined,
-      color2TwoTone: diseno === "two_tone" ? color2TwoTone : undefined,
-      color1: diseno === "solid" ? color1 : undefined,
-      usarColorUnicoCuello: diseno === "solid" ? usarColorUnicoCuello : undefined,
-      colorCuello: diseno === "solid" ? colorCuello : undefined,
-      tipoFullPrint: diseno === "full_print" ? tipoFullPrint : undefined,
-      motifs: diseno === "full_print" ? motifs : undefined,
-      colorBaseFP: diseno === "full_print" ? colorBaseFP : undefined,
-      colorSecFP: diseno === "full_print" ? colorSecFP : undefined,
+      tipoGradiente: diseno === "degradado" ? tipoGradiente : undefined,
+      figura: diseno === "geometrico" ? figura : undefined,
+      escala: diseno === "geometrico" ? escala : undefined,
+      espaciado: diseno === "geometrico" ? espaciado : undefined,
+      superposicion: diseno === "geometrico" ? superposicion : undefined,
+      estiloArtistico: diseno === "abstracto" ? estiloArtistico : undefined,
+      intensidad: diseno === "abstracto" ? intensidad : undefined,
+      cobertura: diseno === "abstracto" ? cobertura : undefined,
+      direccion: diseno === "rayas" ? direccion : undefined,
+      grosor: diseno === "rayas" ? grosor : undefined,
+      numRayas: diseno === "rayas" ? numRayas : undefined,
+      coberturaRayas: diseno === "rayas" ? coberturaRayas : undefined,
+      tamanoCamo: diseno === "camuflaje" ? tamanoCamo : undefined,
+      estiloCamo: diseno === "camuflaje" ? estiloCamo : undefined,
+      paletaCamuflaje: diseno === "camuflaje" ? paletaCamuflaje : undefined,
+      division: diseno === "dos_tonos" ? division : undefined,
+      color1TwoTone: diseno === "dos_tonos" ? color1TwoTone : undefined,
+      color2TwoTone: diseno === "dos_tonos" ? color2TwoTone : undefined,
+      color1: diseno === "solido" ? color1 : undefined,
+      usarColorUnicoCuello: diseno === "solido" ? usarColorUnicoCuello : undefined,
+      colorCuello: diseno === "solido" ? colorCuello : undefined,
+      tipoFullPrint: diseno === "diseño_completo" ? tipoFullPrint : undefined,
+      motifs: diseno === "diseño_completo" ? motifs : undefined,
+      colorBaseFP: diseno === "diseño_completo" ? colorBaseFP : undefined,
+      colorSecFP: diseno === "diseño_completo" ? colorSecFP : undefined,
       coloresExtraFP:
-        diseno === "full_print"
-          ? tipoFullPrint === "objects"
+        diseno === "diseño_completo"
+          ? tipoFullPrint === "objetos"
             ? coloresObjetos
             : coloresExtraFP
           : undefined,
-      styleFP: diseno === "full_print" ? styleFP : undefined,
-      distributionFP: diseno === "full_print" ? distributionFP : undefined,
-      textureType: diseno === "full_print" ? textureType : undefined,
-      customTexture: diseno === "full_print" ? customTexture : undefined,
-      descripcionLibreFP: diseno === "full_print" ? descripcionLibreFP : undefined,
+      styleFP: diseno === "diseño_completo" ? styleFP : undefined,
+      distributionFP: diseno === "diseño_completo" ? distributionFP : undefined,
+      textureType: diseno === "diseño_completo" ? textureType : undefined,
+      customTexture: diseno === "diseño_completo" ? customTexture : undefined,
+      descripcionLibreFP: diseno === "diseño_completo" ? descripcionLibreFP : undefined,
       cuello,
       manga,
       tela,
@@ -758,15 +759,17 @@ const validarPasoActual = () => {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
+    const endpoint = modeloIA === "gemini"
+      ? API_URL_GEMINI
+      : `${API_URL}/api/ia/generar_camiseta_v3`;
+
     try {
-      const res = await fetch(`${API_URL}/api/ia/generar_camiseta_v3`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      console.log("Estado del servidor:", res.status);
       const data = await res.json();
-      console.log("Respuesta del servidor:", data);
       if (data.imageUrl) setImagen(data.imageUrl);
     } catch (e) {
       console.error("Error:", e);
@@ -776,7 +779,7 @@ const validarPasoActual = () => {
   };
 
   /* ===============================
-     🧱 PASOS COMUNES
+     PASOS COMUNES
      =============================== */
   const paso1 = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center">
@@ -784,9 +787,9 @@ const validarPasoActual = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-center">
         {/* Degradado */}
         <div
-          onClick={() => setDiseno("gradient")}
+          onClick={() => setDiseno("degradado")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "gradient" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "degradado" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/Degradado.png" alt="Degradado" className="w-full h-32 object-cover" />
@@ -795,9 +798,9 @@ const validarPasoActual = () => {
 
         {/* Geométrico */}
         <div
-          onClick={() => setDiseno("geometric")}
+          onClick={() => setDiseno("geometrico")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "geometric" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "geometrico" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/Geométrico.png" alt="Geométrico" className="w-full h-32 object-cover" />
@@ -806,9 +809,9 @@ const validarPasoActual = () => {
 
         {/* Artístico */}
         <div
-          onClick={() => setDiseno("abstract")}
+          onClick={() => setDiseno("abstracto")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "abstract" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "abstracto" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/Abstracto.png" alt="Artístico" className="w-full h-32 object-cover" />
@@ -817,9 +820,9 @@ const validarPasoActual = () => {
 
         {/* Rayas */}
         <div
-          onClick={() => setDiseno("stripes")}
+          onClick={() => setDiseno("rayas")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "stripes" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "rayas" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/RayasVerticales.png" alt="Rayas" className="w-full h-32 object-cover" />
@@ -828,9 +831,9 @@ const validarPasoActual = () => {
         
         {/* Camuflaje */}
         <div
-          onClick={() => setDiseno("camouflage")}
+          onClick={() => setDiseno("camuflaje")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "camouflage" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "camuflaje" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/Camuflaje.png" alt="Camuflaje" className="w-full h-32 object-cover" />
@@ -839,9 +842,9 @@ const validarPasoActual = () => {
 
         {/* Dos Tonos */}
         <div
-          onClick={() => setDiseno("two_tone")}
+          onClick={() => setDiseno("dos_tonos")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "two_tone" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "dos_tonos" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/DosTonos.png" alt="Dos Tonos" className="w-full h-32 object-cover" />
@@ -850,9 +853,9 @@ const validarPasoActual = () => {
         
         {/* Sólido */}
         <div
-          onClick={() => setDiseno("solid")}
+          onClick={() => setDiseno("solido")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "solid" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "solido" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/Liso.png" alt="Sólido" className="w-full h-32 object-cover" />
@@ -861,9 +864,9 @@ const validarPasoActual = () => {
         
         {/* Full Print */}
         <div
-          onClick={() => setDiseno("full_print")}
+          onClick={() => setDiseno("diseño_completo")}
           className={`cursor-pointer rounded-xl overflow-hidden border-4 transition ${
-            diseno === "full_print" ? "border-blue-600" : "border-transparent hover:border-gray-300"
+            diseno === "diseño_completo" ? "border-blue-600" : "border-transparent hover:border-gray-300"
           }`}
         >
           <img src="/img/patrones/DiseñoCompleto.png" alt="Full Print" className="w-full h-32 object-cover" />
@@ -873,7 +876,7 @@ const validarPasoActual = () => {
     </div>
   );
   /* ===============================
-     🧩 BLOQUE: DEGRADADO
+     BLOQUE: DEGRADADO
      =============================== */
   const pasosGradient = [
     paso1,
@@ -902,10 +905,10 @@ const validarPasoActual = () => {
           <div className="flex flex-wrap gap-3 justify-center">
             {coloresBase.map((c) => (
               <div
-                key={c.en}
-                onClick={() => handleColorChange(i, c.en)}
+                key={c.es}
+                onClick={() => handleColorChange(i, c.es)}
                 className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                  colores[i] === c.en ? "border-blue-600" : "border-gray-300"
+                  colores[i] === c.es ? "border-blue-600" : "border-gray-300"
                 }`}
                 style={{ backgroundColor: c.hex }}
               />
@@ -937,7 +940,7 @@ const validarPasoActual = () => {
   ];
 
   /* ===============================
-     🧩 BLOQUE: GEOMÉTRICO
+     BLOQUE: GEOMÉTRICO
      =============================== */
   const pasosGeometric = [
     paso1,
@@ -972,10 +975,10 @@ const validarPasoActual = () => {
           <div className="flex flex-wrap gap-3 justify-center">
             {coloresBase.map((c) => (
               <div
-                key={c.en}
-                onClick={() => handleColorChange(i, c.en)}
+                key={c.es}
+                onClick={() => handleColorChange(i, c.es)}
                 className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                  colores[i] === c.en ? "border-blue-600" : "border-gray-300"
+                  colores[i] === c.es ? "border-blue-600" : "border-gray-300"
                 }`}
                 style={{ backgroundColor: c.hex }}
               />
@@ -1034,9 +1037,9 @@ const validarPasoActual = () => {
       <h2 className="text-xl mb-6 font-bold">Superposición de figuras</h2>
        <div className="grid grid-cols-2 gap-6 justify-center">
       {[
-        { key: "flat", label: "Sin superposición", img: "/img/patrones/Geometrico3.png" },
-        { key: "layered", label: "Ligeramente superpuestas", img: "/img/patrones/Geometrico4.png" },
-        { key: "fragmented", label: "Fragmentado", img: "/img/patrones/Geometrico5.png" },
+        { key: "sin superposición", label: "Sin superposición", img: "/img/patrones/Geometrico3.png" },
+        { key: "en capas", label: "Ligeramente superpuestas", img: "/img/patrones/Geometrico4.png" },
+        { key: "fragmentado", label: "Fragmentado", img: "/img/patrones/Geometrico5.png" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1054,7 +1057,7 @@ const validarPasoActual = () => {
   ];
 
   /* ===============================
-   🧩 BLOQUE: ARTÍSTICO / ABSTRACTO
+   BLOQUE: ARTÍSTICO / ABSTRACTO
    =============================== */
 const pasosAbstract = [paso1,
   // Paso 2: Seleccionar estilo artístico
@@ -1062,10 +1065,10 @@ const pasosAbstract = [paso1,
     <h2 className="text-xl font-bold mb-6">Selecciona el estilo artístico</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
-        { key: "brush strokes", label: "Pinceladas", desc: "Trazos suaves o expresivos", img: "/img/patrones/Pinceladas.png" },
-        { key: "paint splatter", label: "Salpicaduras", desc: "Transmite energía o dinamismo", img: "/img/patrones/Salpicaduras.png" },
-        { key: "fluid art", label: "Fluido", desc: "Tipo acuarela, transiciones suaves", img: "/img/patrones/Fluidos.png" },
-        { key: "smoke effect", label: "Humo", desc: "Aspecto etéreo o difuminado", img: "/img/patrones/Humo.png" },
+        { key: "pinceladas", label: "Pinceladas", desc: "Trazos suaves o expresivos", img: "/img/patrones/Pinceladas.png" },
+        { key: "salpicaduras", label: "Salpicaduras", desc: "Transmite energía o dinamismo", img: "/img/patrones/Salpicaduras.png" },
+        { key: "fluido", label: "Fluido", desc: "Tipo acuarela, transiciones suaves", img: "/img/patrones/Fluidos.png" },
+        { key: "humo", label: "Humo", desc: "Aspecto etéreo o difuminado", img: "/img/patrones/Humo.png" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1115,10 +1118,10 @@ const pasosAbstract = [paso1,
           <div className="flex flex-wrap gap-3 justify-center">
             {coloresBase.map((c) => (
               <div
-                key={c.en}
-                onClick={() => handleColorChange(i, c.en)}
+                key={c.es}
+                onClick={() => handleColorChange(i, c.es)}
                 className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                  colores[i] === c.en ? "border-blue-600" : "border-gray-300"
+                  colores[i] === c.es ? "border-blue-600" : "border-gray-300"
                 }`}
                 style={{ backgroundColor: c.hex }}
               />
@@ -1133,8 +1136,8 @@ const pasosAbstract = [paso1,
     <h2 className="text-xl font-bold mb-6">¿Qué tan marcado quieres el diseño?</h2>
     <div className="flex flex-wrap justify-center gap-4">
       {[
-        { key: "subtle", label: "Sutil", desc: "Apenas visible, casi difuminado" },
-        { key: "bold", label: "Marcado", desc: "Fuerte contraste, detalles nítidos" },
+        { key: "sutil", label: "Sutil", desc: "Apenas visible, casi difuminado" },
+        { key: "marcado", label: "Marcado", desc: "Fuerte contraste, detalles nítidos" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1155,8 +1158,8 @@ const pasosAbstract = [paso1,
     <h2 className="text-xl font-bold mb-6">¿Dónde se aplica el diseño?</h2>
     <div className="flex flex-wrap justify-center gap-4">
       {[
-        { key: "full", label: "Completa", desc: "Cubre toda la camiseta (torso y mangas)" },
-        { key: "partial", label: "Difusa", desc: "Solo algunas zonas dispersas" },
+        { key: "completa", label: "Completa", desc: "Cubre toda la camiseta (torso y mangas)" },
+        { key: "difusa", label: "Difusa", desc: "Solo algunas zonas dispersas" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1174,7 +1177,7 @@ const pasosAbstract = [paso1,
 ];
 
 /* ===============================
-   🧩 BLOQUE: RAYAS
+   BLOQUE: RAYAS
    =============================== */
 const pasosStripes = [paso1,
   // Paso 2: Dirección de las rayas
@@ -1217,8 +1220,8 @@ const pasosStripes = [paso1,
     <h2 className="text-xl font-bold mb-6">Selecciona el grosor de las rayas</h2>
     <div className="flex flex-wrap justify-center gap-4">
       {[
-        { key: "thin", label: "Delgadas", desc: "Estilo clásico o minimalista." },
-        { key: "thick", label: "Gruesas", desc: "Diseño llamativo o moderno." },
+        { key: "delgadas", label: "Delgadas", desc: "Estilo clásico o minimalista." },
+        { key: "gruesas", label: "Gruesas", desc: "Diseño llamativo o moderno." },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1238,7 +1241,7 @@ const pasosStripes = [paso1,
   <div key="numRayas" className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-6">Número de rayas visibles</h2>
     <div className="flex flex-wrap justify-center gap-4">
-      {[3, 5, 7, "random"].map((opt) => (
+      {[3, 5, 7, "aleatorio"].map((opt) => (
         <button
           key={opt}
           onClick={() => setNumRayas(opt)}
@@ -1246,7 +1249,7 @@ const pasosStripes = [paso1,
             numRayas === opt ? "bg-blue-600 text-white" : "bg-gray-100"
           }`}
         >
-          {opt === "random" ? "Aleatorio" : `${opt} rayas`}
+          {opt === "aleatorio" ? "Aleatorio" : `${opt} rayas`}
         </button>
       ))}
     </div>
@@ -1257,8 +1260,8 @@ const pasosStripes = [paso1,
     <h2 className="text-xl font-bold mb-6">Cobertura del diseño</h2>
     <div className="flex flex-wrap justify-center gap-4">
       {[
-        { key: "full", label: "Toda la camiseta", desc: "Aplica en torso y mangas.",  img: "/img/patrones/RayaTodos.png" },
-        { key: "chest", label: "Solo pecho", desc: "Diseño frontal.", img: "/img/patrones/RayaPecho.png" },
+        { key: "completa", label: "Toda la camiseta", desc: "Aplica en torso y mangas.",  img: "/img/patrones/RayaTodos.png" },
+        { key: "pecho", label: "Solo pecho", desc: "Diseño frontal.", img: "/img/patrones/RayaPecho.png" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1287,10 +1290,10 @@ const pasosStripes = [paso1,
         <div className="flex flex-wrap gap-3 justify-center">
           {coloresBase.map((c) => (
             <div
-              key={c.en}
-              onClick={() => handleColorChange(i, c.en)}
+              key={c.es}
+              onClick={() => handleColorChange(i, c.es)}
               className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                colores[i] === c.en ? "border-blue-600" : "border-gray-300"
+                colores[i] === c.es ? "border-blue-600" : "border-gray-300"
               }`}
               style={{ backgroundColor: c.hex }}
             />
@@ -1302,7 +1305,7 @@ const pasosStripes = [paso1,
 ];
 
 /* ===============================
-   🧩 BLOQUE: CAMUFLAJE
+   BLOQUE: CAMUFLAJE
    =============================== */
 const pasosCamouflage = [paso1,
   // Paso 2: Paleta predefinida o personalizada
@@ -1310,16 +1313,16 @@ const pasosCamouflage = [paso1,
     <h2 className="text-xl font-bold mb-6">Selecciona la paleta de camuflaje</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
-        { key: "forest", label: "Bosque", desc: "Verde oliva + marrón + negro", img: "/img/patrones/CamuflajeBosque.png" },
-        { key: "desert", label: "Desierto", desc: "Beige + marrón claro", img: "/img/patrones/CamuflajeDesierto.png" },
-        { key: "urban", label: "Urbano", desc: "Gris + blanco + negro", img: "/img/patrones/CamuflajeUrbano.png" },
-        { key: "custom", label: "Personalizado", desc: "Elige tus propios colores", img: "/img/patrones/CamuflajePersonalizado.png" },
+        { key: "bosque", label: "Bosque", desc: "Verde oliva + marrón + negro", img: "/img/patrones/CamuflajeBosque.png" },
+        { key: "desierto", label: "Desierto", desc: "Beige + marrón claro", img: "/img/patrones/CamuflajeDesierto.png" },
+        { key: "urbano", label: "Urbano", desc: "Gris + blanco + negro", img: "/img/patrones/CamuflajeUrbano.png" },
+        { key: "personalizado", label: "Personalizado", desc: "Elige tus propios colores", img: "/img/patrones/CamuflajePersonalizado.png" },
       ].map((opt) => (
         <div
           key={opt.key}
           onClick={() => {
             setPaletaCamuflaje(opt.key);
-            setColoresPersonalizados(opt.key === "custom");
+            setColoresPersonalizados(opt.key === "personalizado");
           }}
           className={`cursor-pointer border-4 rounded-xl overflow-hidden transition ${
             paletaCamuflaje === opt.key ? "border-blue-600 ring-2 ring-blue-400" : "border-gray-300"
@@ -1354,10 +1357,10 @@ const pasosCamouflage = [paso1,
             <div className="flex flex-wrap gap-3 justify-center">
               {coloresBase.map((c) => (
                 <div
-                  key={c.en}
-                  onClick={() => handleColorChange(i, c.en)}
+                  key={c.es}
+                  onClick={() => handleColorChange(i, c.es)}
                   className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                    colores[i] === c.en ? "border-blue-600" : "border-gray-300"
+                    colores[i] === c.es ? "border-blue-600" : "border-gray-300"
                   }`}
                   style={{ backgroundColor: c.hex }}
                 />
@@ -1373,8 +1376,8 @@ const pasosCamouflage = [paso1,
     <h2 className="text-xl font-bold mb-6">Tamaño del patrón</h2>
     <div className="flex flex-wrap justify-center gap-4">
       {[
-        { key: "small", label: "Pequeño", desc: "Manchas finas, estilo micro camo o texturizado." },
-        { key: "large", label: "Grande", desc: "Manchas amplias, estilo militar clásico o moderno." },
+        { key: "pequeño", label: "Pequeño", desc: "Manchas finas, estilo micro camo o texturizado." },
+        { key: "grande", label: "Grande", desc: "Manchas amplias, estilo militar clásico o moderno." },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -1396,7 +1399,7 @@ const pasosCamouflage = [paso1,
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {[
         {
-          key: "classic",
+          key: "clásico",
           label: "Clásico",
           desc: "Manchas redondeadas, bordes suaves, estilo militar estándar.",
           img: "/img/patrones/CamuflajeBosque.png",
@@ -1408,7 +1411,7 @@ const pasosCamouflage = [paso1,
           img: "/img/patrones/CamuflajePixel.png",
         },
         {
-          key: "fragmented",
+          key: "fragmentado",
           label: "Fragmentado moderno",
           desc: "Formas angulares y geométricas, aspecto futurista.",
           img: "/img/patrones/CamuflajeFragmentado.png",
@@ -1434,7 +1437,7 @@ const pasosCamouflage = [paso1,
 
 
 /* ===============================
-   🧩 BLOQUE: DOS TONOS
+   BLOQUE: DOS TONOS
    =============================== */
 const pasosTwoTone = [
   paso1, // Selección de patrón
@@ -1463,7 +1466,7 @@ const pasosTwoTone = [
           img: "/img/patrones/DosTonosDiagonal.png",
         },
         {
-          key: "sleeves_torso",
+          key: "mangas_torso",
           label: "Mangas y torso",
           desc: "Torso color 1 · mangas y cuello color 2.",
           img: "/img/patrones/DosTonosMangas.png",
@@ -1498,16 +1501,16 @@ const pasosTwoTone = [
         <div className="flex flex-wrap gap-3 justify-center">
           {coloresBase.map((c) => (
             <div
-              key={c.en}
+              key={c.es}
               onClick={() => {
                 if (n === 1) {
-                  setColor1TwoTone(c.en);
+                  setColor1TwoTone(c.es);
                 } else {
-                  setColor2TwoTone(c.en);
+                  setColor2TwoTone(c.es);
                 }
               }}
               className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                (n === 1 ? color1TwoTone : color2TwoTone) === c.en
+                (n === 1 ? color1TwoTone : color2TwoTone) === c.es
                   ? "border-blue-600"
                   : "border-gray-300"
               }`}
@@ -1521,7 +1524,7 @@ const pasosTwoTone = [
 ];
 
 /* ===============================
-   🧩 BLOQUE: SÓLIDO
+   BLOQUE: SÓLIDO
    =============================== */
 const pasosSolid = [
   paso1,
@@ -1535,10 +1538,10 @@ const pasosSolid = [
     <div className="flex flex-wrap justify-center gap-3">
       {coloresBase.map((c) => (
         <div
-          key={c.en}
-          onClick={() => setColor1(c.en)}
+          key={c.es}
+          onClick={() => setColor1(c.es)}
           className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-            color1 === c.en ? "border-blue-600" : "border-gray-300"
+            color1 === c.es ? "border-blue-600" : "border-gray-300"
           }`}
           style={{ backgroundColor: c.hex }}
         />
@@ -1560,10 +1563,10 @@ const pasosSolid = [
         <div className="flex flex-wrap gap-3 justify-center">
           {coloresBase.map((c) => (
             <div
-              key={c.en}
-              onClick={() => setColorCuello(c.en)}
+              key={c.es}
+              onClick={() => setColorCuello(c.es)}
               className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
-                colorCuello === c.en ? "border-blue-600" : "border-gray-300"
+                colorCuello === c.es ? "border-blue-600" : "border-gray-300"
               }`}
               style={{ backgroundColor: c.hex }}
             />
@@ -1575,7 +1578,7 @@ const pasosSolid = [
 ];
 
 /* ===============================
-   🧩 BLOQUE: FULL PRINT (Personalizado)
+   BLOQUE: FULL PRINT (Personalizado)
    =============================== */
 const pasosFullPrint = useMemo(() => {
   return [
@@ -1585,7 +1588,7 @@ const pasosFullPrint = useMemo(() => {
       tipoFullPrint={tipoFullPrint} 
       setTipoFullPrint={setTipoFullPrint} 
     />,
-    ...(tipoFullPrint === "objects"
+    ...(tipoFullPrint === "objetos"
       ? [
           <BloqueObjetosPaso1
             key="obj1"
@@ -1611,7 +1614,7 @@ const pasosFullPrint = useMemo(() => {
             setDistributionFP={setDistributionFP}
           />
         ]
-      : tipoFullPrint === "textures"
+      : tipoFullPrint === "texturas"
       ? [
           <BloqueTexturasPaso1 
             key="tex1"
@@ -1658,7 +1661,7 @@ const pasosFullPrint = useMemo(() => {
 ]);
 
 /* ===============================
-   🧩 OPCIONES GENERALES (COMÚN)
+   OPCIONES GENERALES (COMÚN)
    =============================== */
 const pasoOpciones = (
   <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
@@ -1773,6 +1776,18 @@ const pasoOpciones = (
       </div>
     </div>
 
+    <div className="mb-4 text-center">
+      <label className="font-semibold mr-2">Modelo IA:</label>
+      <select
+        value={modeloIA}
+        onChange={e => setModeloIA(e.target.value)}
+        className="border rounded px-2 py-1"
+      >
+        <option value="stable">Stable Diffusion</option>
+        <option value="gemini">Gemini Imagen</option>
+      </select>
+    </div>
+
     <div className="pt-6">
       <button
         onClick={(e) => {
@@ -1798,38 +1813,109 @@ const pasoOpciones = (
 
 
   /* ===============================
-     🧭 CONTROL DE PASOS
+     CONTROL DE PASOS
      =============================== */
   let pasosActuales = [];
-  if (diseno === "gradient") pasosActuales = [...pasosGradient, pasoOpciones];
-  else if (diseno === "geometric") pasosActuales = [...pasosGeometric, pasoOpciones];
-  else if (diseno === "abstract") pasosActuales = [...pasosAbstract, pasoOpciones];
-  else if (diseno === "stripes") pasosActuales = [...pasosStripes, pasoOpciones];
-  else if (diseno === "camouflage") pasosActuales = [...pasosCamouflage, pasoOpciones];
-  else if (diseno === "two_tone") pasosActuales = [...pasosTwoTone, pasoOpciones];
-  else if (diseno === "solid") pasosActuales = [...pasosSolid, pasoOpciones];
-  else if (diseno === "full_print") pasosActuales = [...pasosFullPrint, pasoOpciones];
+  if (diseno === "degradado") pasosActuales = [...pasosGradient, pasoOpciones];
+  else if (diseno === "geometrico") pasosActuales = [...pasosGeometric, pasoOpciones];
+  else if (diseno === "abstracto") pasosActuales = [...pasosAbstract, pasoOpciones];
+  else if (diseno === "rayas") pasosActuales = [...pasosStripes, pasoOpciones];
+  else if (diseno === "camuflaje") pasosActuales = [...pasosCamouflage, pasoOpciones];
+  else if (diseno === "dos_tonos") pasosActuales = [...pasosTwoTone, pasoOpciones];
+  else if (diseno === "solido") pasosActuales = [...pasosSolid, pasoOpciones];
+  else if (diseno === "diseño_completo") pasosActuales = [...pasosFullPrint, pasoOpciones];
   else pasosActuales = [paso1];
 
   // Filtrar pasos nulos o undefined
   const pasosActualesSinVacios = pasosActuales.filter(Boolean);
 
   /* ===============================
-     🧭 RENDER PRINCIPAL
+     RENDER PRINCIPAL
      =============================== */
   return (
     <div>
       <Navbar />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
-          <div className="text-center">
-            <p className="text-green-600 font-bold mb-4">✅ Camiseta generada con éxito</p>
-            <img src={imagen} alt="Camiseta generada" className="mx-auto rounded-lg shadow-lg w-80" />
+          <div className="text-center space-y-6">
+            <p className="text-blue-600 font-bold mb-4 text-2xl"> Camiseta generada con éxito</p>
+
+            <img
+              src={imagen}
+              alt="Camiseta generada"
+              className="mx-auto rounded-lg shadow-lg w-80"
+            />
+
+            <div className="flex justify-center gap-6 mt-8">
+              {/* Ir a mi colección */}
+              <button
+                onClick={() => window.location.href = "/listar-prendasIA"}
+                className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-md"
+              >
+                Ir a mi colección
+              </button>
+
+              {/* Volver a generar */}
+              <button
+                onClick={() => {
+                  // 🔹 Reiniciar todos los campos importantes
+                  setImagen(null);
+                  setDiseno("");
+                  setPaso(1);
+                  setNumColores(4);
+                  setColores(["", "", "", "", ""]);
+                  setTipoGradiente("");
+                  setFigura("");
+                  setEscala("");
+                  setEspaciado("");
+                  setSuperposicion("");
+                  setEstiloArtistico("");
+                  setIntensidad("");
+                  setCobertura("");
+                  setDireccion("");
+                  setGrosor("");
+                  setNumRayas("");
+                  setCoberturaRayas("");
+                  setPaletaCamuflaje("");
+                  setColoresPersonalizados(false);
+                  setTamanoCamo("");
+                  setEstiloCamo("");
+                  setDivision("");
+                  setColor1TwoTone("blanco");
+                  setColor2TwoTone("negro");
+                  setColor1("blanco");
+                  setUsarColorUnicoCuello(true);
+                  setColorCuello("negro");
+                  setTipoFullPrint("objetos");
+                  setMotifs("");
+                  setColorBaseFP("");
+                  setColorSecFP("");
+                  setColoresExtraFP(["", ""]);
+                  setStyleFP("");
+                  setDistributionFP("");
+                  setTextureType("");
+                  setCustomTexture("");
+                  setDescripcionLibreFP("");
+                  setNumObjetos(1);
+                  setMotif1("");
+                  setMotif2("");
+                  setColoresObjetos(["", "", ""]);
+                  setNumColoresFP(2);
+                  setCuello("");
+                  setManga("");
+                  setTela("");
+                  setGenero("");
+                  window.scrollTo({ top: 0, behavior: "smooth" }); // subir al inicio
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg shadow-md"
+              >
+                Volver a generar
+              </button>
+            </div>
           </div>
         ) : (
           <>
             {pasosActualesSinVacios[paso - 1]}
-
             <div className="flex justify-between mt-6">
               {paso > 1 && (
                 <button
@@ -1853,6 +1939,7 @@ const pasoOpciones = (
             </div>
           </>
         )}
+
       </div>
       <Footer />
     </div>

@@ -1,18 +1,19 @@
 // src/components/Perfil/PanelDirecciones.jsx
 import React, { useEffect, useState } from "react";
-import { API_URL } from "../../config";
-import { useAuth } from "../../components/AuthContext";
-import { Plus, Trash2, Star } from "lucide-react";
+import { API_URL } from "../../../config";
+import { useAuth } from "../../../components/AuthContext";
+import { Plus, Trash2, Star, PencilIcon } from "lucide-react";
+
 
 export default function PanelDirecciones() {
   const { user } = useAuth();
   const [direcciones, setDirecciones] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [editarDir, setEditarDir] = useState(null);
   const [form, setForm] = useState({
-    nombre: "",
-    apellido: "",
+    etiqueta: "",
     direccion_principal: "",
-    direccion_secundaria: "",
+    referencia: "",
     ciudad: "",
     provincia: "",
     pais: "Ecuador",
@@ -20,6 +21,7 @@ export default function PanelDirecciones() {
     telefono: "",
     es_predeterminada: false,
   });
+
 
   // Cargar direcciones
   useEffect(() => {
@@ -31,50 +33,112 @@ export default function PanelDirecciones() {
       });
   }, [user]);
 
-  const handleGuardar = async () => {
-    const res = await fetch(`${API_URL}/usuario/${user.id}/direcciones`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (data.ok) {
-      setShowModal(false);
-      setForm({
-        nombre: "",
-        apellido: "",
-        direccion_principal: "",
-        direccion_secundaria: "",
-        ciudad: "",
-        provincia: "",
-        pais: "Ecuador",
-        codigo_postal: "",
-        telefono: "",
-        es_predeterminada: false,
-      });
-      // recargar direcciones
-      const res2 = await fetch(`${API_URL}/usuario/${user.id}/direcciones`);
-      const data2 = await res2.json();
-      if (data2.ok) setDirecciones(data2.direcciones);
-    }
-  };
+  const fetchDirecciones = async () => {
+        const res = await fetch(`${API_URL}/usuario/${user.id}/direcciones`);
+        const data = await res.json();
+        if (data.ok) setDirecciones(data.direcciones);
+    };
 
-  const handleEliminar = async (id) => {
+    useEffect(() => {
+        if (user) fetchDirecciones();
+    }, [user]);
+
+  const handleGuardar = async () => {
+        let endpoint = `${API_URL}/usuario/${user.id}/direcciones`;
+        let method = "POST";
+        let payload = form;
+
+        if (editarDir) {
+            // Modo Edición: Usamos PATCH y el ID de la dirección
+            endpoint = `${API_URL}/usuario/direcciones/${editarDir._id}`;
+            method = "PATCH";
+            // Es crucial enviar el user_id para la verificación en el backend
+            payload = { ...form, user_id: user.id }; 
+        }
+
+        const res = await fetch(endpoint, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        
+        if (data.ok) {
+            setShowModal(false);
+            setForm({
+                etiqueta: "",
+                direccion_principal: "",
+                referencia: "",
+                ciudad: "",
+                provincia: "",
+                pais: "Ecuador",
+                codigo_postal: "",
+                telefono: "",
+                es_predeterminada: false,
+            });
+            setEditarDir(null); // Limpiar modo edición
+            fetchDirecciones(); // Recargar
+        } else {
+            // Mostrar mensaje de error (ej: "Máximo de 3 direcciones")
+            alert(data.msg); 
+        }
+    };
+
+  const handleOpenEdit = (dir) => {
+        setEditarDir(dir);
+        // Llenar el formulario con los datos de la dirección existente
+        setForm({
+            etiqueta: dir.etiqueta,
+            direccion_principal: dir.direccion_principal,
+            referencia: dir.referencia,
+            ciudad: dir.ciudad,
+            provincia: dir.provincia,
+            pais: dir.pais,
+            codigo_postal: dir.codigo_postal,
+            telefono: dir.telefono,
+            es_predeterminada: dir.es_predeterminada,
+        });
+        setShowModal(true);
+    };
+
+const handleEliminar = async (id) => {
     if (!window.confirm("¿Eliminar esta dirección?")) return;
-    await fetch(`${API_URL}/usuario/direcciones/${id}`, { method: "DELETE" });
-    setDirecciones((prev) => prev.filter((d) => d._id !== id));
-  };
+    const res = await fetch(`${API_URL}/usuario/direcciones/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    
+    if(data.ok) {
+        // En lugar de filtrar localmente, recargamos el estado completo del servidor
+        // Esto es más seguro, especialmente si la dirección eliminada era la predeterminada.
+        fetchDirecciones(); 
+    } else {
+        alert(data.msg || "Error al eliminar la dirección.");
+    }
+};
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">Direcciones</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-900 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-        >
-          <Plus size={18} /> Agregar dirección
-        </button>
+          <button
+              onClick={() => {
+                  setEditarDir(null); // Modo Creación
+                  setForm({
+                    etiqueta: "",
+                    direccion_principal: "",
+                    referencia: "",
+                    ciudad: "",
+                    provincia: "",
+                    pais: "Ecuador",
+                    codigo_postal: "",
+                    telefono: "",
+                    es_predeterminada: false,
+                });
+                  setShowModal(true);
+              }}
+              className="bg-blue-900 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+              <Plus size={18} /> Agregar dirección
+          </button>
       </div>
 
       {direcciones.length === 0 ? (
@@ -92,17 +156,25 @@ export default function PanelDirecciones() {
                 </div>
               )}
               <h3 className="font-semibold text-gray-800 mb-1">
-                {dir.nombre} {dir.apellido}
+                {dir.etiqueta}
               </h3>
               <p className="text-sm text-gray-600">{dir.direccion_principal}</p>
-              {dir.direccion_secundaria && (
-                <p className="text-sm text-gray-600">{dir.direccion_secundaria}</p>
+              {dir.referencia && (
+                <p className="text-sm text-gray-600">{dir.referencia}</p>
               )}
               <p className="text-sm text-gray-600">
                 {dir.ciudad}, {dir.provincia}, {dir.pais}
               </p>
               <p className="text-sm text-gray-600">Tel: {dir.telefono}</p>
-              <div className="flex justify-end mt-3">
+              <div className="flex justify-end mt-3 gap-3">
+                {/* 🎯 Botón de Editar */}
+                <button
+                    onClick={() => handleOpenEdit(dir)}
+                    className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+                >
+                    <PencilIcon size={14} /> Editar
+                </button>
+                
                 <button
                   onClick={() => handleEliminar(dir._id)}
                   className="text-red-600 hover:text-red-800 flex items-center gap-1 text-sm"
@@ -119,19 +191,15 @@ export default function PanelDirecciones() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 relative">
-            <h3 className="text-xl font-semibold mb-4">Agregar nueva dirección</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              {editarDir ? "Editar dirección" : "Agregar nueva dirección"}
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
-                placeholder="Nombre"
-                value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                className="border rounded px-3 py-2"
-              />
-              <input
-                placeholder="Apellido"
-                value={form.apellido}
-                onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+                placeholder="Etiqueta"
+                value={form.etiqueta}
+                onChange={(e) => setForm({ ...form, etiqueta: e.target.value })}
                 className="border rounded px-3 py-2"
               />
               <input
@@ -143,10 +211,10 @@ export default function PanelDirecciones() {
                 className="col-span-full border rounded px-3 py-2"
               />
               <input
-                placeholder="Apartamento, suite, etc. (opcional)"
-                value={form.direccion_secundaria}
+                placeholder="Apartamento, suite, etc."
+                value={form.referencia}
                 onChange={(e) =>
-                  setForm({ ...form, direccion_secundaria: e.target.value })
+                  setForm({ ...form, referencia: e.target.value })
                 }
                 className="col-span-full border rounded px-3 py-2"
               />
@@ -197,12 +265,12 @@ export default function PanelDirecciones() {
               >
                 Cancelar
               </button>
-              <button
-                onClick={handleGuardar}
-                className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
-              >
-                Guardar
-              </button>
+                <button
+                    onClick={handleGuardar}
+                    className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
+                >
+                    {editarDir ? "Guardar cambios" : "Guardar"}
+                </button>
             </div>
           </div>
         </div>

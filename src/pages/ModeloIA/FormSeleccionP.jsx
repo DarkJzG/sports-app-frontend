@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 
-// Importa todos los formularios
+
 import FormCamiseta from "./FormCamiseta";
 import FormCamiseta_V2 from "./FormCamiseta_V2";
 import FormPantalon from "./FormPantalon";
@@ -30,7 +30,7 @@ export default function FormSelector() {
     default:
       return (
         <div className="p-6 text-center text-red-600 font-bold">
-          ❌ No hay formulario configurado para la categoría: {categoria_prd}
+           No hay formulario configurado para la categoría: {categoria_prd}
         </div>
       );
   }

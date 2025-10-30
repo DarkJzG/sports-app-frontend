@@ -3,22 +3,25 @@ import React from "react";
 
 export default function NavPanelesRGB({ items, activeId, onChange }) {
   return (
-    <nav className="w-35 shrink-0 rounded-2xl bg-white border border-gray-200 p-2 space-y-1">
-      {items.map((it) => (
-        <button
-          key={it.id}
-          type="button"
-          onClick={() => onChange(it.id)}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm 
-            ${activeId === it.id
-              ? "bg-blue-600 text-white"
-              : "hover:bg-gray-100 text-gray-800"}`}
-          title={it.label}
-        >
-          {it.icon ?? null}
-          <span className="truncate">{it.label}</span>
-        </button>
-      ))}
+    <nav className="flex flex-col gap-4 w-35 shrink-0 rounded-2xl bg-white border border-gray-200 p-2 space-y-1">
+      {items.map((item) => {
+        const active = activeId === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onChange(item.id)}
+            className={`flex flex-col items-center p-2 rounded-xl transition-all duration-200
+              ${active ? "bg-blue-600 text-white shadow-md" : "bg-white text-gray-700 hover:bg-blue-100"}
+            `}
+          >
+            {/* 🔹 texto arriba */}
+            <span className="text-sm font-semibold">{item.label}</span>
+
+            {/* 🔹 icono debajo */}
+            <div className="mt-1">{item.icon}</div>
+          </button>
+        );
+      })}
     </nav>
   );
 }

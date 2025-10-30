@@ -1,14 +1,17 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { EmpresaProvider } from "./components/EmpresaContext";
 
 
 import RutasPrivadas from "./components/RutasPrivadas.jsx";
 
+import PerfilEmpresa from "./pages/Perfil/Admin/PerfilEmpresa.jsx";
+
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import VerificarCuenta from "./pages/VerificarCuenta";
-import Perfil from "./pages/Perfil/Perfil.jsx";
+import Perfil from "./pages/Perfil/Cliente/Perfil.jsx";
 import RestContra from "./pages/RecupContra";
 import OldContra from "./pages/OldContra"; 
 
@@ -50,6 +53,7 @@ import DetalleCarrito from "./pages/DetalleCarrito";
 import Checkout from "./pages/Pedidos/Cliente/Checkout.jsx";
 import MisPedidos from "./pages/Pedidos/Cliente/MisPedidos.jsx";
 import DetallePedido from "./pages/Pedidos/Cliente/DetallePedido.jsx";
+import AgregarPago from "./pages/Pedidos/Cliente/AgregarPago.jsx";
 import DetallePedidoAdmin from "./pages/Pedidos/Admin/DetallePedidoAdmin.jsx";
 import GestionarPagos from "./pages/Pedidos/Admin/GestionPagos.jsx";
 import PedidosAdmin from "./pages/Pedidos/Admin/PedidosAdmin.jsx";
@@ -77,10 +81,14 @@ import SeleccionDiseno from "./pages/DisenarPrendas/SeleccionDiseno";
 import Camiseta3D from "./pages/DisenarPrendas/Camiseta3D";
 import Camiseta3DVista from "./pages/DisenarPrendas/Camiseta3DVista";
 
+//Forms para la generación de prendas por imagen
 import GuiaCamiseta from "./pages/ModeloIA/GuiaCamiseta.jsx"
 import FormCamiseta_V2 from "./pages/ModeloIA/FormCamiseta_V2.jsx"
 import FormCamiseta_V3 from "./pages/ModeloIA/FormCamiseta_V3.jsx"
+import FormChompa from "./pages/ModeloIA/FormChompa.jsx"
 
+
+//Viewers de las prendas para los modelos 3D 
 import CamisetaViewer from "./pages/DisenarPrendas/CamisetaViewer";
 import ListarPrendas3D from "./pages/DisenarPrendas/ListarPrendas3D.jsx"
 import DetallePrd3D from "./pages/DetallesPrendas/DetallePrd_3D.jsx";
@@ -90,9 +98,14 @@ import DetallePrd3D from "./pages/DetallesPrendas/DetallePrd_3D.jsx";
 function App() {
   return (
     <>
-
+      <EmpresaProvider>
       <Router>
         <Routes>
+
+          <Route path="/admin/perfil-empresa" element={
+            <RutasPrivadas roles={["admin"]}>
+              <PerfilEmpresa />
+            </RutasPrivadas>} />
           
           {/* Rutas publicas */}
 
@@ -134,6 +147,11 @@ function App() {
           <Route path="/mis-pedidos" element={
             <RutasPrivadas roles={["cliente"]}>
               <MisPedidos />
+            </RutasPrivadas>} />
+
+          <Route path="/agregar-pago/:pedidoId" element={
+            <RutasPrivadas roles={["cliente"]}>
+              <AgregarPago />
             </RutasPrivadas>} />
 
           <Route path="/mis-pedidos/:id" element={
@@ -242,7 +260,7 @@ function App() {
 
 
 
-          {/* Rutas de IA Genera Imagen*/}
+          {/* Rutas Generar Imagen IA*/}
           <Route path="/gen-img" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <GenerarImagen />
@@ -276,6 +294,11 @@ function App() {
           <Route path="/form-camiseta-v3" element={
             <RutasPrivadas roles={["cliente", "admin"]}>
               <FormCamiseta_V3 />
+            </RutasPrivadas>} />
+
+          <Route path="/form-chompa" element={
+            <RutasPrivadas roles={["cliente", "admin"]}>
+              <FormChompa />
             </RutasPrivadas>} />
 
 
@@ -339,6 +362,7 @@ function App() {
         pauseOnHover
         theme="colored"
       />
+      </EmpresaProvider>
     </>
   );
 }
