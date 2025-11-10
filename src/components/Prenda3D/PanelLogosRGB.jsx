@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { useAuth } from "../../components/AuthContext";
 import PantallaCarga from "../../components/PantallaCarga";
 import { toast } from "react-toastify";
+import { Image } from "lucide-react";
 
 export default function PanelLogosRGB({
   logos,
@@ -131,14 +132,19 @@ export default function PanelLogosRGB({
               show={logoLoading} 
               message="Subiendo logo, por favor espera..." 
             />
-      {/* 📍 Instrucción */}
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold text-blue-900 flex items-center gap-1">
+          <Image size={22} />
+          Logo
+        </h3>
+      </div>
       <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
         <p>
-          👉 Haz <strong>clic en la camiseta</strong> para colocar o mover el logo.
+          Primero <strong>sube una imagen</strong> para colocar o mover el logo.
         </p>
       </div>
 
-      {/* 🖼️ Subida de logo nuevo */}
+      {/* Subida de logo nuevo */}
       <div className="flex flex-col gap-2">
         <label className="block font-semibold text-sm text-blue-900 mb-1">
           Subir nuevo logo

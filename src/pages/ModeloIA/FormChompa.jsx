@@ -58,7 +58,6 @@ export default function FormChompa() {
   // Para degradado
   const [numColoresGradiente, setNumColoresGradiente] = useState(2);
   const [coloresGradiente, setColoresGradiente] = useState(["", "", ""]);
-  const [tipoGradiente, setTipoGradiente] = useState(""); // 'linear' o 'radial'
 
   // Para geométrico
   const [figuraGeometrica, setFiguraGeometrica] = useState(""); // 'triangulos', 'cuadrados', 'hexagonos'
@@ -98,7 +97,7 @@ export default function FormChompa() {
      =============================== */
   const validarPasoActual = () => {
     // Paso 1: Opciones estructurales
-    if (paso === 1 && (!tipoChompa || !capucha || !bolsillos)) {
+    if (paso === 1 && ( !capucha || !bolsillos)) {
       toast.warning("Completa todas las opciones estructurales.");
       return false;
     }
@@ -155,10 +154,6 @@ export default function FormChompa() {
       if (tipoDisenoIA === "degradado") {
         if (paso === 6 && coloresGradiente.slice(0, numColoresGradiente).some(c => !c)) {
           toast.warning("Selecciona todos los colores del degradado.");
-          return false;
-        }
-        if (paso === 7 && !tipoGradiente) {
-          toast.warning("Selecciona el tipo de degradado.");
           return false;
         }
       }
@@ -243,7 +238,6 @@ export default function FormChompa() {
     setColorBaseMixto("");
     setTipoDisenoIA("");
     setColoresGradiente(["", "", ""]);
-    setTipoGradiente("");
     setFiguraGeometrica("");
     setColoresGeometrico(["", "", "", ""]);
     setEstiloArtistico("");
@@ -270,7 +264,7 @@ export default function FormChompa() {
     let payload = {
       userId: user?.id,
       categoria_id: "chompa_ia_v1",
-      tipoChompa,
+      tipoChompa: "chaqueta",
       capucha,
       bolsillos,
       caminoSeleccionado,
@@ -304,7 +298,7 @@ export default function FormChompa() {
       // Agregar datos según el tipo de diseño IA
       if (tipoDisenoIA === "degradado") {
         payload.coloresGradiente = coloresGradiente.slice(0, numColoresGradiente);
-        payload.tipoGradiente = tipoGradiente;
+        payload.tipoGradiente = "lineal";
       } else if (tipoDisenoIA === "geometrico") {
         payload.figuraGeometrica = figuraGeometrica;
         payload.coloresGeometrico = coloresGeometrico.slice(0, numColoresGeometrico);
@@ -355,47 +349,31 @@ export default function FormChompa() {
   // ========== PASO 1: OPCIONES ESTRUCTURALES ==========
   const paso1Estructural = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
-      <h2 className="text-xl font-bold mb-4">Opciones estructurales de la chompa</h2>
+      <h2 className="text-xl font-bold mb-4">Características de la chompa</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Tipo de chompa */}
-        <div>
-          <h3 className="font-semibold mb-2">Tipo de chompa</h3>
-          <div className="flex flex-col gap-3">
-            {[
-              { key: "sudadera", label: "Sudadera", desc: "Sin cierre frontal" },
-              { key: "chaqueta", label: "Chaqueta", desc: "Con cremallera frontal" },
-            ].map((opt) => (
-              <div
-                key={opt.key}
-                onClick={() => setTipoChompa(opt.key)}
-                className={`cursor-pointer p-3 rounded-lg border-4 ${
-                  tipoChompa === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
-                }`}
-              >
-                <p className="font-semibold">{opt.label}</p>
-                <p className="text-sm text-gray-500">{opt.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Capucha */}
         <div>
           <h3 className="font-semibold mb-2">Capucha</h3>
-          <div className="flex flex-col gap-3">
+          <div className="flex justify-center flex-wrap gap-3">
             {[
-              { key: "sí", label: "Con capucha" },
-              { key: "no", label: "Sin capucha" },
+              { key: "Sí", label: "Con capucha", img: "/img/patrones/Capucha.png" },
+              { key: "No", label: "Sin capucha", img: "/img/patrones/SinCapucha.png" },
             ].map((opt) => (
               <div
                 key={opt.key}
                 onClick={() => setCapucha(opt.key)}
-                className={`cursor-pointer p-3 rounded-lg border-4 ${
-                  capucha === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                  capucha === opt.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-blue-900"
                 }`}
               >
-                <p className="font-semibold">{opt.label}</p>
+                <img
+                  src={opt.img}
+                  alt={opt.key}
+                  className="w-24 h-40 object-cover rounded-md mb-1"
+                />
+                <p className="text-center font-medium">{opt.key}</p>
               </div>
             ))}
           </div>
@@ -404,21 +382,24 @@ export default function FormChompa() {
         {/* Bolsillos */}
         <div>
           <h3 className="font-semibold mb-2">Bolsillos</h3>
-          <div className="flex flex-col gap-3">
+          <div className="flex justify-center flex-wrap gap-3">
             {[
-              { key: "canguro", label: "Canguro", desc: "Bolsillo frontal grande" },
-              { key: "laterales", label: "Laterales", desc: "Bolsillos a los costados" },
-              { key: "sin_bolsillos", label: "Sin bolsillos" },
+              { key: "Canguro", label: "Canguro", img: "/img/patrones/Canguro.png" },
+              { key: "Laterales", label: "Laterales", img: "/img/patrones/Laterales.png" },
             ].map((opt) => (
               <div
                 key={opt.key}
                 onClick={() => setBolsillos(opt.key)}
-                className={`cursor-pointer p-3 rounded-lg border-4 ${
-                  bolsillos === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                className={`cursor-pointer p-2 rounded-lg border-4 w-48 ${
+                  bolsillos === opt.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-blue-900"
                 }`}
               >
                 <p className="font-semibold">{opt.label}</p>
-                {opt.desc && <p className="text-sm text-gray-500">{opt.desc}</p>}
+                <img 
+                src={opt.img} 
+                alt={opt.label} 
+                className="w-48 h-20 object-cover rounded-md mb-1"
+                />
               </div>
             ))}
           </div>
@@ -435,21 +416,18 @@ export default function FormChompa() {
         {[
           { 
             key: "solido", 
-            label: "Sólido con Acentos", 
-            desc: "Color base + detalles en color acento",
-            ejemplo: "Ej: Negro con detalles amarillos"
+            label: "Sólido con Acentos",
+            img: "/img/patrones/SolidoAcento.png"
           },
           { 
             key: "bloques", 
             label: "Bloques de Color", 
-            desc: "Paneles de diferentes colores cosidos",
-            ejemplo: "Ej: Estilo Puma o Juventus"
+            img: "/img/patrones/BloqueChompa.png"
           },
           { 
             key: "mixto", 
             label: "Diseño Mixto (IA)", 
-            desc: "Combina sólido + diseño generado por IA",
-            ejemplo: "Ej: Estilo Nike Windrunner"
+            img: "/img/patrones/MixtoChompa.png"
           },
         ].map((opt) => (
           <div
@@ -461,9 +439,8 @@ export default function FormChompa() {
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
-            <p className="font-bold text-lg">{opt.label}</p>
-            <p className="text-sm text-gray-600 mt-2">{opt.desc}</p>
-            <p className="text-xs text-gray-400 mt-1 italic">{opt.ejemplo}</p>
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
           </div>
         ))}
       </div>
@@ -528,20 +505,20 @@ export default function FormChompa() {
           {
             key: "horizontal",
             label: "División Horizontal",
-            desc: "2 bloques: superior e inferior",
-            ejemplo: "Estilo Puma clásico"
+            desc: "Superior e Inferior",
+            img: "/img/patrones/BloqueHChompa.png"
           },
           {
             key: "chevron",
             label: "Diseño Chevron 'V'",
-            desc: "2 bloques: pecho en V y resto",
-            ejemplo: "Estilo Nike V"
+            desc: "Pecho en V y resto",
+            img: "/img/patrones/BloqueVChompa.png"
           },
           {
             key: "paneles",
             label: "Paneles Deportivos",
-            desc: "3 bloques: hombros, cuerpo y mangas",
-            ejemplo: "Estilo Juventus"
+            desc: "Hombros, Cuerpo y Mangas",
+            img: "/img/patrones/BloquePChompa.png"
           },
         ].map((opt) => (
           <div
@@ -553,9 +530,9 @@ export default function FormChompa() {
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
-            <p className="font-bold text-lg">{opt.label}</p>
+             <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
             <p className="text-sm text-gray-600 mt-2">{opt.desc}</p>
-            <p className="text-xs text-gray-400 mt-1 italic">{opt.ejemplo}</p>
           </div>
         ))}
       </div>
@@ -609,15 +586,16 @@ export default function FormChompa() {
         {[
           {
             key: "pecho_hombros",
-            label: "Pecho/Hombros/Capucha",
-            desc: "El diseño IA se aplicará en la parte superior",
-            ejemplo: "Estilo Nike city lights"
+            label: "Superior",
+            desc: "El diseño IA se aplicará en pecho y hombros",
+            img: "/img/patrones/GeometricoChompa.png"
           },
           {
             key: "cuerpo_inferior",
-            label: "Cuerpo/Paneles Inferiores",
-            desc: "El diseño IA se aplicará en la parte inferior",
-            ejemplo: "Estilo J&J degradado"
+            label: "Inferior",
+            desc: "El diseño IA se aplicará en el torso y mangas",
+            img: "/img/patrones/CompletoChompa.png"
+
           },
         ].map((opt) => (
           <div
@@ -629,9 +607,9 @@ export default function FormChompa() {
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
             <p className="font-bold text-lg">{opt.label}</p>
             <p className="text-sm text-gray-600 mt-2">{opt.desc}</p>
-            <p className="text-xs text-gray-400 mt-1 italic">{opt.ejemplo}</p>
           </div>
         ))}
       </div>
@@ -666,13 +644,11 @@ export default function FormChompa() {
   const pasoMixtoTipoDisenoIA = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-4">Selecciona el tipo de diseño IA</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
         {[
-          { key: "degradado", label: "Degradado" },
-          { key: "geometrico", label: "Geométrico" },
-          { key: "artistico", label: "Artístico" },
-          { key: "textura", label: "Textura" },
-          { key: "personalizado", label: "Personalizado" },
+          { key: "degradado", label: "Degradado", img: "/img/patrones/DegradadoChompa.png"},
+          { key: "geometrico", label: "Geométrico", img: "/img/patrones/GeometricoChompa.png" },
+          { key: "artistico", label: "Artístico", img: "/img/patrones/ArtChompa.png" },
         ].map((opt) => (
           <div
             key={opt.key}
@@ -683,6 +659,7 @@ export default function FormChompa() {
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
+            <img src={opt.img} alt={opt.label} className="w-full h-20 object-cover" />
             <p className="font-bold">{opt.label}</p>
           </div>
         ))}
@@ -733,37 +710,15 @@ export default function FormChompa() {
     </div>
   );
 
-  const pasoMixtoDegradadoTipo = (
-    <div className="bg-white p-6 rounded-xl shadow-md text-center">
-      <h2 className="text-xl font-bold mb-4">Tipo de degradado</h2>
-      <div className="grid grid-cols-2 gap-4">
-        {[
-          { key: "linear", label: "Lineal" },
-          { key: "radial", label: "Radial" },
-        ].map((opt) => (
-          <div
-            key={opt.key}
-            onClick={() => setTipoGradiente(opt.key)}
-            className={`cursor-pointer border-4 rounded-xl p-4 ${
-              tipoGradiente === opt.key ? "border-blue-600" : "border-gray-300"
-            }`}
-          >
-            <p className="font-bold">{opt.label}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   // GEOMÉTRICO
   const pasoMixtoGeometricoFigura = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-4">Selecciona la figura geométrica</h2>
       <div className="grid grid-cols-3 gap-4">
         {[
-          { key: "triangulos", label: "Triángulos" },
-          { key: "cuadrados", label: "Cuadrados" },
-          { key: "hexagonos", label: "Hexágonos" },
+          { key: "triangulos", label: "Triángulos", img: "/img/patrones/MixedTriangulo.png" },
+          { key: "cuadrados", label: "Cuadrados", img: "/img/patrones/MixedCuadrados.png" },
+          { key: "hexagonos", label: "Hexágonos", img: "/img/patrones/MixedHexagono.png" },
         ].map((opt) => (
           <div
             key={opt.key}
@@ -772,6 +727,7 @@ export default function FormChompa() {
               figuraGeometrica === opt.key ? "border-blue-600" : "border-gray-300"
             }`}
           >
+            <img src={opt.img} alt={opt.label} className="w-full h-20 object-cover" />
             <p className="font-bold">{opt.label}</p>
           </div>
         ))}
@@ -825,12 +781,11 @@ export default function FormChompa() {
   const pasoMixtoArtisticoEstilo = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-4">Selecciona el estilo artístico</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
-          { key: "pinceladas", label: "Pinceladas" },
-          { key: "salpicaduras", label: "Salpicaduras" },
-          { key: "fluido", label: "Fluido" },
-          { key: "humo", label: "Humo" },
+          { key: "pinceladas", label: "Pinceladas", img: "/img/patrones/MixedPinceladas.png" },
+          { key: "fluido", label: "Fluido", img: "/img/patrones/MixedFluido.png" },
+          { key: "humo", label: "Humo", img: "/img/patrones/MixedHumo.png" },
         ].map((opt) => (
           <div
             key={opt.key}
@@ -839,6 +794,7 @@ export default function FormChompa() {
               estiloArtistico === opt.key ? "border-blue-600" : "border-gray-300"
             }`}
           >
+            <img src={opt.img} alt={opt.label} className="w-full h-20 object-cover" />
             <p className="font-bold">{opt.label}</p>
           </div>
         ))}
@@ -1096,7 +1052,7 @@ export default function FormChompa() {
   // ========== OPCIONES GENERALES (FINAL) ==========
   const pasoOpcionesGenerales = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
-      <h2 className="text-xl font-bold mb-4">Opciones generales</h2>
+      <h2 className="text-xl font-bold mb-4">Características Finales</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Tela */}
@@ -1104,10 +1060,10 @@ export default function FormChompa() {
           <h3 className="font-semibold mb-2">Tela</h3>
           <div className="flex flex-col gap-3">
             {[
-              { key: "Algodón", label: "Algodón" },
-              { key: "Poliéster", label: "Poliéster" },
-              { key: "Fleece", label: "Fleece (Polar)" },
-              { key: "Mezcla", label: "Mezcla Algodón/Poliéster" },
+              { key: "Algodón", label: "Algodón", img: "/img/patrones/Algodon.png" },
+              { key: "Poliéster", label: "Poliéster", img: "/img/patrones/Poliester.png" },
+              { key: "Fleece", label: "Impermeable", img: "/img/patrones/Impermeable.png" },
+              { key: "Mezcla", label: "Alg/Pol", img: "/img/patrones/Mezcla.png" },
             ].map((opt) => (
               <div
                 key={opt.key}
@@ -1116,7 +1072,8 @@ export default function FormChompa() {
                   tela === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
                 }`}
               >
-                <p className="font-semibold">{opt.label}</p>
+                <img src={opt.img} alt={opt.label} className="w-full h-10 object-cover" />
+                <p className="font-semibold ">{opt.label}</p>
               </div>
             ))}
           </div>
@@ -1125,11 +1082,11 @@ export default function FormChompa() {
         {/* Género */}
         <div>
           <h3 className="font-semibold mb-2">Género</h3>
-          <div className="flex flex-col gap-3">
+          <div className="flex justify-center gap-3 flex-wrap">
             {[
-              { key: "Hombre", label: "Hombre" },
-              { key: "Mujer", label: "Mujer" },
-              { key: "Unisex", label: "Unisex" },
+              { key: "Hombre", label: "Hombre", img: "/img/patrones/HombreChompa.png" },
+              { key: "Mujer", label: "Mujer", img: "/img/patrones/MujerChompa.png" },
+              { key: "Unisex", label: "Unisex", img: "/img/patrones/UnisexChompa.png" },
             ].map((opt) => (
               <div
                 key={opt.key}
@@ -1138,6 +1095,7 @@ export default function FormChompa() {
                   genero === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
                 }`}
               >
+                <img src={opt.img} alt={opt.label} className="w-40 h-20 object-cover" />
                 <p className="font-semibold">{opt.label}</p>
               </div>
             ))}
@@ -1208,7 +1166,7 @@ export default function FormChompa() {
     ];
 
     if (tipoDisenoIA === "degradado") {
-      pasosActuales.push(pasoMixtoDegradadoColores, pasoMixtoDegradadoTipo);
+      pasosActuales.push(pasoMixtoDegradadoColores);
     } else if (tipoDisenoIA === "geometrico") {
       pasosActuales.push(pasoMixtoGeometricoFigura, pasoMixtoGeometricoColores);
     } else if (tipoDisenoIA === "artistico") {
@@ -1266,7 +1224,6 @@ export default function FormChompa() {
                   setColorBaseMixto("");
                   setTipoDisenoIA("");
                   setColoresGradiente(["", "", ""]);
-                  setTipoGradiente("");
                   setFiguraGeometrica("");
                   setColoresGeometrico(["", "", "", ""]);
                   setEstiloArtistico("");
@@ -1296,7 +1253,7 @@ export default function FormChompa() {
               {paso > 1 && (
                 <button
                   onClick={() => setPaso(paso - 1)}
-                  className="bg-gray-300 hover:bg-gray-400 text-black px-6 py-2 rounded-lg"
+                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-6 py-2 rounded-lg"
                 >
                   Atrás
                 </button>
@@ -1307,7 +1264,7 @@ export default function FormChompa() {
                     if (!validarPasoActual()) return;
                     setPaso(paso + 1);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg ml-auto"
+                  className="bg-blue-900 hover:bg-blue-300 text-white px-6 py-2 rounded-lg ml-auto"
                 >
                   Siguiente
                 </button>

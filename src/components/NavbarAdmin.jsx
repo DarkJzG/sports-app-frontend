@@ -67,14 +67,6 @@ export default function Navbar() {
         </div>
         {/* Iconos de acciones */}
         <div className="hidden sm:flex gap-3 items-center">
-          <Link to="/wishlist" className="relative" title="Wishlist">
-            <img src="/img/icon-heart.svg" alt="" className="h-6" />
-            <span className="absolute -top-2 -right-2 bg-pink-600 text-xs rounded-full w-5 h-5 flex items-center justify-center text-white">3</span>
-          </Link>
-          <Link to="/cart" className="relative" title="Cart">
-            <img src="/img/icon-cart.svg" alt="" className="h-6" />
-            <span className="absolute -top-2 -right-2 bg-green-600 text-xs rounded-full w-5 h-5 flex items-center justify-center text-white">3</span>
-          </Link>
         </div>
       </nav>
     </header>

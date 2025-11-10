@@ -3,49 +3,52 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import NavbarA from "../components/NavbarAdmin";
 import FooterA from "../components/FooterAdmin";
+import { API_URL } from "../config";
+import { Spool, Shirt, Layers2, Layers, Truck, FileTerminal, UsersRound   } from "lucide-react";
+
 
 const tools = [
   {
     title: "Telas",
     desc: "Gestiona las telas disponibles en tu local",
-    img: "/img/telas.png",
+    icon: <Spool size={60} />,
     route: "/telas"
   },
   {
     title: "Categoría de Telas",
     desc: "Clasifica las telas en categorías específicas",
-    img: "/img/catg_tela.png",
+    icon: <Layers2 size={60} />,
     route: "/catg_tela"
   },
   {
     title: "Categoría de Productos",
     desc: "Organiza tus productos en diferentes categorías",
-    img: "/img/categoria.png",
-    route: "/catg_prod"
+    icon: <Layers size={60} />,
+    route: "/catgPrd"
   },
   {
     title: "Mano de Obra",
     desc: "Gestiona los costos de mano de obra e insumos",
-    img: "/img/manodeobra.png",
-    route: "/manodeobra"
+    icon: <UsersRound size={60} />,
+    route: "/manObra"
   },
   {
     title: "Productos",
     desc: "Administra el catálogo de productos finales",
-    img: "/img/producto.png",
-    route: "/productos"
+    icon: <Shirt size={60} />,
+    route: "/producto"
   },
   {
     title: "Pedidos",
     desc: "Monitorea los estados de los pedidos de clientes",
-    img: "/img/pedidos.png",
+    icon: <Truck size={60} />,
     route: "/admin/pedidos"
   },
   {
     title: "Facturas",
     desc: "Consulta el historial de ventas y facturación",
-    img: "/img/facturas.png",
-    route: "/facturas"
+    icon: <FileTerminal size={60} />,
+    route: "/admin/facturas"
   },
 ];
 
@@ -81,7 +84,7 @@ export default function HomeAdmin() {
 
       {/* Herramientas */}
       <main className="flex-1 px-8 py-10 max-w-7xl mx-auto">
-        <h3 className="text-3xl font-bold text-center mb-10">Panel de Administración</h3>
+        <h3 className="text-3xl font-bold text-blue-900 text-center mb-10">Panel de Administración</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {tools.map((tool, idx) => (
             <div
@@ -89,14 +92,10 @@ export default function HomeAdmin() {
               onClick={() => navigate(tool.route)}
               className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center transition hover:scale-105 hover:shadow-2xl cursor-pointer border border-gray-200"
             >
-              <div className="w-24 h-24 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mb-5">
-                <img
-                  src={tool.img}
-                  alt={tool.title}
-                  className="h-16 object-contain"
-                />
+              <div className="w-24 h-24 flex text-blue-900 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mb-5">
+                {tool.icon}
               </div>
-              <h4 className="text-lg font-bold mb-2 text-gray-900 text-center">{tool.title}</h4>
+              <h4 className="text-lg font-bold mb-2 text-black text-center">{tool.title}</h4>
               <p className="text-gray-600 text-center text-sm">{tool.desc}</p>
             </div>
           ))}

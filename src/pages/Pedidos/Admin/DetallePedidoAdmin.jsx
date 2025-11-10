@@ -116,12 +116,12 @@ const obtenerEstadosDisponibles = (estadoActual, infoPago, tipoEntrega) => {
   const transiciones = {
     en_revision: [
       { 
-        value: "listo", 
-        label: "Marcar como Listo", 
-        color: "purple",
-        requiere: "pago_completo",
-        requireFecha: false,
-        requireNota: false
+        value: "en_produccion",  // ✅ Ahora va primero a producción
+        label: "Iniciar Producción",
+        color: "indigo",
+        requiere: "pago_50",  // Requiere mínimo 50%
+        requireFecha: true,  
+        requireNota: false,
       },
       { 
         value: "cancelado", 
@@ -132,13 +132,14 @@ const obtenerEstadosDisponibles = (estadoActual, infoPago, tipoEntrega) => {
       }
     ],
     en_produccion: [
-      { 
-        value: "listo", 
-        label: "Marcar como Listo", 
+      {
+        value: "listo",
+        label: "Marcar como Listo",
         color: "purple",
-        requireFecha: false, // ✅ No requiere selección, se marca automáticamente
-        requireNota: false
-      }
+        requiere: "pago_completo",  
+        requireFecha: false,  
+        requireNota: false,
+      },
     ],
     listo: [
       { 
@@ -351,123 +352,98 @@ const estadosDisponibles = useMemo(() => {
   };
 }, [pedido]);
 
-  // Validación de transiciones de estado
-  const validarTransicion = (estadoDestino) => {
-    if (!estadoPago) return { valido: false, mensaje: "Cargando información de pago..." };
+const validarTransicion = (estadoDestino) => {
+  if (!estadoPago) {
+    return { valido: false, mensaje: "Cargando información de pago..." };
+  }
 
-    const { pagoCompleto, hayPagosPendientes, porcentajePagado, esAnticipo } = estadoPago;
+  const { pagoCompleto, hayPagosPendientes, porcentajePagado } = estadoPago;
 
-    // Transición: pendiente_pago → en_produccion
-    if (pedido.estado === 'pendiente_pago' && estadoDestino === 'en_produccion') {
-      if (hayPagosPendientes) {
-        return { 
-          valido: false, 
-          mensaje: "⚠️ Debes aprobar o rechazar los comprobantes de pago antes de pasar a producción." 
-        };
-      }
-      if (porcentajePagado < 50) {
-        return { 
-          valido: false, 
-          mensaje: `⚠️ Se requiere al menos el 50% del pago para iniciar producción. Actual: ${porcentajePagado}%` 
-        };
-      }
-      if (esAnticipo) {
-        return { 
-          valido: true, 
-          advertencia: "⚠️ IMPORTANTE: Este pedido está en producción con pago incompleto (50%). El cliente debe completar el pago restante." 
-        };
-      }
-      return { valido: true };
+  // ✅ VALIDACIÓN CORREGIDA: en_revision → en_produccion
+  if (pedido.estado === "en_revision" && estadoDestino === "en_produccion") {
+    if (hayPagosPendientes) {
+      return {
+        valido: false,
+        mensaje: "Debes aprobar o rechazar todos los comprobantes de pago antes de iniciar producción.",
+      };
     }
 
-    // Transición: pagado_parcial → en_produccion
-    if (pedido.estado === 'pagado_parcial' && estadoDestino === 'en_produccion') {
-      if (hayPagosPendientes) {
-        return { 
-          valido: false, 
-          mensaje: "⚠️ Debes aprobar o rechazar los comprobantes de pago pendientes." 
-        };
-      }
-      if (porcentajePagado < 50) {
-        return { 
-          valido: false, 
-          mensaje: `⚠️ Se requiere al menos el 50% del pago. Actual: ${porcentajePagado}%` 
-        };
-      }
-      return { valido: true };
+    if (porcentajePagado < 50) {
+      return {
+        valido: false,
+        mensaje: `Se requiere al menos el 50% del pago aprobado para iniciar producción. Actual: ${porcentajePagado}%`,
+      };
     }
 
-    // Transición: pagado_total → en_produccion
-    if (pedido.estado === 'pagado_total' && estadoDestino === 'en_produccion') {
-      return { valido: true };
-    }
-
-    // Transición: en_produccion → listo
-    if (pedido.estado === 'en_produccion' && estadoDestino === 'listo') {
-      if (hayPagosPendientes) {
-        return { 
-          valido: true, 
-          advertencia: "⚠️ Hay comprobantes de pago pendientes de aprobación. Revísalos para actualizar el estado de pago." 
-        };
-      }
-      return { valido: true };
-    }
-
-    // Transición: listo → enviado
-
-    if (pedido.estado === 'en_produccion' && estadoDestino === 'listo') {
-      if (hayPagosPendientes) {
-        return { 
-          valido: false, 
-          mensaje: "❌ No se puede completar el producto. Hay comprobantes de pago pendientes de aprobación." 
-        };
-      }
-      if (!pagoCompleto) {
-        return { 
-          valido: false, 
-          mensaje: `❌ No se puede marcar como Listo. El pago está incompleto.\n\n` +
-                  `💰 Pagado: ${porcentajePagado}%\n` +
-                  `📊 Falta: $${infoPago.saldo_pendiente.toFixed(2)}\n\n` +
-                  `El cliente debe completar el 100% del pago antes de pasar a estado "Listo".`
-        };
-      }
-      return { valido: true };
-    }
-
-    if (pedido.estado === 'listo' && estadoDestino === 'enviado') {
-      if (hayPagosPendientes) {
-        return { 
-          valido: false, 
-          mensaje: "❌ No se puede enviar el pedido. Hay comprobantes de pago pendientes de aprobación." 
-        };
-      }
-      if (!pagoCompleto) {
-        return { 
-          valido: false, 
-          mensaje: `❌ No se puede enviar el pedido. El pago está incompleto. Pagado: ${porcentajePagado}% de 100%` 
-        };
-      }
-      return { valido: true };
-    }
-
-    // Transición: enviado → entregado
-    if (pedido.estado === 'enviado' && estadoDestino === 'entregado') {
-      if (!pagoCompleto) {
-        return { 
-          valido: false, 
-          mensaje: "❌ No se puede marcar como entregado sin pago completo." 
-        };
-      }
-      return { valido: true };
-    }
-
-    // Cancelación
-    if (estadoDestino === 'cancelado') {
-      return { valido: true };
+    // Advertencia si es justo 50%
+    if (porcentajePagado >= 45 && porcentajePagado <= 55) {
+      return {
+        valido: true,
+        advertencia: `⚠️ IMPORTANTE: Iniciando producción con anticipo del ${porcentajePagado}%. El cliente debe completar el pago restante antes de que el pedido esté listo.`,
+      };
     }
 
     return { valido: true };
-  };
+  }
+
+  // ✅ en_produccion → listo (requiere 100% pagado)
+  if (pedido.estado === "en_produccion" && estadoDestino === "listo") {
+    if (hayPagosPendientes) {
+      return {
+        valido: true,
+        advertencia: "⚠️ Hay comprobantes de pago pendientes de aprobación. Revsalos antes de marcar como listo.",
+      };
+    }
+
+    if (!pagoCompleto) {
+      return {
+        valido: false,
+        mensaje: `❌ No se puede marcar como Listo. El pago no está completo (${porcentajePagado}%). Falta: $${infoPago.saldo_pendiente?.toFixed(2)}. El cliente debe pagar el 100% antes de pasar a estado Listo.`,
+      };
+    }
+
+    return { valido: true };
+  }
+
+  // listo → enviado/retiro
+  if (pedido.estado === "listo" && (estadoDestino === "enviado" || estadoDestino === "retiro")) {
+    if (hayPagosPendientes) {
+      return {
+        valido: false,
+        mensaje: "No se puede enviar/entregar el pedido. Hay comprobantes de pago pendientes de aprobación.",
+      };
+    }
+
+    if (!pagoCompleto) {
+      return {
+        valido: false,
+        mensaje: `No se puede enviar/entregar sin pago completo. Pagado: ${porcentajePagado}%`,
+      };
+    }
+
+    return { valido: true };
+  }
+
+  // enviado/retiro → entregado
+  if ((pedido.estado === "enviado" || pedido.estado === "retiro") && estadoDestino === "entregado") {
+    if (!pagoCompleto) {
+      return {
+        valido: false,
+        mensaje: "No se puede marcar como entregado sin pago completo al 100%.",
+      };
+    }
+
+    return { valido: true };
+  }
+
+  // Cancelación siempre permitida
+  if (estadoDestino === "cancelado") {
+    return { valido: true };
+  }
+
+  return { valido: true };
+};
+
 
 const handleActualizarEstado = async (estadoDestino) => {
   const validacion = validarTransicion(estadoDestino);
@@ -928,44 +904,81 @@ const handleRechazarPago = async (indiceOriginal) => {
                 <p className="text-gray-500 text-sm">No hay historial disponible</p>
               )}
             </InfoCard>
-            {pedido.facturaUrl && (
-              <InfoCard title="📄 Factura">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <div>
-                        <p className="font-medium text-gray-900">Factura del Pedido</p>
-                        <p className="text-xs text-gray-600">
-                          Generada el {pedido.facturaGenerada ? formatDateSafe(pedido.facturaGenerada) : 'Fecha no disponible'}
-                        </p>
+              {pedido.facturaUrl && (
+                <InfoCard title="📄 Factura">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div>
+                          <p className="font-medium text-gray-900">Factura del Pedido</p>
+                          <p className="text-xs text-gray-600">
+                            Generada el {pedido.facturaGenerada 
+                              ? formatDateSafe(pedido.facturaGenerada) 
+                              : 'Fecha no disponible'}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Botones de acción */}
+                    <div className="flex gap-2">
+                      {/* ✅ BOTÓN 1: VER EN LÍNEA */}
+                      <button
+                        onClick={() => {
+                          window.open(pedido.facturaUrl, '_blank');
+                          toast.info("Abriendo factura en nueva pestaña");
+                        }}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Ver Factura
+                      </button>
+
+                      {/* ✅ BOTÓN 2: DESCARGAR */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            toast.info("Descargando factura...");
+                            
+                            // Agregar fl_attachment a la URL para forzar descarga
+                            const urlDescarga = pedido.facturaUrl.replace('/upload/', '/upload/fl_attachment/');
+                            
+                            const response = await fetch(urlDescarga);
+                            const blob = await response.blob();
+                            
+                            const blobUrl = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = blobUrl;
+                            link.download = `Factura-${pedido._id}.pdf`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(blobUrl);
+                            
+                            toast.success("Factura descargada exitosamente");
+                          } catch (error) {
+                            console.error("Error al descargar:", error);
+                            toast.error("Error al descargar la factura");
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Descargar
+                      </button>
+                    </div>
                   </div>
-                  
-                <button
-                  onClick={() => {
-                    // Agregar parámetro de descarga a la URL de Cloudinary
-                    const downloadUrl = pedido.facturaUrl.replace('/upload/', '/upload/fl_attachment/');
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    link.download = `Factura_${pedido._id}.pdf`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Descargar Factura
-                </button>
-                </div>
-              </InfoCard>
-            )}
+                </InfoCard>
+              )}
+
           </div>
 
           {/* Columna derecha */}

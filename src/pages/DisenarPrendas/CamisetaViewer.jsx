@@ -7,9 +7,8 @@ import { API_URL } from "../../config";
 import { toast } from "react-toastify";
 import { useAuth } from "../../components/AuthContext";
 import PantallaCarga from "../../components/PantallaCarga";
-import {useNavigate} from "react-router-dom";
-import { Shirt, Palette, Type, Image, Layers, Sparkles } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import { Palette, Type, Image, Layers, Sparkles, Save } from "lucide-react";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -25,7 +24,6 @@ import { PerformanceMonitor } from "@react-three/drei";
 
 import { Matrix4, Vector2, Vector3 } from "three";
 
-/* Cambia la profundidad a la que agrego el texto y los logos */
 const toDecalScale = (s, thickness = 1) =>
   Array.isArray(s) ? s : [s, s, thickness];
 
@@ -33,76 +31,68 @@ const toDecalScale = (s, thickness = 1) =>
 const CATALOG = {
   camiseta: {
     name: "Camiseta",
-    glb:  "/prendas3d/camiseta.glb",
+    glb: "/prendas3d/camiseta_v2.glb",
     designs: {
       base: {
         name: "Base",
         mask: "/prendas3d/mask_base_rgb.png",
         zones: {
-          cuello:    { label: "Cuello",  channel: "R", default: "#ffffff" },
-          mangas: { label: "Mangas",  channel: "G", default: "#7a2f9a" },
-          torso:   { label: "Torso",   channel: "B", default: "#1c9d70" },
+          cuello: { label: "Cuello", channel: "R", default: "#ffffff" },
+          mangas: { label: "Mangas", channel: "G", default: "#7a2f9a" },
+          torso: { label: "Torso", channel: "B", default: "#1c9d70" },
         },
       },
       rayo: {
         name: "Rayo",
         mask: "/prendas3d/rayo_rgb.png",
         zones: {
-          torso:  { label: "Torso",  channel: "R", default: "#d32f2f" },
+          torso: { label: "Torso", channel: "R", default: "#d32f2f" },
           franja: { label: "Franja", channel: "G", default: "#21c521" },
-          cuello:   { label: "Cuello", channel: "B", default: "#0d47a1" },
+          cuello: { label: "Cuello", channel: "B", default: "#0d47a1" },
         },
       },
     },
   },
 };
 
-// Devuelve tamaño en UV (0-1) equivalente a un tamaño en mundo "worldSize"
 function worldScaleToUvScale(e, worldSize) {
   const obj = e.object;
   const geom = obj.geometry;
   const idx = geom.index;
   const pos = geom.attributes.position;
-  const uv  = geom.attributes.uv;
+  const uv = geom.attributes.uv;
   const faceIndex = e.faceIndex ?? 0;
 
-  if (!uv || !pos || !idx) return worldSize * 0.001; // fallback
+  if (!uv || !pos || !idx) return worldSize * 0.001;
 
-  // Índices del triángulo impactado
   const ia = idx.array[faceIndex * 3 + 0];
   const ib = idx.array[faceIndex * 3 + 1];
   const ic = idx.array[faceIndex * 3 + 2];
 
-  // Vértices del triángulo en local
   const va = new Vector3().fromBufferAttribute(pos, ia);
   const vb = new Vector3().fromBufferAttribute(pos, ib);
   const vc = new Vector3().fromBufferAttribute(pos, ic);
 
-  // Llevar a mundo
   const m = new Matrix4().copy(obj.matrixWorld);
-  va.applyMatrix4(m); vb.applyMatrix4(m); vc.applyMatrix4(m);
+  va.applyMatrix4(m);
+  vb.applyMatrix4(m);
+  vc.applyMatrix4(m);
 
-  // Área del triángulo en mundo
   const ab = new Vector3().subVectors(vb, va);
   const ac = new Vector3().subVectors(vc, va);
   const areaWorld = ab.clone().cross(ac).length() * 0.5;
 
-  // UVs del triángulo
   const uva = new Vector2().fromBufferAttribute(uv, ia);
   const uvb = new Vector2().fromBufferAttribute(uv, ib);
   const uvc = new Vector2().fromBufferAttribute(uv, ic);
 
-  // Área del triángulo en UV (2D)
   const e1 = uvb.clone().sub(uva);
   const e2 = uvc.clone().sub(uva);
   const areaUV = Math.abs(e1.x * e2.y - e1.y * e2.x) * 0.5;
 
   if (areaWorld <= 1e-8 || areaUV <= 1e-8) return worldSize * 0.001;
 
-  // Ratio local: (unidades UV / unidades Mundo)
   const ratio = Math.sqrt(areaUV / areaWorld);
-
-  // "worldSize" (tu scale en 3D) → tamaño en UV (0–1)
   return worldSize * ratio;
 }
 
@@ -128,7 +118,7 @@ function makeTextTexture(txt, { font = "900 128px Inter", fill = "#000000", outl
   t.generateMipmaps = false;
   t.minFilter = THREE.LinearFilter;
   t.magFilter = THREE.LinearFilter;
-  t.anisotropy = 1
+  t.anisotropy = 1;
   return t;
 }
 
@@ -143,8 +133,6 @@ function TextDecal({ d }) {
     }),
     [d.text, font, d.fill, d.outline, d.outlineWidth]
   );
-
-
 
   React.useEffect(() => () => texture?.dispose(), [texture]);
 
@@ -163,9 +151,7 @@ function TextDecal({ d }) {
   );
 }
 
-
-/* ========= 3) Escena ========= */
-function Scene({ product, design, colors, decals, textDecals, textures, setDecals, setTextDecals, activeElement, setActiveElement  }) {
+function Scene({ product, design, colors, decals, textDecals, textures, setDecals, setTextDecals, activeElement, setActiveElement }) {
   const gltf = useGLTF(product.glb);
 
   const zonesSpec = React.useMemo(
@@ -177,7 +163,7 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
     ),
     [design, colors, textures]
   );
-  
+
   const colorMap = useChannelMaskTexture(design.mask, zonesSpec);
 
   const [meshes, setMeshes] = useState([]);
@@ -213,25 +199,24 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
     const worldScale = e.object.scale.clone().length();
     const uvSize = worldScaleToUvScale(e, worldScale);
 
-    
     if (!activeElement) return;
 
     const { type, index } = activeElement;
     if (type === "text") {
       setTextDecals((prev) => {
         const copy = [...prev];
-        const prevZ = copy[index]?.rotation?.[2] ?? 0; 
+        const prevZ = copy[index]?.rotation?.[2] ?? 0;
         const worldScale = copy[index]?.scale ?? 1.0;
         const uvSize = worldScaleToUvScale(e, worldScale);
 
-        copy[index] = { 
-          ...copy[index], 
-          position: p.toArray(), 
-          rotation: [eul.x, eul.y, prevZ], 
+        copy[index] = {
+          ...copy[index],
+          position: p.toArray(),
+          rotation: [eul.x, eul.y, prevZ],
           meshIndex: idxMesh,
           faceIndex,
           uv,
-          uvSize,         
+          uvSize,
           rotationZ: prevZ,
           scale: worldScale,
         };
@@ -240,29 +225,25 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
     } else if (type === "logo") {
       setDecals((prev) => {
         const copy = [...prev];
-        const prevZ = copy[index]?.rotation?.[2] ?? 0; 
+        const prevZ = copy[index]?.rotation?.[2] ?? 0;
         const worldScale = copy[index]?.scale ?? 1.0;
         const uvSize = worldScaleToUvScale(e, worldScale);
 
-        copy[index] = { 
-          ...copy[index], 
-          position: p.toArray(), 
-          rotation: [eul.x, eul.y, prevZ], 
+        copy[index] = {
+          ...copy[index],
+          position: p.toArray(),
+          rotation: [eul.x, eul.y, prevZ],
           meshIndex: idxMesh,
           faceIndex,
           uv,
-          uvSize,         
+          uvSize,
           rotationZ: prevZ,
           scale: worldScale,
-
-          
         };
         return copy;
       });
     }
   };
-  
-  
 
   return (
     <group>
@@ -280,7 +261,6 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
         >
           <meshStandardMaterial color="white" metalness={0.1} roughness={0.7} map={colorMap || null} />
 
-          {/* Logos */}
           {decals.map(
             (d, k) =>
               d.texture &&
@@ -300,7 +280,6 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
               )
           )}
 
-          {/* Textos */}
           {textDecals.filter((d) => d.meshIndex === i).map((d, k) => (
             <TextDecal key={`text-${i}-${k}`} d={d} />
           ))}
@@ -311,8 +290,6 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
   );
 }
 
-
-
 export default function CamisetaViewer() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -320,12 +297,12 @@ export default function CamisetaViewer() {
   const { user } = useAuth();
   const glRef = useRef();
 
-  const [productId, setProductId] = useState("camiseta");
+  const [productId] = useState("camiseta"); // Fijo a camiseta
   const product = CATALOG[productId];
 
   const [designId, setDesignId] = useState("base");
   const designs = product.designs;
-  const design  = designs[designId];
+  const design = designs[designId];
 
   const [dpr, setDpr] = useState(1.5);
 
@@ -342,17 +319,15 @@ export default function CamisetaViewer() {
     setTextDecals([]);
     setActiveElement(null);
     setSelectedElement(null);
-  }, [productId, designId]);
+  }, [designId]);
 
   const [textures, setTextures] = useState({});
   const [decals, setDecals] = useState([]);
   const [textDecals, setTextDecals] = useState([]);
-  const [activeElement, setActiveElement] = useState(null); 
+  const [activeElement, setActiveElement] = useState(null);
   const [currentLogo, setCurrentLogo] = useState({ scale: 0.5, position: "centro" });
   const [currentText, setCurrentText] = useState({ scale: 0.5, position: "centro" });
   const [selectedElement, setSelectedElement] = useState(null);
-  const [initialText, setInitialText] = useState("Ingrese su texto");
-
 
   const [activeSection, setActiveSection] = useState("colores");
   useEffect(() => {
@@ -360,88 +335,31 @@ export default function CamisetaViewer() {
     setSelectedElement(null);
   }, [activeSection]);
 
-<NavPanelesRGB
-  items={[
-    { id: "prenda",   label: "Prenda",   icon: <Shirt size={22} /> },
-    { id: "estilos",  label: "Estilos",  icon: <Layers size={22} /> },
-    { id: "colores",  label: "Colores",  icon: <Palette size={22} /> },
-    { id: "texto",    label: "Texto",    icon: <Type size={22} /> },
-    { id: "logos",    label: "Logos",    icon: <Image size={22} /> },
-    { id: "texturas", label: "Texturas IA", icon: <Sparkles size={22} /> },
-  ]}
-  activeId={activeSection}
-  onChange={setActiveSection}
-/>
-
-
-  // ---- mutadores
   const updateActiveElement = (patch) => {
     if (!activeElement) return;
     const { type, index } = activeElement;
-  
+
     const update = (arrSetter) => {
       arrSetter(arr => {
         const copy = [...arr];
         const current = copy[index];
         if (!current) return arr;
-  
+
         const merged = { ...current, ...patch };
-  
-        // ⚙️ recalcular uvSize si se cambia scale
+
         if (patch.scale !== undefined && current.uvSize && current.scale) {
           const ratio = current.uvSize / current.scale;
           merged.uvSize = patch.scale * ratio;
         }
-  
+
         copy[index] = merged;
         return copy;
       });
     };
-  
+
     if (type === "logo") update(setDecals);
     if (type === "text") update(setTextDecals);
   };
-  
-
-  // Reset TOTAL al cambiar de PRENDA
-  useEffect(() => {
-    
-    if (!CATALOG[productId].designs[designId]) {
-      setDesignId(Object.keys(CATALOG[productId].designs)[0]);
-    }
-    const zones = CATALOG[productId].designs[designId].zones;
-    setColors(Object.fromEntries(Object.entries(zones).map(([k, z]) => [k, z.default])));
-    setTextures({});
-    setDecals([]);
-    setTextDecals([]);
-    setActiveElement(null);
-    setSelectedElement(null);
-  }, [productId]);
-
-  
-  useEffect(() => {
-    const zones = CATALOG[productId].designs[designId].zones;
-
-    
-    setColors(prev => {
-      const next = {};
-      for (const [k, z] of Object.entries(zones)) {
-        next[k] = prev?.[k] ?? z.default;
-      }
-      return next;
-    });
-
-  
-    setTextures(prev => {
-      const next = {};
-      for (const k of Object.keys(zones)) {
-        if (prev?.[k]) next[k] = prev[k];
-      }
-      return next;
-    });
-
-    
-  }, [designId, productId]);
 
   const handleAddText = (initialText = "") => {
     if (textDecals.length >= 5) return alert("Solo puedes añadir hasta 5 textos.");
@@ -468,8 +386,8 @@ export default function CamisetaViewer() {
   };
 
   const handleRemoveElement = (id, type) => {
-    if (type === "logo")  setDecals(d => d.filter((_, i) => i !== id));
-    if (type === "text")  setTextDecals(t => t.filter((_, i) => i !== id));
+    if (type === "logo") setDecals(d => d.filter((_, i) => i !== id));
+    if (type === "text") setTextDecals(t => t.filter((_, i) => i !== id));
     if (activeElement && activeElement.type === type && activeElement.index === id) {
       setActiveElement(null);
     }
@@ -481,21 +399,6 @@ export default function CamisetaViewer() {
 
   const renderPanel = () => {
     switch (activeSection) {
-      case "prenda":
-        return (
-          <div className="bg-white rounded-2xl shadow p-4">
-            <label className="block text-sm font-semibold mb-2">Elegir prenda</label>
-            <select
-              className="w-full border rounded p-2"
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-            >
-              {Object.entries(CATALOG).map(([id, p]) => (
-                <option key={id} value={id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-        );
       case "estilos":
         return (
           <div className="bg-white rounded-2xl shadow p-4">
@@ -533,7 +436,6 @@ export default function CamisetaViewer() {
         return (
           <div className="bg-white rounded-2xl shadow p-4">
             <PanelLogosRGB
-            
               logos={decals}
               selectedElement={selectedElement}
               moveSelectedElement={moveSelectedElement}
@@ -568,44 +470,39 @@ export default function CamisetaViewer() {
     setLoading(true);
     try {
       const { gl, scene, camera } = glRef.current;
-  
+
       if (!gl || !scene || !camera) {
         toast.error("No se detectó el canvas 3D. Intenta nuevamente.");
         return;
       }
-  
+
       if (!user || !user.id) {
         toast.error("Debes iniciar sesión para guardar el diseño");
         return;
       }
-  
-      // 1️⃣ Asegurar que la escena se haya renderizado antes de capturar
+
       await new Promise((resolve) => requestAnimationFrame(resolve));
-
-
       gl.render(scene, camera);
 
-      // 3️⃣ Capturar versión normal (con fondo gris)
       const angles = [
         { name: "espalda", rotationY: Math.PI },
         { name: "lado_izq", rotationY: Math.PI / 2 },
         { name: "lado_der", rotationY: -Math.PI / 2 },
         { name: "frente", rotationY: 0 },
       ];
-      
+
       const renders = {};
-      
+
       for (const a of angles) {
         camera.position.set(Math.sin(a.rotationY) * 5, -0.5, Math.cos(a.rotationY) * 5);
         camera.lookAt(0, 1, 0);
         gl.render(scene, camera);
         await new Promise((r) => requestAnimationFrame(r));
-      
+
         const dataURL = gl.domElement.toDataURL("image/png");
         renders[a.name] = await (await fetch(dataURL)).blob();
       }
 
-      // 2️⃣ Crear el FormData DESPUÉS de tener el blob
       const formData = new FormData();
       formData.append("user_id", user.id);
       formData.append("categoria", productId || "camiseta");
@@ -620,19 +517,18 @@ export default function CamisetaViewer() {
       formData.append("render_lado_izq", renders.lado_izq, "lado_izq.png");
       formData.append("render_lado_der", renders.lado_der, "lado_der.png");
       const UV_RES = [2048, 2048];
-      formData.append("uv_resolution", JSON.stringify(UV_RES));   
+      formData.append("uv_resolution", JSON.stringify(UV_RES));
 
       console.log("📤 Enviando diseño al backend...");
-  
-      // 3️⃣ Enviar al backend
+
       const res = await fetch(`${API_URL}/api/3d/prenda/guardar`, {
         method: "POST",
         body: formData,
       });
-  
+
       const data = await res.json();
       console.log("Respuesta backend:", data);
-  
+
       if (res.ok) {
         toast.success("Diseño guardado correctamente 🎨");
         console.log("Ficha técnica:", data.ficha_pdf_url);
@@ -647,91 +543,90 @@ export default function CamisetaViewer() {
       setLoading(false);
     }
   };
-  
 
   return (
     <>
-    <Navbar />
-    <div className="flex h-[90vh] bg-gray-100">
-      {/* izquierda: navegación vertical */}
-      <div className="p-4">
-        <NavPanelesRGB items={[
-          { id: "prenda",   label: "Prenda" },
-          { id: "estilos",  label: "Estilos" },
-          { id: "colores",  label: "Colores" },
-          { id: "texto",    label: "Texto" },
-          { id: "logos",    label: "Logos" },
-          { id: "texturas", label: "Texturas IA" },
-        ]} activeId={activeSection} onChange={setActiveSection} />
-      </div>
+      <Navbar />
+      <div className="flex h-[90vh] bg-gray-100">
+        {/* Panel de navegación sin "Prenda" */}
+        <div className="flex flex-col p-4">
+          <NavPanelesRGB
+            items={[
+              { id: "estilos", label: "Estilos", icon: <Layers size={22} /> },
+              { id: "colores", label: "Colores", icon: <Palette size={22} /> },
+              { id: "texto", label: "Texto", icon: <Type size={22} /> },
+              { id: "logos", label: "Logos", icon: <Image size={22} /> },
+              { id: "texturas", label: "Texturas IA", icon: <Sparkles size={22} /> },
+            ]}
+            activeId={activeSection}
+            onChange={setActiveSection}
+          />
+        </div>
 
-      {/* centro: panel con scroll */}
-      <div className="w-[560px] p-4 overflow-y-auto">
-        {renderPanel()}
-      </div>
+        <div className="w-[560px] p-4 overflow-y-auto">
+          {renderPanel()}
+        </div>
 
-      {/* derecha: canvas */}
-      <div className="flex-1 bg-white rounded-lg shadow-lg relative">
-      <PantallaCarga
-        show={loading || loadingLogo}
-        message={
-          loadingLogo
-            ? "Subiendo logo a Cloudinary..."
-            : "Guardando tu diseño 3D..."
-        }
-      />
-      <Canvas
-        dpr={dpr}
-        frameloop="demand"
-        gl={{ preserveDrawingBuffer: true, antialias: true, powerPreference: "high-performance" }}
-        camera={{ position: [0, 5, 2], fov: 70 }}
-        onCreated={({ gl, scene, camera }) => { 
-          glRef.current = { gl, scene, camera };
-          scene.background = new THREE.Color("#f2f2f2");
-        }}
-      >
-          <Suspense fallback={<Html><span style={{ color: "#fff" }}>Cargando...</span></Html>}>
-            <Scene
-              product={product}
-              design={design}
-              colors={colors}
-              decals={decals}
-              setDecals={setDecals}
-              textDecals={textDecals}
-              setTextDecals={setTextDecals}
-              activeElement={activeElement}
-              setActiveElement={setActiveElement}
-              textures={textures}
-            />
-            <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} />
-            <OrbitControls enablePan={false} minPolarAngle={Math.PI * 0.35} maxPolarAngle={Math.PI * 0.65} />
-          </Suspense>
-        </Canvas>
-        <button
-          onClick={handleGuardarDiseno}
-          disabled={!glRef.current}
-          className={`bg-blue-600 text-white rounded-md py-2 px-4 mt-4 hover:bg-blue-700 ${
-            !glRef.current ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-           Guardar Diseño
-        </button>
-        <div className="absolute top-4 left-4 bg-black/70 p-3 rounded-lg text-white text-sm">
-          <h3 className="font-bold mb-1">Controles</h3>
-          <p>• Click izquierdo sobre la prenda: Colocar elemento</p>
-          <p>• Rueda del ratón: Zoom</p>
-          <p>• Click izquierdo + arrastrar: Rotar vista</p>
+        <div className="flex-1 bg-white rounded-lg shadow-lg relative">
+          <PantallaCarga
+            show={loading || loadingLogo}
+            message={
+              loadingLogo
+                ? "Subiendo logo a Cloudinary..."
+                : "Guardando tu diseño 3D..."
+            }
+          />
+          <Canvas
+            dpr={dpr}
+            frameloop="demand"
+            gl={{ preserveDrawingBuffer: true, antialias: true, powerPreference: "high-performance" }}
+            camera={{ position: [0, 5, 2], fov: 70 }}
+            onCreated={({ gl, scene, camera }) => {
+              glRef.current = { gl, scene, camera };
+              scene.background = new THREE.Color("#f2f2f2");
+            }}
+          >
+            <Suspense fallback={<Html><span style={{ color: "#fff" }}>Cargando...</span></Html>}>
+              <Scene
+                product={product}
+                design={design}
+                colors={colors}
+                decals={decals}
+                setDecals={setDecals}
+                textDecals={textDecals}
+                setTextDecals={setTextDecals}
+                activeElement={activeElement}
+                setActiveElement={setActiveElement}
+                textures={textures}
+              />
+              <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} />
+              <OrbitControls enablePan={false} minPolarAngle={Math.PI * 0.35} maxPolarAngle={Math.PI * 0.65} />
+            </Suspense>
+          </Canvas>
+
+          <div className="absolute top-4 left-4 bg-black/70 p-3 rounded-lg text-white text-sm">
+            <h3 className="font-bold mb-1">Controles</h3>
+            <p>• Click izquierdo sobre la prenda: Colocar elemento</p>
+            <p>• Rueda del ratón: Zoom</p>
+            <p>• Click izquierdo + arrastrar: Rotar vista</p>
+          </div>
+
+          <div className="absolute top-2 right-2 bg-black/70 p-3 rounded-lg text-white text-sm">
+            <h3 className="font-bold mb-1">Guardar Diseño</h3>
+            <button
+              onClick={handleGuardarDiseno}
+              disabled={!glRef.current}
+              className={`mt-4 w-full bg-blue-900 text-white rounded-lg py-2 px-2 font-semibold hover:bg-blue-600 transition-colors ${!glRef.current ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+            >
+              <Save size={16} className="inline" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <Footer />
+      <Footer />
     </>
   );
 }
 
-// precarga de modelos (opcional)
-useGLTF.preload("/prendas3d/camiseta.glb");
-
-
-
-
+useGLTF.preload("/prendas3d/camiseta_v2.glb");

@@ -11,7 +11,7 @@ export default function NavPanelesRGB({ items, activeId, onChange }) {
             key={item.id}
             onClick={() => onChange(item.id)}
             className={`flex flex-col items-center p-2 rounded-xl transition-all duration-200
-              ${active ? "bg-blue-600 text-white shadow-md" : "bg-white text-gray-700 hover:bg-blue-100"}
+              ${active ? "bg-blue-900 text-white shadow-md" : "bg-white text-gray-700 hover:bg-blue-100"}
             `}
           >
             {/* 🔹 texto arriba */}

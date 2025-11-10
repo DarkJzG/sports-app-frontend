@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { API_URL } from "../config";
 
+
 export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions = true }) {
   const fechaCreacion = pedido.createdAt
     ? new Date(pedido.createdAt.replace("+00:00", "Z"))
@@ -81,10 +82,10 @@ export default function PedidoCardAdmin({ pedido, onCambiarEstado, showActions =
           <b>Total:</b> ${pedido.costos?.total?.toFixed(2)}
         </p>
         <p>
-          <b>Pagado:</b> ${pedido.montoPagado?.toFixed(2)}
+          <b>Pagado:</b> ${pedido.infoPago?.total_pagado?.toFixed(2)}
         </p>
         <p>
-          <b>Pendiente:</b> ${pedido.saldoPendiente?.toFixed(2)}
+          <b>Pendiente:</b> ${pedido.infoPago?.saldo_pendiente?.toFixed(2)}
         </p>
       </div>
 

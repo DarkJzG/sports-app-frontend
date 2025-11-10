@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { PlusCircle, Type, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
+import { PlusCircle, Type, Trash2 } from "lucide-react";
+
 
 
 export default function PanelTextoRGB({
-  currentElement,
-  setCurrentElement,
   handleAddText,
   selectedElement,
   moveSelectedElement,
@@ -29,7 +28,17 @@ export default function PanelTextoRGB({
 
   return (
     <div className="bg-white rounded-2xl shadow p-5 flex flex-col gap-5">
-      {/* ➕ Crear nuevo texto (solo botón) */}
+      <div className="flex justify-between items-center">
+          <h3 className="text-lg font-bold text-blue-900 flex items-center gap-1">
+            <Type size={22} />
+            Textos
+          </h3>
+        </div>
+        <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
+          <p>
+            Haz <strong>click</strong> en <strong> Añadir Texto</strong> para agregar un nuevo texto
+          </p>
+        </div>
       <div className="flex items-center justify-between">
         <button
           onClick={() => handleAddText?.("")}
@@ -46,7 +55,7 @@ export default function PanelTextoRGB({
       {/* Lista de textos */}
       <div>
         <h4 className="font-bold text-blue-900 flex items-center gap-2">
-          <Type size={18} /> Textos agregados
+          Lista de textos agregados
         </h4>
 
         {texts.length === 0 ? (

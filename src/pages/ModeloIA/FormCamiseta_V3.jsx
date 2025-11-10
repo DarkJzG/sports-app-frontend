@@ -7,6 +7,7 @@ import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PantallaCarga from "../../components/PantallaCarga";
 
   /* Paleta base */
   const coloresBase = [
@@ -397,223 +398,225 @@ export default function FormCamiseta_V3() {
   const [motif2, setMotif2] = useState("");
   const [coloresObjetos, setColoresObjetos] = useState(["", "", ""]);
   const [numColoresFP, setNumColoresFP] = useState(2);
-
-  const [modeloIA, setModeloIA] = useState("stable");
   
-  const validarPasoActual = () => {
-    const pasoActual = pasosActuales[paso - 1];
+const validarPasoActual = () => {
+  const pasoActual = pasosActuales[paso - 1];
 
-    switch (diseno) {
-      case "degradado":
-        if (paso === 2 && !numColores) {
-          toast.warning("Selecciona el número de colores para el degradado.");
-          return false;
-        }
-        if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
-          toast.warning("Selecciona todos los colores requeridos.");
-          return false;
-        }
-        if (paso === 4 && !tipoGradiente) {
-          toast.warning("Selecciona un tipo de degradado.");
-          return false;
-        }
-        break;
-
-      case "geometrico":
-        if (paso === 2 && !numColores) {
-          toast.warning("Selecciona el número de colores para el patrón.");
-          return false;
-        }
-        if (paso === 3 && colores.some((c, i) => i < numColores && !c)) {
-          toast.warning("Selecciona todos los colores requeridos.");
-          return false;
-        }
-        if (paso === 4 && !figura) {
-          toast.warning("Selecciona una figura principal.");
-          return false;
-        }
-        if (paso === 5 && (!escala || !espaciado)) {
-          toast.warning("Selecciona una escala y espaciado.");
-          return false;
-        }
-        if (paso === 6 && !superposicion) {
-          toast.warning("Selecciona una superposicion.");
-          return false;
-        }
-
-        break;
-
-      case "abstracto":
-        if (paso === 2 && !estiloArtistico) {
-          toast.warning("Selecciona un estilo artístico.");
-          return false;
-        }
-        if (paso === 3 && !numColores) {
-          toast.warning("Selecciona el número de colores para el patrón.");
-          return false;
-        }
-        if (paso === 4 && colores.some((c, i) => i < numColores && !c)) {
-          toast.warning("Selecciona todos los colores requeridos.");
-          return false;
-        }
-        if (paso === 5 && !intensidad) {
-          toast.warning("Selecciona la intensidad del patrón.");
-          return false;
-        }
-        if (paso === 6 && !cobertura) {
-          toast.warning("Selecciona la cobertura del patrón.");
-          return false;
-        }
-        break;
-
-      case "rayas":
-        if (paso === 2 && !direccion) {
-          toast.warning("Selecciona la dirección de las rayas.");
-          return false;
-        }
-        if (paso === 3 && !grosor) {
-          toast.warning("Selecciona el grosor de las rayas.");
-          return false;
-        }
-        if (paso === 4 && !numRayas) {
-          toast.warning("Selecciona el número de rayas.");
-          return false;
-        }
-        if (paso === 5 && !coberturaRayas) {
-          toast.warning("Selecciona la cobertura de las rayas.");
-          return false;
-        }
-        if (paso === 6 && (!colores[0] || !colores[1])) {
-          toast.warning("Selecciona ambos colores para las rayas.");
-          return false;
-        }
-        break;
-
-        case "camuflaje":
-          // Paso 2: Selección de paleta
-          if (paso === 2 && !paletaCamuflaje) {
-            toast.warning("Selecciona una paleta de camuflaje.");
-            return false;
-          }
-
-          // Si la paleta es personalizada
-          if (paletaCamuflaje === "personalizado") {
-            if (paso === 3) {
-              // Validar que los dos primeros colores sean obligatorios
-              if (!colores[0] || !colores[1]) {
-                toast.warning("Debes seleccionar al menos los colores 1 y 2 (base y manchas principales).");
-                return false;
-              }
-
-              // Validar que si el usuario selecciona color 4 sin seleccionar el 3, no lo permita
-              if (colores[3] && !colores[2]) {
-                toast.warning("Completa los colores en orden, no dejes huecos intermedios.");
-                return false;
-              }
-            }
-
-            if (paso === 4 && !tamanoCamo) {
-              toast.warning("Selecciona el tamaño del camuflaje.");
-              return false;
-            }
-
-            if (paso === 5 && !estiloCamo) {
-              toast.warning("Selecciona el estilo del camuflaje.");
-              return false;
-            }
-          } 
-
-          else {
-            if (paso === 3 && !tamanoCamo) {
-              toast.warning("Selecciona el tamaño del camuflaje.");
-              return false;
-            }
-            if (paso === 4 && !estiloCamo) {
-              toast.warning("Selecciona el estilo del camuflaje.");
-              return false;
-            }
-          }
-          break;
-
-
-      case "dos_tonos":
-        if (paso === 2 && !division) {
-          toast.warning("Selecciona un tipo de división.");
-          return false;
-        }
-        if (paso === 3 && (!color1TwoTone || !color2TwoTone)) {
-          toast.warning("Selecciona ambos colores.");
-          return false;
-        }
-          break;
-
-      case "solido":
-        if (paso === 2 && !color1) {
-          toast.warning("Selecciona un color base para la camiseta.");
-          return false;
-        }
-        if (paso === 2 && !usarColorUnicoCuello && !colorCuello) {
-          toast.warning("Selecciona un color para el cuello y puños.");
-          return false;
-        }
-        break;
-
-      case "diseño_completo":
-        if (tipoFullPrint === "objetos") {
-          if (paso === 2 && !tipoFullPrint) {
-            toast.warning("Selecciona un tipo de diseño completo.");
-            return false;
-          }
-          if (paso === 3 && (!motif1 || (numObjetos === 2 && !motif2))) {
-            toast.warning("Completa los campos de objetos.");
-            return false;
-          }
-          if (paso === 4) {
-            if (!coloresObjetos[0] || !coloresObjetos[1] || (numObjetos === 2 && !coloresObjetos[2])) {
-              toast.warning("Selecciona los colores requeridos.");
-              return false;
-            }
-          }
-          if (paso === 5 && (!styleFP || !distributionFP)) {
-            toast.warning("Selecciona el estilo y la distribución del diseño completo.");
-            return false;
-          }
-        } else if (tipoFullPrint === "texturas") {
-          if (paso === 3) {
-            if (numColoresFP === 2 && (!coloresExtraFP[0] || !coloresExtraFP[1])) {
-              toast.warning("Selecciona el número de colores.");
-              return false;
-            }
-            if (numColoresFP === 3 && (!coloresExtraFP[0] || !coloresExtraFP[1] || !coloresExtraFP[2])) {
-              toast.warning("Selecciona el número de colores.");
-              return false;
-            }
-          }
-          if (paso === 4) {
-            if (!textureType) {
-              toast.warning("Selecciona un tipo de textura.");
-              return false;
-            }
-            if (textureType === "personalizado" && !customTexture) {
-              toast.warning("Describe la textura personalizada.");
-              return false;
-            }
-          }
-        }
-        break;
+  // Paso 1: Cuello y Manga
+  if (paso === 1) {
+    if (!cuello || !manga) {
+      toast.warning("Selecciona el tipo de cuello y manga.");
+      return false;
     }
+    return true;
+  }
 
+  // Paso 2: Patrón
+  if (paso === 2 && !diseno) {
+    toast.warning("Selecciona un patrón base.");
+    return false;
+  }
 
-    if (pasoActual === pasoOpciones) {
-      if (!cuello || !manga || !tela || !genero) {
-        toast.warning("Completa todas las opciones generales antes de continuar.");
+  // Validaciones específicas por patrón (ahora empiezan en paso 3)
+  switch (diseno) {
+    case "degradado":
+      if (paso === 3 && !numColores) {
+        toast.warning("Selecciona el número de colores para el degradado.");
         return false;
       }
+      if (paso === 4 && colores.some((c, i) => i < numColores && !c)) {
+        toast.warning("Selecciona todos los colores requeridos.");
+        return false;
+      }
+      if (paso === 5 && !tipoGradiente) {
+        toast.warning("Selecciona un tipo de degradado.");
+        return false;
+      }
+      break;
+
+    case "geometrico":
+      if (paso === 3 && !numColores) {
+        toast.warning("Selecciona el número de colores para el patrón.");
+        return false;
+      }
+      if (paso === 4 && colores.some((c, i) => i < numColores && !c)) {
+        toast.warning("Selecciona todos los colores requeridos.");
+        return false;
+      }
+      if (paso === 5 && !figura) {
+        toast.warning("Selecciona una figura principal.");
+        return false;
+      }
+      if (paso === 6 && (!escala || !espaciado)) {
+        toast.warning("Selecciona una escala y espaciado.");
+        return false;
+      }
+      if (paso === 7 && !superposicion) {
+        toast.warning("Selecciona una superposicion.");
+        return false;
+      }
+      break;
+
+    case "abstracto":
+      if (paso === 3 && !estiloArtistico) {
+        toast.warning("Selecciona un estilo artístico.");
+        return false;
+      }
+      if (paso === 4 && !numColores) {
+        toast.warning("Selecciona el número de colores para el patrón.");
+        return false;
+      }
+      if (paso === 5 && colores.some((c, i) => i < numColores && !c)) {
+        toast.warning("Selecciona todos los colores requeridos.");
+        return false;
+      }
+      if (paso === 6 && !intensidad) {
+        toast.warning("Selecciona la intensidad del patrón.");
+        return false;
+      }
+      if (paso === 7 && !cobertura) {
+        toast.warning("Selecciona la cobertura del patrón.");
+        return false;
+      }
+      break;
+
+    case "rayas":
+      if (paso === 3 && !direccion) {
+        toast.warning("Selecciona la dirección de las rayas.");
+        return false;
+      }
+      if (paso === 4 && !grosor) {
+        toast.warning("Selecciona el grosor de las rayas.");
+        return false;
+      }
+      if (paso === 5 && !numRayas) {
+        toast.warning("Selecciona el número de rayas.");
+        return false;
+      }
+      if (paso === 6 && !coberturaRayas) {
+        toast.warning("Selecciona la cobertura de las rayas.");
+        return false;
+      }
+      if (paso === 7 && (!colores[0] || !colores[1])) {
+        toast.warning("Selecciona ambos colores para las rayas.");
+        return false;
+      }
+      break;
+
+    case "camuflaje":
+      if (paso === 3 && !paletaCamuflaje) {
+        toast.warning("Selecciona una paleta de camuflaje.");
+        return false;
+      }
+
+      if (paletaCamuflaje === "personalizado") {
+        if (paso === 4) {
+          if (!colores[0] || !colores[1]) {
+            toast.warning("Debes seleccionar al menos los colores 1 y 2 (base y manchas principales).");
+            return false;
+          }
+          if (colores[3] && !colores[2]) {
+            toast.warning("Completa los colores en orden, no dejes huecos intermedios.");
+            return false;
+          }
+        }
+        if (paso === 5 && !tamanoCamo) {
+          toast.warning("Selecciona el tamaño del camuflaje.");
+          return false;
+        }
+        if (paso === 6 && !estiloCamo) {
+          toast.warning("Selecciona el estilo del camuflaje.");
+          return false;
+        }
+      } else {
+        if (paso === 4 && !tamanoCamo) {
+          toast.warning("Selecciona el tamaño del camuflaje.");
+          return false;
+        }
+        if (paso === 5 && !estiloCamo) {
+          toast.warning("Selecciona el estilo del camuflaje.");
+          return false;
+        }
+      }
+      break;
+
+    case "dos_tonos":
+      if (paso === 3 && !division) {
+        toast.warning("Selecciona un tipo de división.");
+        return false;
+      }
+      if (paso === 4 && (!color1TwoTone || !color2TwoTone)) {
+        toast.warning("Selecciona ambos colores.");
+        return false;
+      }
+      break;
+
+    case "solido":
+      if (paso === 3 && !color1) {
+        toast.warning("Selecciona un color base para la camiseta.");
+        return false;
+      }
+      if (paso === 3 && !usarColorUnicoCuello && !colorCuello) {
+        toast.warning("Selecciona un color para el cuello y puños.");
+        return false;
+      }
+      break;
+
+    case "diseño_completo":
+      if (tipoFullPrint === "objetos") {
+        if (paso === 3 && !tipoFullPrint) {
+          toast.warning("Selecciona un tipo de diseño completo.");
+          return false;
+        }
+        if (paso === 4 && (!motif1 || (numObjetos === 2 && !motif2))) {
+          toast.warning("Completa los campos de objetos.");
+          return false;
+        }
+        if (paso === 5) {
+          if (!coloresObjetos[0] || !coloresObjetos[1] || (numObjetos === 2 && !coloresObjetos[2])) {
+            toast.warning("Selecciona los colores requeridos.");
+            return false;
+          }
+        }
+        if (paso === 6 && (!styleFP || !distributionFP)) {
+          toast.warning("Selecciona el estilo y la distribución del diseño completo.");
+          return false;
+        }
+      } else if (tipoFullPrint === "texturas") {
+        if (paso === 4) {
+          if (numColoresFP === 2 && (!coloresExtraFP[0] || !coloresExtraFP[1])) {
+            toast.warning("Selecciona los 2 colores.");
+            return false;
+          }
+          if (numColoresFP === 3 && (!coloresExtraFP[0] || !coloresExtraFP[1] || !coloresExtraFP[2])) {
+            toast.warning("Selecciona los 3 colores.");
+            return false;
+          }
+        }
+        if (paso === 5) {
+          if (!textureType) {
+            toast.warning("Selecciona un tipo de textura.");
+            return false;
+          }
+          if (textureType === "personalizado" && !customTexture) {
+            toast.warning("Describe la textura personalizada.");
+            return false;
+          }
+        }
+      }
+      break;
+  }
+
+
+  if (pasoActual === pasoOpcionesFinal) {
+    if (!tela || !genero) {
+      toast.warning("Completa todas las opciones generales antes de continuar.");
+      return false;
     }
+  }
 
-    return true;
-  };
-
+  return true;
+};
 
 
  useEffect(() => {
@@ -673,10 +676,6 @@ export default function FormCamiseta_V3() {
     setCustomTexture("");
     setColoresObjetos(["", "", ""]);
     setColoresExtraFP(["", ""]);
-    setCuello("");
-    setManga("");
-    setTela("");
-    setGenero("");
     if (diseno === "degradado") setNumColores(2);
     if (diseno === "geometrico") setNumColores(3);
     if (diseno === "abstracto") setNumColores(2);
@@ -708,7 +707,7 @@ export default function FormCamiseta_V3() {
 
     let payload = {
       userId: user?.id,
-      categoria_id: "camiseta_ia_v3",
+      categoria_id: "Camiseta IA",
       diseno,
       colorCuello,
       numColores,
@@ -759,9 +758,7 @@ export default function FormCamiseta_V3() {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
-    const endpoint = modeloIA === "gemini"
-      ? API_URL_GEMINI
-      : `${API_URL}/api/ia/generar_camiseta_v3`;
+    const endpoint = `${API_URL}/api/ia/generar_prenda_hf`;
 
     try {
       const res = await fetch(endpoint, {
@@ -769,21 +766,89 @@ export default function FormCamiseta_V3() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
-      if (data.imageUrl) setImagen(data.imageUrl);
+
+      if (data.imageUrl) {
+        setImagen(data.imageUrl);
+        toast.success("¡Camiseta generada con éxito con Hugging Face!");
+      } else if (data.error) {
+        toast.error(data.error);
+      }
     } catch (e) {
       console.error("Error:", e);
+      toast.error("Error al generar la camiseta");
     } finally {
       setLoading(false);
     }
   };
-
   /* ===============================
-     PASOS COMUNES
+     PASOS DE DISEÑO
      =============================== */
-  const paso1 = (
+  const paso1CuelloManga = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
+      <h2 className="text-xl font-bold mb-4">Características de la camiseta</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        {/* Cuello */}
+        <div>
+          <h3 className="font-semibold mb-2 text-center">Cuello</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Redondo", img: "/img/patrones/CuelloRedondo.png" },
+              { key: "En V", img: "/img/patrones/CuelloV.png" },
+              { key: "Polo", img: "/img/patrones/CuelloPolo.png" },
+            ].map((op) => (
+              <div
+                key={op.key}
+                onClick={() => setCuello(op.key)}
+                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                  cuello === op.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                }`}
+              >
+                <img
+                  src={op.img}
+                  alt={op.key}
+                  className="w-24 h-40 object-cover rounded-md mb-1"
+                />
+                <p className="text-center font-medium">{op.key}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Manga */}
+        <div>
+          <h3 className="font-semibold mb-2 text-center">Manga</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Corta", img: "/img/patrones/MangaCorta.png" },
+              { key: "Larga", img: "/img/patrones/MangaLarga.png" },
+            ].map((op) => (
+              <div
+                key={op.key}
+                onClick={() => setManga(op.key)}
+                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                  manga === op.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                }`}
+              >
+                <img
+                  src={op.img}
+                  alt={op.key}
+                  className="w-24 h-40 object-cover rounded-md mb-1"
+                />
+                <p className="text-center font-medium">{op.key}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const paso2Patron = (
     <div className="bg-white p-6 rounded-xl shadow-md text-center">
-      <h2 className="text-xl font-bold mb-4">1. Selecciona el patrón base</h2>
+      <h2 className="text-xl font-bold mb-4">Selecciona el patrón base</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-center">
         {/* Degradado */}
         <div
@@ -879,7 +944,8 @@ export default function FormCamiseta_V3() {
      BLOQUE: DEGRADADO
      =============================== */
   const pasosGradient = [
-    paso1,
+      paso1CuelloManga,
+      paso2Patron,
     <div key="ncol" className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-6">¿Cuántos colores tendrá el degradado?</h2>
       <div className="grid grid-cols-3 gap-6 justify-center">
@@ -943,7 +1009,8 @@ export default function FormCamiseta_V3() {
      BLOQUE: GEOMÉTRICO
      =============================== */
   const pasosGeometric = [
-    paso1,
+    paso1CuelloManga,
+    paso2Patron,
     <div key="ncol" className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-6">¿Cuántos colores tendrá el patrón?</h2>
       <div className="grid grid-cols-3 gap-6 justify-center">
@@ -1059,8 +1126,10 @@ export default function FormCamiseta_V3() {
   /* ===============================
    BLOQUE: ARTÍSTICO / ABSTRACTO
    =============================== */
-const pasosAbstract = [paso1,
-  // Paso 2: Seleccionar estilo artístico
+const pasosAbstract = [
+  paso1CuelloManga,
+  paso2Patron,
+  // Paso 2: Seleccionar estilo artístico 
   <div key="estilo" className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-6">Selecciona el estilo artístico</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1179,7 +1248,9 @@ const pasosAbstract = [paso1,
 /* ===============================
    BLOQUE: RAYAS
    =============================== */
-const pasosStripes = [paso1,
+const pasosStripes = [
+  paso1CuelloManga,
+  paso2Patron,
   // Paso 2: Dirección de las rayas
   <div key="direccion" className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-6">Dirección de las rayas</h2>
@@ -1307,7 +1378,9 @@ const pasosStripes = [paso1,
 /* ===============================
    BLOQUE: CAMUFLAJE
    =============================== */
-const pasosCamouflage = [paso1,
+const pasosCamouflage = [
+  paso1CuelloManga,
+  paso2Patron,
   // Paso 2: Paleta predefinida o personalizada
   <div key="paleta" className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-6">Selecciona la paleta de camuflaje</h2>
@@ -1440,7 +1513,8 @@ const pasosCamouflage = [paso1,
    BLOQUE: DOS TONOS
    =============================== */
 const pasosTwoTone = [
-  paso1, // Selección de patrón
+  paso1CuelloManga,
+  paso2Patron,
 
   // Paso 2: Tipo de división
   <div key="division" className="bg-white p-6 rounded-xl shadow-md text-center">
@@ -1527,7 +1601,8 @@ const pasosTwoTone = [
    BLOQUE: SÓLIDO
    =============================== */
 const pasosSolid = [
-  paso1,
+  paso1CuelloManga,
+  paso2Patron,
 
   // Paso 2: Color base general
   <div key="colorBase" className="bg-white p-6 rounded-xl shadow-md text-center">
@@ -1582,7 +1657,8 @@ const pasosSolid = [
    =============================== */
 const pasosFullPrint = useMemo(() => {
   return [
-    paso1,
+    paso1CuelloManga,
+    paso2Patron,
     <BloqueTipoDiseno 
       key="tipo" 
       tipoFullPrint={tipoFullPrint} 
@@ -1661,170 +1737,108 @@ const pasosFullPrint = useMemo(() => {
 ]);
 
 /* ===============================
-   OPCIONES GENERALES (COMÚN)
+   ÚLTIMO PASO: TELA Y GÉNERO
    =============================== */
-const pasoOpciones = (
-  <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
-    <h2 className="text-xl font-bold mb-4">Opciones generales</h2>
+  const pasoOpcionesFinal = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
+      <h2 className="text-xl font-bold mb-4">Características finales</h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-      {/* Cuello */}
-      <div>
-        <h3 className="font-semibold mb-2 text-center">Cuello</h3>
-        <div className="flex justify-center gap-3 flex-wrap">
-          {[
-            { key: "Redondo", img: "/img/patrones/CuelloRedondo.png" },
-            { key: "En V", img: "/img/patrones/CuelloV.png" },
-            { key: "Polo", img: "/img/patrones/CuelloPolo.png" },
-          ].map((op) => (
-            <div
-              key={op.key}
-              onClick={() => setCuello(op.key)}
-              className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
-                cuello === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              <img
-                src={op.img}
-                alt={op.key}
-                className="w-full h-20 object-cover rounded-md mb-1"
-              />
-              <p className="text-center font-medium">{op.key}</p>
-            </div>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        {/* Tela */}
+        <div>
+          <h3 className="font-semibold mb-2 text-center">Tela</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Algodón", img: "/img/patrones/Algodon.png" },
+              { key: "Poliéster", img: "/img/patrones/Poliester.png" },
+              { key: "Alg/Pol", img: "/img/patrones/Mezcla.png" },
+            ].map((op) => (
+              <div
+                key={op.key}
+                onClick={() => setTela(op.key)}
+                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                  tela === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                }`}
+              >
+                <img
+                  src={op.img}
+                  alt={op.key}
+                  className="w-24 h-40 object-cover rounded-md mb-1"
+                />
+                <p className="text-center font-medium">{op.key}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Género */}
+        <div>
+          <h3 className="font-semibold mb-2 text-center">Género</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Hombre", img: "/img/patrones/Hombre.png" },
+              { key: "Mujer", img: "/img/patrones/Mujer.png" },
+              { key: "Unisex", img: "/img/patrones/Unisex.png" },
+            ].map((op) => (
+              <div
+                key={op.key}
+                onClick={() => setGenero(op.key)}
+                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                  genero === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                }`}
+              >
+                <img
+                  src={op.img}
+                  alt={op.key}
+                  className="w-24 h-40 object-cover rounded-md mb-1"
+                />
+                <p className="text-center font-medium">{op.key}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Manga */}
-      <div>
-        <h3 className="font-semibold mb-2 text-center">Manga</h3>
-        <div className="flex justify-center gap-3 flex-wrap">
-          {[
-            { key: "Corta", img: "/img/patrones/MangaCorta.png" },
-            { key: "Larga", img: "/img/patrones/MangaLarga.png" },
-          ].map((op) => (
-            <div
-              key={op.key}
-              onClick={() => setManga(op.key)}
-              className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
-                manga === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              <img
-                src={op.img}
-                alt={op.key}
-                className="w-full h-20 object-cover rounded-md mb-1"
-              />
-              <p className="text-center font-medium">{op.key}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Tela */}
-      <div>
-        <h3 className="font-semibold mb-2 text-center">Tela</h3>
-        <div className="flex justify-center gap-3 flex-wrap">
-          {[
-            { key: "Algodón", img: "/img/patrones/Algodon.png" },
-            { key: "Poliéster", img: "/img/patrones/Poliester.png" },
-            { key: "Mezcla Algodón/Poliéster", img: "/img/patrones/Mezcla.png" },
-          ].map((op) => (
-            <div
-              key={op.key}
-              onClick={() => setTela(op.key)}
-              className={`cursor-pointer p-2 rounded-lg border-4 w-36 ${
-                tela === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              <img
-                src={op.img}
-                alt={op.key}
-                className="w-full h-20 object-cover rounded-md mb-1"
-              />
-              <p className="text-center text-sm font-medium">{op.key}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Género */}
-      <div>
-        <h3 className="font-semibold mb-2 text-center">Género</h3>
-        <div className="flex justify-center gap-3 flex-wrap">
-          {[
-            { key: "Hombre", img: "/img/patrones/Hombre.png" },
-            { key: "Mujer", img: "/img/patrones/Mujer.png" },
-            { key: "Unisex", img: "/img/patrones/Unisex.png" },
-          ].map((op) => (
-            <div
-              key={op.key}
-              onClick={() => setGenero(op.key)}
-              className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
-                genero === op.key ? "border-blue-600 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              <img
-                src={op.img}
-                alt={op.key}
-                className="w-full h-20 object-cover rounded-md mb-1"
-              />
-              <p className="text-center font-medium">{op.key}</p>
-            </div>
-          ))}
-        </div>
+      <div className="pt-6">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            if (!cuello || !manga || !tela || !genero) {
+              toast.warning("Por favor completa todas las opciones antes de generar la camiseta.");
+              return;
+            }
+            handleGenerar();
+          }}
+          disabled={loading}
+          className={`font-bold px-8 py-3 rounded-lg ${
+            loading 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-blue-700 hover:bg-blue-800 text-white"
+          }`}
+        >
+          {loading ? "Generando..." : "Generar Camiseta"}
+        </button>
       </div>
     </div>
+  );
 
-    <div className="mb-4 text-center">
-      <label className="font-semibold mr-2">Modelo IA:</label>
-      <select
-        value={modeloIA}
-        onChange={e => setModeloIA(e.target.value)}
-        className="border rounded px-2 py-1"
-      >
-        <option value="stable">Stable Diffusion</option>
-        <option value="gemini">Gemini Imagen</option>
-      </select>
-    </div>
-
-    <div className="pt-6">
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          if (!cuello || !manga || !tela || !genero) {
-            toast.warning("Por favor completa todas las opciones generales antes de generar la camiseta.");
-            return;
-          }
-          handleGenerar();
-        }}
-        disabled={loading}
-        className={`font-bold px-8 py-3 rounded-lg ${
-          loading 
-            ? "bg-gray-400 cursor-not-allowed" 
-            : "bg-blue-700 hover:bg-blue-800 text-white"
-        }`}
-      >
-        {loading ? "Generando..." : "Generar Camiseta"}
-      </button>
-    </div>
-  </div>
-);
 
 
   /* ===============================
      CONTROL DE PASOS
      =============================== */
+
   let pasosActuales = [];
-  if (diseno === "degradado") pasosActuales = [...pasosGradient, pasoOpciones];
-  else if (diseno === "geometrico") pasosActuales = [...pasosGeometric, pasoOpciones];
-  else if (diseno === "abstracto") pasosActuales = [...pasosAbstract, pasoOpciones];
-  else if (diseno === "rayas") pasosActuales = [...pasosStripes, pasoOpciones];
-  else if (diseno === "camuflaje") pasosActuales = [...pasosCamouflage, pasoOpciones];
-  else if (diseno === "dos_tonos") pasosActuales = [...pasosTwoTone, pasoOpciones];
-  else if (diseno === "solido") pasosActuales = [...pasosSolid, pasoOpciones];
-  else if (diseno === "diseño_completo") pasosActuales = [...pasosFullPrint, pasoOpciones];
-  else pasosActuales = [paso1];
+  if (diseno === "degradado") pasosActuales = [...pasosGradient, pasoOpcionesFinal];
+  else if (diseno === "geometrico") pasosActuales = [...pasosGeometric, pasoOpcionesFinal];
+  else if (diseno === "abstracto") pasosActuales = [...pasosAbstract, pasoOpcionesFinal];
+  else if (diseno === "rayas") pasosActuales = [...pasosStripes, pasoOpcionesFinal];
+  else if (diseno === "camuflaje") pasosActuales = [...pasosCamouflage, pasoOpcionesFinal];
+  else if (diseno === "dos_tonos") pasosActuales = [...pasosTwoTone, pasoOpcionesFinal];
+  else if (diseno === "solido") pasosActuales = [...pasosSolid, pasoOpcionesFinal];
+  else if (diseno === "diseño_completo") pasosActuales = [...pasosFullPrint, pasoOpcionesFinal];
+  else pasosActuales = [paso1CuelloManga, paso2Patron];
+
 
   // Filtrar pasos nulos o undefined
   const pasosActualesSinVacios = pasosActuales.filter(Boolean);
@@ -1835,6 +1849,10 @@ const pasoOpciones = (
   return (
     <div>
       <Navbar />
+      <PantallaCarga 
+        show={loading} 
+        message="Generando tu camiseta con IA... ⏱️ 10-30 segundos"
+      />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
           <div className="text-center space-y-6">

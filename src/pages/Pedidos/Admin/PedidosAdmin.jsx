@@ -5,25 +5,25 @@ import { API_URL } from "../../../config";
 import NavbarAdmin from "../../../components/NavbarAdmin";
 import FooterAdmin from "../../../components/FooterAdmin";
 import PedidoCardAdmin from "../../../components/PedidoCardAdmin";
-import { Grid2x2, Rows2 } from "lucide-react";
+import { Grid2x2, Rows2, Search, Settings, Spool, Truck, ClipboardCheck, UserCheck, PackageCheck, Ban, BanknoteX, CircleDollarSign, BanknoteArrowUp } from "lucide-react";
 
 
 // ✅ Estados actualizados según nueva estructura
 const ESTADOS_PEDIDO = [
-  { key: "en_revision", label: "En Revisión", color: "bg-yellow-600", icon: "🔍" },
-  { key: "en_produccion", label: "En Producción", color: "bg-indigo-600", icon: "⚙️" },
-  { key: "listo", label: "Listo", color: "bg-purple-600", icon: "✅" },
-  { key: "enviado", label: "Enviado", color: "bg-cyan-600", icon: "🚚" },
-  { key: "retiro", label: "Para Retiro", color: "bg-blue-600", icon: "🏪" },
-  { key: "entregado", label: "Entregado", color: "bg-green-600", icon: "📦" },
-  { key: "cancelado", label: "Cancelado", color: "bg-red-600", icon: "❌" },
+  { key: "en_revision", label: "En Revisión", color: "bg-yellow-600", icon: <Search size={20} /> },
+  { key: "en_produccion", label: "En Producción", color: "bg-indigo-600", icon: <Spool size={20} /> },
+  { key: "listo", label: "Listo", color: "bg-purple-600", icon: <ClipboardCheck size={20} /> },
+  { key: "enviado", label: "Enviado", color: "bg-cyan-600", icon: <Truck size={20} /> },
+  { key: "retiro", label: "Para Retiro", color: "bg-blue-600", icon: <PackageCheck size={20} /> },
+  { key: "entregado", label: "Entregado", color: "bg-green-600", icon: <UserCheck size={20} /> },
+  { key: "cancelado", label: "Cancelado", color: "bg-red-600", icon: <Ban size={20} /> },
 ];
 
 // ✅ Estados de pago para filtros adicionales
 const ESTADOS_PAGO = [
-  { key: "pago_pendiente", label: "Sin Pago", color: "bg-red-500", icon: "💰" },
-  { key: "pago_parcial", label: "Pago Parcial", color: "bg-orange-500", icon: "💵" },
-  { key: "pago_completo", label: "Pago Completo", color: "bg-green-500", icon: "✔️" },
+  { key: "pago_pendiente", label: "Sin Pago", color: "bg-red-500", icon: <BanknoteX size={20} /> },
+  { key: "pago_parcial", label: "Pago Parcial", color: "bg-orange-500", icon: <BanknoteArrowUp size={20} /> },
+  { key: "pago_completo", label: "Pago Completo", color: "bg-green-500", icon: <CircleDollarSign size={20} /> },
 ];
 
 export default function PedidosAdmin() {
@@ -33,7 +33,7 @@ export default function PedidosAdmin() {
   const [estadoFiltro, setEstadoFiltro] = useState(""); // Filtro de estado de pedido
   const [pagoFiltro, setPagoFiltro] = useState(""); // Filtro de estado de pago
   const [busqueda, setBusqueda] = useState(""); // Búsqueda por ID o cliente
-  const [vistaActiva, setVistaActiva] = useState("kanban"); // "kanban" o "lista"
+  const [vistaActiva, setVistaActiva] = useState("lista"); // "kanban" o "lista"
   const navigate = useNavigate();
 
   // Cargar todos los pedidos
@@ -223,7 +223,7 @@ export default function PedidosAdmin() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setEstadoFiltro("")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex justify-center ${
                   estadoFiltro === ""
                     ? "bg-blue-800 text-white shadow"
                     : "bg-white text-gray-700 hover:bg-gray-100 border"
@@ -235,7 +235,7 @@ export default function PedidosAdmin() {
                 <button
                   key={estado.key}
                   onClick={() => setEstadoFiltro(estado.key)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex justify-center ${
                     estadoFiltro === estado.key
                       ? `${estado.color} text-white shadow`
                       : "bg-white text-gray-700 hover:bg-gray-100 border"

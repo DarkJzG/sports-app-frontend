@@ -1,439 +1,994 @@
 // src/pages/ModeloIA/FormPantalon.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { useLocation } from "react-router-dom";
 import { API_URL } from "../../config";
+import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+/* ===============================
+   PALETA DE COLORES BASE
+   =============================== */
+const coloresBase = [
+  { es: "Negro", en: "black", hex: "#000000" },
+  { es: "Blanco", en: "white", hex: "#ffffff" },
+  { es: "Rojo", en: "red", hex: "#ff0000" },
+  { es: "Azul", en: "blue", hex: "#0000ff" },
+  { es: "Verde", en: "green", hex: "#008000" },
+  { es: "Amarillo", en: "yellow", hex: "#ffff00" },
+  { es: "Gris", en: "gray", hex: "#808080" },
+  { es: "Naranja", en: "orange", hex: "#ffa500" },
+  { es: "Celeste", en: "sky blue", hex: "#87ceeb" },
+  { es: "Morado", en: "purple", hex: "#800080" },
+  { es: "Azul Marino", en: "navy blue", hex: "#000080" },
+];
+
+/* ===============================
+   COMPONENTE PRINCIPAL
+   =============================== */
 export default function FormPantalon() {
   const { user } = useAuth();
-  const location = useLocation();
-  const categoria_id = location.state?.categoria_id;
-  const categoria_prd = location.state?.categoria_prd || "pantalón";
 
-  // Campos principales
-  const [estilo, setEstilo] = useState("");
-  const [color1, setColor1] = useState("");
-  const [color2, setColor2] = useState("");
-  const [diseno, setDiseno] = useState("");
-  const [disenoOtro, setDisenoOtro] = useState("");
-  const [pretina, setPretina] = useState("");
-  const [ajuste, setAjuste] = useState("");
+  // Estados generales
+  const [paso, setPaso] = useState(1);
+  const [caminoSeleccionado, setCaminoSeleccionado] = useState(""); // 'solido', 'paneles', 'sublimacion'
+
+  // ========== PASO 1: OPCIONES ESTRUCTURALES (COMÚN) ==========
+  const [tipoCorte, setTipoCorte] = useState(""); // 'jogger' o 'recto'
+  const [tipoTobillo, setTipoTobillo] = useState(""); 
+
+  useEffect(() => {
+    if (tipoCorte === "jogger") {
+      setTipoTobillo("elastico");
+    } else if (tipoCorte === "recto") {
+      setTipoTobillo("suelto");
+    }
+  }, [tipoCorte]);
+
+  const [bolsillos, setBolsillos] = useState(""); // 'laterales_zip', 'laterales_sin_zip', 'sin_bolsillos'
+
+  // ========== CAMINO 1: SÓLIDO CON ACENTOS ==========
+  const [colorBase, setColorBase] = useState("");
+  const [colorAcentos, setColorAcentos] = useState("");
+
+  // ========== CAMINO 2: PANELES Y RAYAS ==========
+  const [tipoPanelCorte, setTipoPanelCorte] = useState(""); // 'rayas_laterales' o 'panel_ancho_lateral'
+  const [coloresBloque, setColoresBloque] = useState(["", ""]); // [Color Base, Color Panel/Raya]
+
+  // ========== CAMINO 3: SUBLIMACIÓN (IA) ==========
+  const [areaDisenoIA, setAreaDisenoIA] = useState(""); // 'completo' o 'paneles_laterales'
+  const [colorBaseMixto, setColorBaseMixto] = useState("");
+  
+  // Tipo de diseño IA
+  const [tipoDisenoIA, setTipoDisenoIA] = useState(""); // 'degradado', 'geometrico', 'artistico'
+  
+  // Para degradado
+  const [numColoresGradiente, setNumColoresGradiente] = useState(2);
+  const [coloresGradiente, setColoresGradiente] = useState(["", "", ""]);
+
+  // Para geométrico
+  const [figuraGeometrica, setFiguraGeometrica] = useState(""); // 'triangulos', 'cuadrados', 'lineas_diagonales'
+  const [numColoresGeometrico, setNumColoresGeometrico] = useState(3);
+  const [coloresGeometrico, setColoresGeometrico] = useState(["", "", "", ""]);
+
+  // Para artístico
+  const [estiloArtistico, setEstiloArtistico] = useState(""); // 'pinceladas', 'fluido', 'humo'
+  const [numColoresArtistico, setNumColoresArtistico] = useState(2);
+  const [coloresArtistico, setColoresArtistico] = useState(["", "", ""]);
+
+  // ========== OPCIONES GENERALES ==========
   const [tela, setTela] = useState("");
   const [genero, setGenero] = useState("");
+  const [modeloIA, setModeloIA] = useState("stable");
 
-  // Extras
-  const [bolsillos, setBolsillos] = useState([]);
-  const [estiloAvanzado, setEstiloAvanzado] = useState("");
-  const [acabado, setAcabado] = useState("");
-  const [detalles, setDetalles] = useState([]);
-
-  // Resultados
+  // Estados de imagen y carga
   const [imagen, setImagen] = useState(null);
-  const [promptResult, setPromptResult] = useState("");
-  const [costo, setCosto] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Opciones
-  const estilos = [
-    { es: "Deportivo", en: "sports style" },
-    { es: "Casual", en: "casual style" },
-    { es: "Urbano", en: "urban style" },
-    { es: "Cargo", en: "cargo style" },
-    { es: "Jogger", en: "jogger style" },
-  ];
+  /* ===============================
+     VALIDACIÓN DE PASOS
+     =============================== */
+  const validarPasoActual = () => {
+    // Paso 1: Opciones estructurales
+    if (paso === 1 && (!tipoCorte || !bolsillos)) {
+      toast.warning("Completa todas las opciones estructurales.");
+      return false;
+    }
 
-  const colores = [
-    { es: "Negro", en: "black", hex: "#000000" },
-    { es: "Blanco", en: "white", hex: "#ffffff" },
-    { es: "Rojo", en: "red", hex: "#ff0000" },
-    { es: "Azul", en: "blue", hex: "#0000ff" },
-    { es: "Gris", en: "gray", hex: "#808080" },
-    { es: "Verde", en: "green", hex: "#008000" },
-    { es: "Amarillo", en: "yellow", hex: "#ffff00" },
-    { es: "Camuflaje", en: "camouflage", hex: "#4b5320" },
-  ];
+    // Paso 2: Selección de camino
+    if (paso === 2 && !caminoSeleccionado) {
+      toast.warning("Selecciona un tipo de diseño.");
+      return false;
+    }
 
-  const disenos = [
-    { es: "Franjas laterales", en: "side stripes" },
-    { es: "Bloques de color", en: "color block" },
-    { es: "Geométrico", en: "geometric" },
-    { es: "Camuflaje", en: "camouflage" },
-    { es: "Abstracto", en: "abstract" },
-    { es: "Otros", en: "other" },
-  ];
+    // CAMINO 1: SÓLIDO
+    if (caminoSeleccionado === "solido") {
+      if (paso === 3 && !colorBase) {
+        toast.warning("Selecciona el color base.");
+        return false;
+      }
+      if (paso === 4 && !colorAcentos) {
+        toast.warning("Selecciona el color de acentos.");
+        return false;
+      }
+    }
 
-  const pretinas = [
-    { es: "Elástica", en: "elastic waistband" },
-    { es: "Con cordón", en: "drawstring waistband" },
-    { es: "Ajustable", en: "adjustable waistband" },
-    { es: "Estándar", en: "standard waistband" },
-  ];
+    // CAMINO 2: PANELES
+    if (caminoSeleccionado === "paneles") {
+      if (paso === 3 && !tipoPanelCorte) {
+        toast.warning("Selecciona un tipo de panel.");
+        return false;
+      }
+      if (paso === 4 && coloresBloque.some(c => !c)) {
+        toast.warning("Selecciona todos los colores requeridos.");
+        return false;
+      }
+    }
 
-  const ajustes = [
-    { es: "Slim Fit", en: "slim fit" },
-    { es: "Regular", en: "regular fit" },
-    { es: "Holgado", en: "loose fit" },
-  ];
+    // CAMINO 3: SUBLIMACIÓN
+    if (caminoSeleccionado === "sublimacion") {
+      if (paso === 3 && !areaDisenoIA) {
+        toast.warning("Selecciona el área de sublimación.");
+        return false;
+      }
+      
+      // Paso 4 condicional: solo si areaDisenoIA es 'paneles_laterales'
+      if (areaDisenoIA === "paneles_laterales" && paso === 4 && !colorBaseMixto) {
+        toast.warning("Selecciona el color base sólido.");
+        return false;
+      }
 
-  const telas = [
-    { es: "Algodón", en: "cotton" },
-    { es: "Poliéster", en: "polyester" },
-    { es: "Mezcla Algodón/Poliéster", en: "cotton/polyester blend" },
-  ];
+      // Validar tipo de diseño IA
+      const pasoTipoDisenoIA = areaDisenoIA === "completo" ? 4 : 5;
+      if (paso === pasoTipoDisenoIA && !tipoDisenoIA) {
+        toast.warning("Selecciona el tipo de diseño IA.");
+        return false;
+      }
 
-  const generos = [
-    { es: "Hombre", en: "male" },
-    { es: "Mujer", en: "female" },
-    { es: "Unisex", en: "unisex" },
-  ];
+      // Validaciones específicas según tipo de diseño IA
+      if (tipoDisenoIA === "degradado") {
+        const pasoColores = areaDisenoIA === "completo" ? 5 : 6;
+        if (paso === pasoColores && coloresGradiente.slice(0, numColoresGradiente).some(c => !c)) {
+          toast.warning("Selecciona todos los colores del degradado.");
+          return false;
+        }
+      }
 
-  const opcionesBolsillos = [
-    { es: "Laterales", en: "side pockets" },
-    { es: "Traseros", en: "back pockets" },
-    { es: "Cargo", en: "cargo pockets" },
-    { es: "Sin bolsillos", en: "no pockets" },
-  ];
+      if (tipoDisenoIA === "geometrico") {
+        const pasoFigura = areaDisenoIA === "completo" ? 5 : 6;
+        const pasoColores = areaDisenoIA === "completo" ? 6 : 7;
+        
+        if (paso === pasoFigura && !figuraGeometrica) {
+          toast.warning("Selecciona una figura geométrica.");
+          return false;
+        }
+        if (paso === pasoColores && coloresGeometrico.slice(0, numColoresGeometrico).some(c => !c)) {
+          toast.warning("Selecciona todos los colores requeridos.");
+          return false;
+        }
+      }
 
-  const estilosAvanzados = [
-    { es: "Minimalista", en: "minimalist" },
-    { es: "Futurista", en: "futuristic" },
-    { es: "Camuflaje", en: "camouflage" },
-    { es: "Brochazos", en: "brush strokes" },
-  ];
+      if (tipoDisenoIA === "artistico") {
+        const pasoEstilo = areaDisenoIA === "completo" ? 5 : 6;
+        const pasoColores = areaDisenoIA === "completo" ? 6 : 7;
+        
+        if (paso === pasoEstilo && !estiloArtistico) {
+          toast.warning("Selecciona un estilo artístico.");
+          return false;
+        }
+        if (paso === pasoColores && coloresArtistico.slice(0, numColoresArtistico).some(c => !c)) {
+          toast.warning("Selecciona todos los colores requeridos.");
+          return false;
+        }
+      }
+    }
 
-  const acabados = [
-    { es: "Mate", en: "matte finish" },
-    { es: "Brillante", en: "glossy finish" },
-    { es: "Texturizado", en: "textured finish" },
-  ];
+    // Validación final: Opciones generales
+    const pasoActual = pasosActuales[paso - 1];
+    if (pasoActual === pasoOpcionesGenerales) {
+      if (!tela || !genero) {
+        toast.warning("Completa todas las opciones generales.");
+        return false;
+      }
+    }
 
-  const detallesExtras = [
-    { es: "Cremalleras", en: "zippers" },
-    { es: "Costuras visibles", en: "visible seams" },
-    { es: "Franjas reflectivas", en: "reflective stripes" },
-  ];
+    return true;
+  };
 
+  /* ===============================
+     RESET AL CAMBIAR DE CAMINO
+     =============================== */
+  useEffect(() => {
+    if (!caminoSeleccionado) return;
+    
+    // Reset de todos los estados específicos
+    setColorBase("");
+    setColorAcentos("");
+    setTipoPanelCorte("");
+    setColoresBloque(["", ""]);
+    setAreaDisenoIA("");
+    setColorBaseMixto("");
+    setTipoDisenoIA("");
+    setColoresGradiente(["", "", ""]);
+    setFiguraGeometrica("");
+    setColoresGeometrico(["", "", "", ""]);
+    setEstiloArtistico("");
+    setColoresArtistico(["", "", ""]);
+    
+    setPaso(3); // Ir al paso 3 después de seleccionar el camino
+  }, [caminoSeleccionado]);
+
+  /* ===============================
+     GENERACIÓN DEL DISEÑO
+     =============================== */
   const handleGenerar = async () => {
     setLoading(true);
     setImagen(null);
-    setPromptResult("");
 
-    const payload = {
-      categoria_id,
-      categoria_prd,
+    let payload = {
       userId: user?.id,
-      atributos: {
-        estilo,
-        color1,
-        color2,
-        diseno: diseno === "other" ? disenoOtro : diseno,
-        pretina,
-        ajuste,
-        tela,
-        genero,
-        bolsillos,
-        estiloAvanzado,
-        detalles,
-        acabado,
-      },
+      categoria_id: "pantalon_ia_v1",
+      tipoCorte,
+      tipoTobillo,
+      bolsillos,
+      caminoSeleccionado,
+      tela,
+      genero,
     };
 
+    // Datos específicos según el camino
+    if (caminoSeleccionado === "solido") {
+      payload = {
+        ...payload,
+        colorBase,
+        colorAcentos,
+      };
+    } else if (caminoSeleccionado === "paneles") {
+      payload = {
+        ...payload,
+        tipoPanelCorte,
+        coloresBloque,
+      };
+    } else if (caminoSeleccionado === "sublimacion") {
+      payload = {
+        ...payload,
+        areaDisenoIA,
+        tipoDisenoIA,
+      };
+
+      // Solo agregar colorBaseMixto si el área es paneles laterales
+      if (areaDisenoIA === "paneles_laterales") {
+        payload.colorBaseMixto = colorBaseMixto;
+      }
+
+      // Agregar datos según el tipo de diseño IA
+      if (tipoDisenoIA === "degradado") {
+        payload.coloresGradiente = coloresGradiente.slice(0, numColoresGradiente);
+      } else if (tipoDisenoIA === "geometrico") {
+        payload.figuraGeometrica = figuraGeometrica;
+        payload.coloresGeometrico = coloresGeometrico.slice(0, numColoresGeometrico);
+      } else if (tipoDisenoIA === "artistico") {
+        payload.estiloArtistico = estiloArtistico;
+        payload.coloresArtistico = coloresArtistico.slice(0, numColoresArtistico);
+      }
+    }
+
+    // Limpiar valores vacíos
+    Object.keys(payload).forEach(
+      (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
+    );
+
+    const endpoint = modeloIA === "gemini"
+      ? API_URL_GEMINI
+      : `${API_URL}/api/ia/generar_pantalon_v1`;
+
     try {
-      const res = await fetch(`${API_URL}/api/ia/generar_prendas`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      setImagen(data.imageUrl);
-      setPromptResult(data.descripcion || "");
-      setCosto(data.costo);
+      if (data.imageUrl) setImagen(data.imageUrl);
     } catch (e) {
       console.error("Error:", e);
+      toast.error("Error al generar el pantalón.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Render UI → igual que FormCamiseta, cambiando títulos
+  /* ===============================
+     BLOQUES DE INTERFAZ
+     =============================== */
+
+  // ========== PASO 1: OPCIONES ESTRUCTURALES ==========
+  const paso1Estructural = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
+      <h2 className="text-xl font-bold mb-4">Opciones estructurales del pantalón</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Tipo de corte */}
+        <div>
+          <h3 className="font-semibold mb-2">Tipo de corte</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "jogger", label: "Jogger", img: "/img/patrones/Jogger.png" },
+              { key: "recto", label: "Recto", img: "/img/patrones/Recto.png" },
+            ].map((opt) => (
+              <div
+                key={opt.key}
+                onClick={() => setTipoCorte(opt.key)}
+                className={`cursor-pointer p-3 rounded-lg border-4 ${
+                  tipoCorte === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                }`}
+              >
+                <img src={opt.img} alt={opt.label} className="w-24 h-40 object-cover" />
+                <p className="font-semibold mt-2">{opt.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bolsillos */}
+        <div>
+          <h3 className="font-semibold mb-2">Bolsillos</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "laterales_zip", label: "Con cierre", img: "/img/patrones/Cierre.png" },
+              { key: "laterales_sin_zip", label: "Sin cierre", img: "/img/patrones/SinCierre.png" },
+          
+            ].map((opt) => (
+              <div
+                key={opt.key}
+                onClick={() => setBolsillos(opt.key)}
+                className={`cursor-pointer p-3 rounded-lg border-4 ${
+                  bolsillos === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                }`}
+              >
+                <img src={opt.img} alt={opt.label} className="w-45 h-20 object-cover" />
+                <p className="font-semibold">{opt.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ========== PASO 2: SELECCIÓN DE CAMINO ==========
+  const paso2SeleccionCamino = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el estilo de diseño</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { 
+            key: "solido", 
+            label: "Sólido con Acentos", 
+            img: "/img/patrones/SolidoPant.png"
+          },
+          { 
+            key: "paneles", 
+            label: "Paneles y Rayas", 
+            img: "/img/patrones/RayasPant.png"
+          },
+          { 
+            key: "sublimacion", 
+            label: "Diseño Sublimado (IA)", 
+            img: "/img/patrones/CompletoPant.png"
+          },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setCaminoSeleccionado(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl overflow-hidden transition p-4 ${
+              caminoSeleccionado === opt.key
+                ? "border-blue-600 ring-2 ring-blue-400"
+                : "border-gray-300 hover:border-gray-400"
+            }`}
+          >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ========== CAMINO 1: SÓLIDO CON ACENTOS ==========
+  const pasoSolidoColorBase = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el color base</h2>
+      <p className="text-sm text-gray-500 mb-6">Este será el color principal del pantalón</p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {coloresBase.map((c) => (
+          <div
+            key={c.es}
+            onClick={() => setColorBase(c.es)}
+            className={`w-12 h-12 rounded-full border-4 cursor-pointer ${
+              colorBase === c.es ? "border-blue-600 ring-2 ring-blue-400" : "border-gray-300"
+            }`}
+            style={{ backgroundColor: c.hex }}
+            title={c.es}
+          />
+        ))}
+      </div>
+      {colorBase && (
+        <p className="mt-4 font-semibold text-lg">Color seleccionado: {colorBase}</p>
+      )}
+    </div>
+  );
+
+  const pasoSolidoColorAcentos = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el color de acentos</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Este color se usará para cordones, zippers y detalles
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {coloresBase.map((c) => (
+          <div
+            key={c.es}
+            onClick={() => setColorAcentos(c.es)}
+            className={`w-12 h-12 rounded-full border-4 cursor-pointer ${
+              colorAcentos === c.es ? "border-blue-600 ring-2 ring-blue-400" : "border-gray-300"
+            }`}
+            style={{ backgroundColor: c.hex }}
+            title={c.es}
+          />
+        ))}
+      </div>
+      {colorAcentos && (
+        <p className="mt-4 font-semibold text-lg">Color seleccionado: {colorAcentos}</p>
+      )}
+    </div>
+  );
+
+  // ========== CAMINO 2: PANELES Y RAYAS ==========
+  const pasoPanelesTipo = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el tipo de panel</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          {
+            key: "rayas_laterales",
+            label: "Rayas Finas",
+            desc: "3 rayas finas en los laterales",
+            img: "/img/patrones/RayasPant.png"
+          },
+          {
+            key: "panel_ancho_lateral",
+            label: "Raya Ancha",
+            desc: "1 franja ancha en cada lado",
+            img: "/img/patrones/RayaAnchaPant.png"
+          },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setTipoPanelCorte(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl p-4 transition ${
+              tipoPanelCorte === opt.key
+                ? "border-blue-600 ring-2 ring-blue-400"
+                : "border-gray-300 hover:border-gray-400"
+            }`}
+          >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
+            <p className="text-sm text-gray-600 mt-2">{opt.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const pasosPanelesColores = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona los colores</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Color 1 = cuerpo principal · Color 2 = paneles/rayas laterales
+      </p>
+      
+      {[0, 1].map((i) => (
+        <div key={i} className="mb-6">
+          <p className="font-semibold mb-2">
+            Color {i + 1}
+            {i === 0 ? " (Cuerpo Principal)" : " (Paneles/Rayas)"}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {coloresBase.map((c) => (
+              <div
+                key={c.es}
+                onClick={() => {
+                  const nuevosColores = [...coloresBloque];
+                  nuevosColores[i] = c.es;
+                  setColoresBloque(nuevosColores);
+                }}
+                className={`w-12 h-12 rounded-full border-4 cursor-pointer ${
+                  coloresBloque[i] === c.es ? "border-blue-600 ring-2 ring-blue-400" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+                title={c.es}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ========== CAMINO 3: SUBLIMACIÓN ==========
+  const pasoSublimacionArea = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el área de sublimación</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          {
+            key: "completo",
+            label: "Completo",
+            desc: "Todo el pantalón es sublimado",
+            img: "/img/patrones/CompletoPant.png"
+          },
+          {
+            key: "paneles_laterales",
+            label: "Paneles Laterales",
+            desc: "Solo los paneles anchos laterales",
+            img: "/img/patrones/PanelPant.png"
+          },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setAreaDisenoIA(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl p-4 transition ${
+              areaDisenoIA === opt.key
+                ? "border-blue-600 ring-2 ring-blue-400"
+                : "border-gray-300 hover:border-gray-400"
+            }`}
+          >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
+            <p className="text-sm text-gray-600 mt-2">{opt.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const pasoSublimacionColorBase = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el color base sólido</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Este color se aplicará en el frente, espalda y cintura
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {coloresBase.map((c) => (
+          <div
+            key={c.es}
+            onClick={() => setColorBaseMixto(c.es)}
+            className={`w-12 h-12 rounded-full border-4 cursor-pointer ${
+              colorBaseMixto === c.es ? "border-blue-600 ring-2 ring-blue-400" : "border-gray-300"
+            }`}
+            style={{ backgroundColor: c.hex }}
+            title={c.es}
+          />
+        ))}
+      </div>
+      {colorBaseMixto && (
+        <p className="mt-4 font-semibold text-lg">Color seleccionado: {colorBaseMixto}</p>
+      )}
+    </div>
+  );
+
+  const pasoSublimacionTipoDisenoIA = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el tipo de diseño IA</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { key: "degradado", label: "Degradado", img: "/img/patrones/DegradadoPant.png" },
+          { key: "artistico", label: "Artístico", img: "/img/patrones/PinceladasPant.png" },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setTipoDisenoIA(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl p-4 transition ${
+              tipoDisenoIA === opt.key
+                ? "border-blue-600 ring-2 ring-blue-400"
+                : "border-gray-300 hover:border-gray-400"
+            }`}
+          >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Sub-pasos para diseños IA
+
+  // DEGRADADO
+  const pasoSublimacionDegradadoColores = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Colores del degradado</h2>
+      <div className="flex justify-center gap-4 mb-6">
+        {[2, 3].map((n) => (
+          <button
+            key={n}
+            onClick={() => setNumColoresGradiente(n)}
+            className={`px-4 py-2 rounded-lg border ${
+              numColoresGradiente === n ? "bg-blue-600 text-white" : "bg-gray-100"
+            }`}
+          >
+            {n} Colores
+          </button>
+        ))}
+      </div>
+      {[...Array(numColoresGradiente)].map((_, i) => (
+        <div key={i} className="mb-4">
+          <p className="font-semibold mb-2">Color {i + 1}</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {coloresBase.map((c) => (
+              <div
+                key={c.es}
+                onClick={() => {
+                  const nuevos = [...coloresGradiente];
+                  nuevos[i] = c.es;
+                  setColoresGradiente(nuevos);
+                }}
+                className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
+                  coloresGradiente[i] === c.es ? "border-blue-600" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // GEOMÉTRICO
+  const pasoSublimacionGeometricoFigura = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona la figura geométrica</h2>
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { key: "triangulos", label: "Triángulos" },
+          { key: "cuadrados", label: "Cuadrados" },
+          { key: "lineas_diagonales", label: "Líneas Diagonales" },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setFiguraGeometrica(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl p-4 ${
+              figuraGeometrica === opt.key ? "border-blue-600" : "border-gray-300"
+            }`}
+          >
+            <p className="font-bold">{opt.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const pasoSublimacionGeometricoColores = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Colores del patrón geométrico</h2>
+      <div className="flex justify-center gap-4 mb-6">
+        {[3, 4].map((n) => (
+          <button
+            key={n}
+            onClick={() => setNumColoresGeometrico(n)}
+            className={`px-4 py-2 rounded-lg border ${
+              numColoresGeometrico === n ? "bg-blue-600 text-white" : "bg-gray-100"
+            }`}
+          >
+            {n} Colores
+          </button>
+        ))}
+      </div>
+      {[...Array(numColoresGeometrico)].map((_, i) => (
+        <div key={i} className="mb-4">
+          <p className="font-semibold mb-2">
+            Color {i + 1} {i === 0 ? "(Base)" : i === 1 ? "(Figuras)" : "(Apoyo)"}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {coloresBase.map((c) => (
+              <div
+                key={c.es}
+                onClick={() => {
+                  const nuevos = [...coloresGeometrico];
+                  nuevos[i] = c.es;
+                  setColoresGeometrico(nuevos);
+                }}
+                className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
+                  coloresGeometrico[i] === c.es ? "border-blue-600" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ARTÍSTICO
+  const pasoSublimacionArtisticoEstilo = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Selecciona el estilo artístico</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { key: "pinceladas", label: "Pinceladas", img: "/img/patrones/PinceladasPant.png" },
+          { key: "humo", label: "Humo", img: "/img/patrones/HumoPant.png" },
+        ].map((opt) => (
+          <div
+            key={opt.key}
+            onClick={() => setEstiloArtistico(opt.key)}
+            className={`cursor-pointer border-4 rounded-xl p-4 ${
+              estiloArtistico === opt.key ? "border-blue-600" : "border-gray-300"
+            }`}
+          >
+            <img src={opt.img} alt={opt.label} className="w-full h-32 object-cover" />
+            <p className="font-bold text-lg mt-2">{opt.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const pasoSublimacionArtisticoColores = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center">
+      <h2 className="text-xl font-bold mb-4">Colores del diseño artístico</h2>
+      <div className="flex justify-center gap-4 mb-6">
+        {[2, 3].map((n) => (
+          <button
+            key={n}
+            onClick={() => setNumColoresArtistico(n)}
+            className={`px-4 py-2 rounded-lg border ${
+              numColoresArtistico === n ? "bg-blue-600 text-white" : "bg-gray-100"
+            }`}
+          >
+            {n} Colores
+          </button>
+        ))}
+      </div>
+      {[...Array(numColoresArtistico)].map((_, i) => (
+        <div key={i} className="mb-4">
+          <p className="font-semibold mb-2">Color {i + 1}</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {coloresBase.map((c) => (
+              <div
+                key={c.es}
+                onClick={() => {
+                  const nuevos = [...coloresArtistico];
+                  nuevos[i] = c.es;
+                  setColoresArtistico(nuevos);
+                }}
+                className={`w-10 h-10 rounded-full border-4 cursor-pointer ${
+                  coloresArtistico[i] === c.es ? "border-blue-600" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ========== OPCIONES GENERALES (FINAL) ==========
+  const pasoOpcionesGenerales = (
+    <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
+      <h2 className="text-xl font-bold mb-4">Opciones generales</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Tela */}
+        <div>
+          <h3 className="font-semibold mb-2">Tela</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Algodón", label: "Algodón", img: "/img/patrones/Algodon.png" },
+              { key: "Poliéster", label: "Poliéster", img: "/img/patrones/Poliester.png" },
+              { key: "Fleece", label: "Impermeable", img: "/img/patrones/Impermeable.png" },
+            ].map((opt) => (
+              <div
+                key={opt.key}
+                onClick={() => setTela(opt.key)}
+                className={`cursor-pointer p-3 rounded-lg border-4 ${
+                  tela === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                }`}
+              >
+                <img src={opt.img} alt={opt.label} className="w-24 h-24 object-cover" />
+                <p className="font-semibold text-lg mt-2">{opt.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Género */}
+        <div>
+          <h3 className="font-semibold mb-2">Género</h3>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { key: "Hombre", label: "Hombre", img: "/img/patrones/HombrePant.png" },
+              { key: "Mujer", label: "Mujer", img: "/img/patrones/MujerPant.png" },
+              { key: "Unisex", label: "Unisex", img: "/img/patrones/UnisexPant.png" },
+            ].map((opt) => (
+              <div
+                key={opt.key}
+                onClick={() => setGenero(opt.key)}
+                className={`cursor-pointer p-3 rounded-lg border-4 ${
+                  genero === opt.key ? "border-blue-600 bg-blue-50" : "border-gray-300"
+                }`}
+              >
+                <img src={opt.img} alt={opt.label} className="w-24 h-24 object-cover" />
+                <p className="font-semibold text-lg mt-2">{opt.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <label className="font-semibold mr-2">Modelo IA:</label>
+        <select
+          value={modeloIA}
+          onChange={(e) => setModeloIA(e.target.value)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="stable">Stable Diffusion</option>
+          <option value="gemini">Gemini Imagen</option>
+        </select>
+      </div>
+
+      <div className="pt-6">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            if (!tela || !genero) {
+              toast.warning("Completa todas las opciones generales.");
+              return;
+            }
+            handleGenerar();
+          }}
+          disabled={loading}
+          className={`font-bold px-8 py-3 rounded-lg ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-700 hover:bg-blue-800 text-white"
+          }`}
+        >
+          {loading ? "Generando..." : "Generar Pantalón"}
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ===============================
+     CONTROL DE FLUJO DE PASOS
+     =============================== */
+  let pasosActuales = [paso1Estructural, paso2SeleccionCamino];
+
+  if (caminoSeleccionado === "solido") {
+    pasosActuales = [
+      ...pasosActuales,
+      pasoSolidoColorBase,
+      pasoSolidoColorAcentos,
+      pasoOpcionesGenerales,
+    ];
+  } else if (caminoSeleccionado === "paneles") {
+    pasosActuales = [
+      ...pasosActuales,
+      pasoPanelesTipo,
+      pasosPanelesColores,
+      pasoOpcionesGenerales,
+    ];
+  } else if (caminoSeleccionado === "sublimacion") {
+    pasosActuales = [
+      ...pasosActuales,
+      pasoSublimacionArea,
+    ];
+
+    // Solo agregar paso de color base si el área es paneles laterales
+    if (areaDisenoIA === "paneles_laterales") {
+      pasosActuales.push(pasoSublimacionColorBase);
+    }
+
+    pasosActuales.push(pasoSublimacionTipoDisenoIA);
+
+    // Agregar sub-pasos según el tipo de diseño IA
+    if (tipoDisenoIA === "degradado") {
+      pasosActuales.push(pasoSublimacionDegradadoColores);
+    } else if (tipoDisenoIA === "geometrico") {
+      pasosActuales.push(pasoSublimacionGeometricoFigura, pasoSublimacionGeometricoColores);
+    } else if (tipoDisenoIA === "artistico") {
+      pasosActuales.push(pasoSublimacionArtisticoEstilo, pasoSublimacionArtisticoColores);
+    }
+
+    pasosActuales.push(pasoOpcionesGenerales);
+  }
+
+  /* ===============================
+     RENDER PRINCIPAL
+     =============================== */
   return (
     <div>
       <Navbar />
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-blue-900 font-bold text-lg">Generando tu diseño...</p>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
-        <h1 className="text-3xl font-bold text-blue-900 text-center">Diseña tu pantalón</h1>
-
-        {/* 🔹 Estilo */}
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">¿Qué estilo prefieres?</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {estilos.map((s) => (
-              <button
-                key={s.en}
-                onClick={() => setEstilo(s.en)}
-                className={`p-4 rounded-lg border ${
-                  estilo === s.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {s.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 🔹 Colores */}
-                {/* 🔹 Colores */}
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Escoge el color principal</h2>
-          <div className="flex flex-wrap gap-3">
-            {colores.map((c) => (
-              <div
-                key={c.en}
-                onClick={() => setColor1(c.en)}
-                className={`w-10 h-10 rounded-full cursor-pointer border-2 ${
-                  color1 === c.en ? "border-blue-600" : "border-gray-300"
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
-          </div>
-
-          <h2 className="font-bold text-lg mt-6 mb-4">Escoge el color secundario</h2>
-          <div className="flex flex-wrap gap-3">
-            {colores.map((c) => (
-              <div
-                key={c.en}
-                onClick={() => setColor2(c.en)}
-                className={`w-10 h-10 rounded-full cursor-pointer border-2 ${
-                  color2 === c.en ? "border-blue-600" : "border-gray-300"
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
-          </div>
-        </div>
-
-
-        {/* 🔹 Diseño */}
-        {/* (igual que camiseta, con campo adicional disenoOtro) */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">¿Qué diseño te gusta más?</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {disenos.map((d) => (
-              <button
-                key={d.en}
-                onClick={() => setDiseno(d.en)}
-                className={`p-3 rounded-lg border ${
-                  diseno === d.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {d.es}
-              </button>
-            ))}
-          </div>
-          {diseno === "other" && (
-            <input
-              type="text"
-              placeholder="Describe tu diseño"
-              value={disenoOtro}
-              onChange={(e) => setDisenoOtro(e.target.value)}
-              className="mt-3 w-full border px-3 py-2 rounded-lg"
-            />
-          )}
-        </div>
-
-        {/* 🔹 Pretina */}
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Tipo de pretina</h2>
-          <div className="flex flex-wrap gap-3">
-            {pretinas.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setPretina(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  pretina === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-
-        {/* 🔹 Ajuste */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Ajuste</h2>
-          <div className="flex flex-wrap gap-3">
-            {ajustes.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setAjuste(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  ajuste === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 🔹 Tela */}
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Tela</h2>
-          <div className="flex flex-wrap gap-3">
-            {telas.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setTela(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  tela === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 🔹 Género */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Género</h2>
-          <div className="flex flex-wrap gap-3">
-            {generos.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setGenero(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  genero === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-
-
-        {/* 🔹 Bolsillos */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Bolsillo</h2>
-          <div className="flex flex-wrap gap-3">
-            {opcionesBolsillos.map((p) => (
-              <button
-                key={p.en}
-                onClick={() =>
-                  setBolsillos(prev =>
-                    prev.includes(p.en) ? prev.filter(x => x !== p.en) : [...prev, p.en]
-                  )
-                }
-                className={`px-4 py-2 rounded-lg border ${
-                  bolsillos.includes(p.en) ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* 🔹 Estilo avanzado */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Estilo Avanzado</h2>
-          <div className="flex flex-wrap gap-3">
-            {estilosAvanzados.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setEstiloAvanzado(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  estiloAvanzado === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* 🔹 Detalles */}
-
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Detalles</h2>
-          <div className="flex flex-wrap gap-3">
-            {detallesExtras.map((p) => (
-              <button
-                key={p.en}
-                onClick={() =>
-                  setDetalles(prev =>
-                    prev.includes(p.en) ? prev.filter(x => x !== p.en) : [...prev, p.en]
-                  )
-                }
-                className={`px-4 py-2 rounded-lg border ${
-                  detalles.includes(p.en) ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* 🔹 Acabado */}
-        <div className="bg-white shadow-md p-6 rounded-xl">
-          <h2 className="font-bold text-lg mb-4">Acabado</h2>
-          <div className="flex flex-wrap gap-3">
-            {acabados.map((p) => (
-              <button
-                key={p.en}
-                onClick={() => setAcabado(p.en)}
-                className={`px-4 py-2 rounded-lg border ${
-                  acabado === p.en ? "bg-blue-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {p.es}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Botón Generar */}
-        <div className="text-center">
-          <button
-            onClick={handleGenerar}
-            disabled={loading}
-            className="mt-6 bg-blue-900 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold"
-          >
-            {loading ? "Generando..." : "Generar Imagen"}
-          </button>
-        </div>
-
-        {/* Resultado */}
-        {imagen && (
-          <div className="text-center mt-10 space-y-6">
-            <p className="text-green-700 font-bold text-lg">
-              ✅ Prenda agregada a tu colección de prendas
+        {imagen ? (
+          <div className="text-center space-y-6">
+            <p className="text-blue-600 font-bold mb-4 text-2xl">
+              ¡Pantalón generado con éxito!
             </p>
-            <img src={imagen} alt="Pantalón generado" className="mx-auto rounded-lg shadow-lg w-80" />
-            {promptResult && (
-              <p className="mt-4 text-gray-700 text-lg">
-                <strong>Descripción:</strong> {promptResult}
-              </p>
-            )}
+            <img
+              src={imagen}
+              alt="Pantalón generado"
+              className="mx-auto rounded-lg shadow-lg w-80"
+            />
+            <div className="flex justify-center gap-6 mt-8">
+              <button
+                onClick={() => (window.location.href = "/listar-prendasIA")}
+                className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-md"
+              >
+                Ir a mi colección
+              </button>
+              <button
+                onClick={() => {
+                  setImagen(null);
+                  setPaso(1);
+                  setCaminoSeleccionado("");
+                  setTipoCorte("");
+                  setTipoTobillo("");
+                  setBolsillos("");
+                  setColorBase("");
+                  setColorAcentos("");
+                  setTipoPanelCorte("");
+                  setColoresBloque(["", ""]);
+                  setAreaDisenoIA("");
+                  setColorBaseMixto("");
+                  setTipoDisenoIA("");
+                  setColoresGradiente(["", "", ""]);
+                  setFiguraGeometrica("");
+                  setColoresGeometrico(["", "", "", ""]);
+                  setEstiloArtistico("");
+                  setColoresArtistico(["", "", ""]);
+                  setTela("");
+                  setGenero("");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg shadow-md"
+              >
+                Volver a generar
+              </button>
+            </div>
           </div>
+        ) : (
+          <>
+            {pasosActuales[paso - 1]}
+            <div className="flex justify-between mt-6">
+              {paso > 1 && (
+                <button
+                  onClick={() => setPaso(paso - 1)}
+                  className="bg-gray-300 hover:bg-gray-400 text-black px-6 py-2 rounded-lg"
+                >
+                  Atrás
+                </button>
+              )}
+              {paso < pasosActuales.length && (
+                <button
+                  onClick={() => {
+                    if (!validarPasoActual()) return;
+                    setPaso(paso + 1);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg ml-auto"
+                >
+                  Siguiente
+                </button>
+              )}
+            </div>
+          </>
         )}
       </div>
       <Footer />

@@ -10,6 +10,9 @@ export default function SeleccionPrenda() {
   const { user, loading } = useAuth();
   const [categorias, setCategorias] = useState([]);
 
+  // 🔹 Categorías permitidas (solo estas se mostrarán)
+  const categoriasPermitidas = ["camiseta", "pantalón", "pantaloneta", "chompas"];
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login", { replace: true });
@@ -19,7 +22,16 @@ export default function SeleccionPrenda() {
   useEffect(() => {
     fetch(`${API_URL}/catg_prod/all`)
       .then((res) => res.json())
-      .then((data) => setCategorias(Array.isArray(data) ? data : []))
+      .then((data) => {
+        // 🔹 Filtrar solo las categorías permitidas
+        const categoriasFiltradas = Array.isArray(data)
+          ? data.filter((cat) =>
+              categoriasPermitidas.includes(cat.nombre.toLowerCase())
+            )
+          : [];
+        
+        setCategorias(categoriasFiltradas);
+      })
       .catch((err) => console.error("Error cargando categorías:", err));
   }, []);
 
@@ -50,18 +62,17 @@ export default function SeleccionPrenda() {
               className="cursor-pointer bg-white shadow-lg hover:shadow-xl rounded-xl overflow-hidden border hover:border-blue-600 transition"
             >
               <img
-                src={c.imagen_url}
+                src={c.imagen_url} 
                 alt={c.nombre}
-                className="w-full h-40 object-cover"
+                className="w-center h-40 object-cover "
               />
               <div className="p-4">
-                <h2 className="font-bold text-xl text-blue-900">{c.nombre}</h2>
-                <p className="text-gray-600 text-sm mt-2">{c.descripcion}</p>
+                <h2 className="font-bold text-xl text-left text-blue-900">{c.nombre}</h2>
+                <p className="text-gray-600 text-left text-sm mt-2">{c.descripcion}</p>
               </div>
             </div>
           ))}
         </div>
-
       </div>
       <Footer />
     </div>

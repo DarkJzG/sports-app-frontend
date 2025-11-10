@@ -1,12 +1,8 @@
-import React from "react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
+import { Palette } from "lucide-react";
 
-/**
- * PanelColoresRGB:
- * Permite cambiar los colores base de cada zona (R/G/B/A)
- * y ver si una zona tiene una textura AI aplicada.
- */
 export default function PanelColoresRGB({ designZones, colors, setColors, textures, setTextures }) {
-  // 🧩 Reestablecer todos los colores y eliminar texturas
+
   const resetColors = () => {
     const reset = {};
     Object.keys(designZones).forEach((z) => (reset[z] = "#ffffff"));
@@ -14,7 +10,7 @@ export default function PanelColoresRGB({ designZones, colors, setColors, textur
     if (setTextures) setTextures({});
   };
 
-  // 🧽 Quitar textura de una zona (vuelve al color plano)
+
   const clearTexture = (zone) => {
     if (setTextures)
       setTextures((prev) => {
@@ -26,15 +22,24 @@ export default function PanelColoresRGB({ designZones, colors, setColors, textur
 
   return (
     <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
-      {/* Encabezado */}
+
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold text-blue-900">🎨 Colores Base</h3>
+        <h3 className="text-lg font-bold text-blue-900 flex items-center gap-1">
+          <Palette size={22} />
+          Colores Base
+        </h3>
         <button
           onClick={resetColors}
           className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
         >
           Reestablecer
         </button>
+      </div>
+
+      <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
+        <p>
+          Selecciona un color para la zona.
+        </p>
       </div>
 
       {/* Listado de zonas */}

@@ -4,6 +4,7 @@ import { API_URL } from "../../config";
 import PantallaCarga from "../../components/PantallaCarga";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Sparkles } from "lucide-react";
 
 const COLORES_BASE = [
   { nombre: "Negro", hex: "#000000" },
@@ -120,13 +121,22 @@ export default function PanelTexturasRGB({ designZones, setTextures, setColors }
       <PantallaCarga show={loading} message="Generando textura con IA..." />
 
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold text-blue-900">🧵 Texturas IA por Zona</h3>
+        <h3 className="text-lg font-bold text-blue-900 flex items-center gap-1">
+          <Sparkles size={22} />
+          Texturas IA
+        </h3>
         <button
           onClick={resetPanel}
           className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
         >
           Reestablecer
         </button>
+      </div>
+
+      <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
+        <p>
+          Primero <strong>selecciona una zona</strong> para colocar o mover el logo.
+        </p>
       </div>
 
       {/* Zona */}
@@ -143,7 +153,11 @@ export default function PanelTexturasRGB({ designZones, setTextures, setColors }
         </select>
       </div>
 
-
+      <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
+        <p>
+          Segundo <strong>selecciona los colores</strong> para la textura.
+        </p>
+      </div>
       {/* Colores base */}
       <div>
         <p className="text-sm mb-2">Selecciona los colores:</p>
