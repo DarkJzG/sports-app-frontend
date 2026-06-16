@@ -25,7 +25,6 @@ function ModalEliminarMano({ show, onClose, onConfirm }) {
 function ManoCard({ mano, onEditar, onEliminar }) {
   return (
     <div className="bg-[#f4f4f4] flex items-center gap-6 p-6 mb-5 rounded-xl shadow-sm">
-      <img src="/img/insumo.png" alt="icono-insumo" className="h-16 w-16 object-contain" />
       <div className="flex-1">
         <div className="font-bold text-lg text-gray-900">Categoría pertenece</div>
         <div className="text-gray-700 mb-1">{mano.categoria_nombre}</div>
@@ -75,13 +74,7 @@ export default function ListarManoObra() {
       {/* Banner */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
         <h2 className="text-4xl font-semibold flex-5">Mano de Obra</h2>
-        <div className="rounded-full bg-blue-200 p-3">
-          <img
-            className="h-10"
-            src="/img/manobra.png"
-            alt="logo mano obra"
-          />
-        </div>
+
       </section>
       {/* Título y botón agregar */}
       <main className="flex-1 max-w-5xl mx-auto w-full py-8 px-4">

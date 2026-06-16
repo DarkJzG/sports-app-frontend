@@ -132,13 +132,9 @@ export default function PanelTextoRGB({
               onChange={(e) => updateActiveElement?.({ fontFamily: e.target.value })}
               className="border border-gray-300 rounded-lg px-2 py-1 w-full focus:ring-2 focus:ring-blue-500"
             >
-              <option value="Inter">Inter (moderna)</option>
+              <option value="Inter">Inter</option>
               <option value="Rubik">Rubik</option>
-              <option value="Rock3D">Rock3D</option>
-              <option value="Anta">Anta</option>
-              <option value="Tourney">Tourney</option>
-              <option value="Fascinate">Fascinate</option>
-              <option value="Limelight">Limelight</option>
+
             </select>
           </div>
 
@@ -203,7 +199,7 @@ export default function PanelTextoRGB({
       )}
 
       <div className="bg-blue-50 text-blue-800 text-sm rounded-lg p-2 border border-blue-200">
-        Haz <strong>clic en la camiseta 3D</strong> para colocar o mover el elemento seleccionado.
+        Haz <strong>clic en la prenda 3D</strong> para colocar o mover el elemento seleccionado.
       </div>
     </div>
   );

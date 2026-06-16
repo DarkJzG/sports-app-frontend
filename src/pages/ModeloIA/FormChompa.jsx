@@ -1,12 +1,12 @@
 // src/pages/ModeloIA/FormChompa.jsx
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
-import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PantallaCarga from "../../components/PantallaCarga";
 
 /* ===============================
    PALETA DE COLORES BASE
@@ -18,7 +18,6 @@ const coloresBase = [
   { es: "Azul", en: "blue", hex: "#0000ff" },
   { es: "Verde", en: "green", hex: "#008000" },
   { es: "Amarillo", en: "yellow", hex: "#ffff00" },
-  { es: "Amarillo Neón", en: "neon yellow", hex: "#ffff00" },
   { es: "Gris", en: "gray", hex: "#808080" },
   { es: "Naranja", en: "orange", hex: "#ffa500" },
   { es: "Celeste", en: "sky blue", hex: "#87ceeb" },
@@ -36,7 +35,7 @@ export default function FormChompa() {
   const [caminoSeleccionado, setCaminoSeleccionado] = useState(""); // 'solido', 'bloques', 'mixto'
 
   // ========== PASO 1: OPCIONES ESTRUCTURALES (COMÚN) ==========
-  const [tipoChompa, setTipoChompa] = useState(""); // 'sudadera' o 'chaqueta'
+  const [tipoChompa, setTipoChompa] = useState(""); // 'chompa', 'chompa_cortada'
   const [capucha, setCapucha] = useState(""); // 'si' o 'no'
   const [bolsillos, setBolsillos] = useState(""); // 'canguro', 'laterales', 'sin_bolsillos'
 
@@ -86,7 +85,6 @@ export default function FormChompa() {
   // ========== OPCIONES GENERALES ==========
   const [tela, setTela] = useState("");
   const [genero, setGenero] = useState("");
-  const [modeloIA, setModeloIA] = useState("stable");
 
   // Estados de imagen y carga
   const [imagen, setImagen] = useState(null);
@@ -263,7 +261,7 @@ export default function FormChompa() {
 
     let payload = {
       userId: user?.id,
-      categoria_id: "chompa_ia_v1",
+      categoria_id: "Chompa IA",
       tipoChompa: "chaqueta",
       capucha,
       bolsillos,
@@ -322,21 +320,29 @@ export default function FormChompa() {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
-    const endpoint = modeloIA === "gemini"
-      ? API_URL_GEMINI
-      : `${API_URL}/api/ia/generar_chompa_v1`;
-
     try {
-      const res = await fetch(endpoint, {
+      console.log("📤 Enviando payload a Hugging Face:", payload);
+      
+      const res = await fetch(`${API_URL}/api/ia/generar_prenda_hf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
-      if (data.imageUrl) setImagen(data.imageUrl);
-    } catch (e) {
-      console.error("Error:", e);
-      toast.error("Error al generar la chompa.");
+      console.log("📥 Respuesta recibida:", data);
+
+      if (data.ok && data.imageUrl) {
+        setImagen(data.imageUrl);
+        toast.success("Chompa generada exitosamente ");
+      } else if (data.error) {
+        toast.error(`Error: ${data.error}`);
+      } else {
+        toast.error("No se pudo generar la imagen");
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      toast.error("Error al generar el pantalón");
     } finally {
       setLoading(false);
     }
@@ -416,7 +422,7 @@ export default function FormChompa() {
         {[
           { 
             key: "solido", 
-            label: "Sólido con Acentos",
+            label: "Sólido",
             img: "/img/patrones/SolidoAcento.png"
           },
           { 
@@ -426,7 +432,7 @@ export default function FormChompa() {
           },
           { 
             key: "mixto", 
-            label: "Diseño Mixto (IA)", 
+            label: "Sublimado", 
             img: "/img/patrones/MixtoChompa.png"
           },
         ].map((opt) => (
@@ -510,7 +516,7 @@ export default function FormChompa() {
           },
           {
             key: "chevron",
-            label: "Diseño Chevron 'V'",
+            label: "Diseño en 'V'",
             desc: "Pecho en V y resto",
             img: "/img/patrones/BloqueVChompa.png"
           },
@@ -1103,18 +1109,6 @@ export default function FormChompa() {
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="font-semibold mr-2">Modelo IA:</label>
-        <select
-          value={modeloIA}
-          onChange={(e) => setModeloIA(e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          <option value="stable">Stable Diffusion</option>
-          <option value="gemini">Gemini Imagen</option>
-        </select>
-      </div>
-
       <div className="pt-6">
         <button
           onClick={(e) => {
@@ -1190,6 +1184,10 @@ export default function FormChompa() {
   return (
     <div>
       <Navbar />
+      <PantallaCarga 
+        show={loading} 
+        message="Generando tu chompa con IA... 10-30 segundos"
+      />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
           <div className="text-center space-y-6">

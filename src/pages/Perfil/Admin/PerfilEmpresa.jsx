@@ -313,7 +313,7 @@ export default function PerfilEmpresa() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imágenes de la Empresa */}
-          <InfoCard title="🖼️ Imágenes de la Empresa">
+          <InfoCard title="Imágenes de la Empresa">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <ImageUpload
                 label="Logo de la Empresa"
@@ -343,7 +343,7 @@ export default function PerfilEmpresa() {
           </InfoCard>
 
           {/* Datos Generales */}
-          <InfoCard title="📋 Información General">
+          <InfoCard title="Información General">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="Nombre de la Empresa"
@@ -435,7 +435,7 @@ export default function PerfilEmpresa() {
           </InfoCard>
 
           {/* Redes Sociales */}
-          <InfoCard title="📱 Redes Sociales">
+          <InfoCard title="Redes Sociales">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="Facebook"
@@ -476,7 +476,7 @@ export default function PerfilEmpresa() {
           </InfoCard>
 
           {/* Datos Bancarios */}
-          <InfoCard title="🏦 Datos Bancarios">
+          <InfoCard title="Datos Bancarios">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="Banco"
@@ -510,7 +510,7 @@ export default function PerfilEmpresa() {
           </InfoCard>
 
           {/* Horario de Atención */}
-          <InfoCard title="🕒 Horario de Atención">
+          <InfoCard title="Horario de Atención">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.keys(horarioAtencion).map((dia) => (
                 <InputField
@@ -526,7 +526,7 @@ export default function PerfilEmpresa() {
           </InfoCard>
 
           {/* Configuración */}
-          <InfoCard title="⚙️ Configuración">
+          <InfoCard title="Configuración">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InputField
                 label="IVA (%)"
@@ -574,7 +574,6 @@ export default function PerfilEmpresa() {
                 </>
               ) : (
                 <>
-                  <span>💾</span>
                   <span>Guardar Cambios</span>
                 </>
               )}

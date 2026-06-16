@@ -32,18 +32,16 @@ const CATALOG = {
         name: "Base",
         mask: "/prendas3d/mask_rgb_pantaloneta_base.png",
         zones: {
-          cintura: { label: "Cintura", channel: "R", default: "#1e3a8a" },
-          pierna_izq: { label: "Pierna Izquierda", channel: "G", default: "#059669" },
-          pierna_der: { label: "Pierna Derecha", channel: "B", default: "#dc2626" },
+          cintura: { label: "Pantaloneta", channel: "R", default: "#1e3a8a" },
+          pierna_der: { label: "Laterales", channel: "B", default: "#dc2626" },
         },
       },
       estilo1: {
         name: "Estilo 1",
         mask: "/prendas3d/mask_rgb_pantaloneta_1.png",
         zones: {
-          cintura: { label: "Cintura", channel: "R", default: "#f59e0b" },
-          franja: { label: "Franja", channel: "G", default: "#8b5cf6" },
-          cuerpo: { label: "Cuerpo", channel: "B", default: "#10b981" },
+          cintura: { label: "Pantaloneta", channel: "R", default: "#f59e0b" },
+          cuerpo: { label: "Cintura y Franajas", channel: "B", default: "#10b981" },
         },
       },
     },

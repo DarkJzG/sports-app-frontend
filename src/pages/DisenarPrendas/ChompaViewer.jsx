@@ -38,18 +38,17 @@ const CATALOG = {
         name: "Base",
         mask: "/prendas3d/mask_rgb_chompa_base.png",
         zones: {
-          capucha: { label: "Capucha", channel: "R", default: "#1e3a8a" },
-          torso: { label: "Torso", channel: "G", default: "#059669" },
-          mangas: { label: "Mangas", channel: "B", default: "#dc2626" },
+          capucha: { label: "Torso y Capucha", channel: "R", default: "#1e3a8a" },
+          torso: { label: "Mangas y Cintura", channel: "G", default: "#059669" },
         },
       },
       estilo1: {
         name: "Estilo 1",
         mask: "/prendas3d/mask_rgb_chompa_1.png",
         zones: {
-          capucha: { label: "Capucha", channel: "R", default: "#f59e0b" },
-          franja: { label: "Franja", channel: "G", default: "#8b5cf6" },
-          cuerpo: { label: "Cuerpo", channel: "B", default: "#10b981" },
+          capucha: { label: "Torso y Capucha", channel: "R", default: "#f59e0b" },
+          franja: { label: "Cintura y Puños", channel: "G", default: "#8b5cf6" },
+          cuerpo: { label: "Hombros y Brazos", channel: "B", default: "#10b981" },
         },
       },
     },
@@ -537,7 +536,7 @@ export default function ChompaViewer() {
       console.log("Respuesta backend:", data);
 
       if (res.ok) {
-        toast.success("Diseño guardado correctamente 🎨");
+        toast.success("Diseño guardado correctamente");
         console.log("Ficha técnica:", data.ficha_pdf_url);
         navigate(`/modelo3d/listar-prendas3d`);
       } else {

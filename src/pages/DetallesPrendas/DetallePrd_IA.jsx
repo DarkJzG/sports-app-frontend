@@ -8,6 +8,87 @@ import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// ===============================
+//  Configuración de metros de tela por talla
+//  (coherente con la ficha técnica / 3D)
+// ===============================
+const METROS_TELA = {
+  camiseta: {
+    S: 1.0,
+    M: 1.1,
+    L: 1.2,
+    XL: 1.3,
+    XXL: 1.4,
+  },
+  pantalon: {
+    S: 1.2,
+    M: 1.2,
+    L: 1.25,
+    XL: 1.3,
+    XXL: 1.3,
+  },
+  pantaloneta: {
+    S: 0.5,
+    M: 0.55,
+    L: 0.6,
+    XL: 0.65,
+    XXL: 0.65,
+  },
+  chompa: {
+    S: 1.5,
+    M: 1.55,
+    L: 1.6,
+    XL: 1.65,
+    XXL: 1.65,
+  },
+};
+
+// Detectar tipo/categoría de prenda IA
+function getCategoriaKeyIA(prendaData) {
+  const cat = (
+    prendaData?.tipo_prenda ||
+    prendaData?.categoria_prd ||
+    ""
+  ).toLowerCase();
+
+  if (cat.includes("camiseta")) return "camiseta";
+  if (cat.includes("pantaloneta")) return "pantaloneta";
+  if (cat.includes("chompa")) return "chompa";
+  // pantalón pero NO pantaloneta
+  if (cat.includes("pantalon") && !cat.includes("pantaloneta")) return "pantalon";
+
+  // fallback
+  return "camiseta";
+}
+
+// Ajustar precio según metros de tela y talla
+function ajustarPrecioPorTalla(precioBase, prendaData, talla, tipoTallaActual) {
+  if (!precioBase || !prendaData) return 0;
+
+  // Talla personalizada → recargo fijo
+  if (tipoTallaActual === "personalizada") {
+    return precioBase * 1.25; // 25% extra
+  }
+
+  // Si no hay talla general seleccionada, devolver base
+  if (tipoTallaActual !== "general" || !talla) {
+    return precioBase;
+  }
+
+  const catKey = getCategoriaKeyIA(prendaData);
+  const tabla = METROS_TELA[catKey];
+  if (!tabla) return precioBase;
+
+  const t = talla.toUpperCase();
+  const baseMetros = tabla.S || Object.values(tabla)[0];
+  const metrosTalla = tabla[t];
+
+  if (!metrosTalla || !baseMetros) return precioBase;
+
+  const factor = metrosTalla / baseMetros;
+  return precioBase * factor;
+}
+
 export default function DetallePrdIA() {
   const { id } = useParams();
   const [prenda, setPrenda] = useState(null);
@@ -27,48 +108,107 @@ export default function DetallePrdIA() {
       .then((res) => res.json())
       .then((data) => {
         setPrenda(data);
+
         const precioMenor = data.costo?.precio_venta || 0;
         const precioMayor = data.costo?.precio_mayor || 0;
-        const unitario = cantidad >= 12 ? precioMayor : precioMenor;
-        setPrecioUnitario(unitario);
-        setSubtotal(unitario * cantidad);
+        const base = cantidad >= 12 ? precioMayor : precioMenor;
+
+        const ajustado = ajustarPrecioPorTalla(
+          base,
+          data,
+          tallaSeleccionada,
+          tipoTalla
+        );
+
+        setPrecioUnitario(ajustado);
+        setSubtotal(ajustado * cantidad);
       })
       .catch((err) => console.error("Error cargando prenda IA:", err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // 🔹 Actualizar precio según cantidad
+  // 🔹 Actualizar precio según cantidad, talla o tipo de talla
   useEffect(() => {
     if (!prenda) return;
+
     const precioMenor = prenda.costo?.precio_venta || 0;
     const precioMayor = prenda.costo?.precio_mayor || 0;
-    const unitario = cantidad >= 12 ? precioMayor : precioMenor;
-    setPrecioUnitario(unitario);
-    setSubtotal(unitario * cantidad);
-  }, [cantidad, prenda]);
+    const base = cantidad >= 12 ? precioMayor : precioMenor;
+
+    const ajustado = ajustarPrecioPorTalla(
+      base,
+      prenda,
+      tallaSeleccionada,
+      tipoTalla
+    );
+
+    setPrecioUnitario(ajustado);
+    setSubtotal(ajustado * cantidad);
+  }, [cantidad, prenda, tallaSeleccionada, tipoTalla]);
 
   if (!prenda) return <div className="p-6">Cargando prenda generada...</div>;
 
   // 🔹 Determinar colores con distintas estructuras posibles
-  const getColoresTexto = () => {
-    const atr = prenda.atributos_es || {};
-    const lista = [];
+const getColoresTexto = () => {
+  const atr = prenda.atributos_es || {};
+  const lista = [];
 
-    // Caso 1: array o string en "colores"
-    if (Array.isArray(atr.colores)) {
-      lista.push(...atr.colores.filter(Boolean));
-    } else if (typeof atr.colores === "string" && atr.colores.trim() !== "") {
-      lista.push(atr.colores.trim());
-    }
+  // Genérico
+  if (Array.isArray(atr.colores)) {
+    lista.push(...atr.colores.filter(Boolean));
+  } else if (typeof atr.colores === "string" && atr.colores.trim() !== "") {
+    lista.push(atr.colores.trim());
+  }
 
-    // Caso 2: propiedades individuales
-    if (atr.color1) lista.push(atr.color1);
-    if (atr.color2) lista.push(atr.color2);
-    if (atr.colorBase) lista.push(atr.colorBase);
-    if (atr.colorCuello) lista.push(`Cuello: ${atr.colorCuello}`);
-    if (atr.colorMangas) lista.push(`Mangas: ${atr.colorMangas}`);
+  // Colores base / secundarios / acentos
+  if (atr.color1) lista.push(atr.color1);
+  if (atr.color2) lista.push(atr.color2);
+  if (atr.color1TwoTone) lista.push(atr.color1TwoTone);
+  if (atr.color2TwoTone) lista.push(atr.color2TwoTone);
+  if (atr.colorBase) lista.push(atr.colorBase);
+  if (atr.colorBaseFP) lista.push(atr.colorBaseFP);
+  if (atr.colorSecFP) lista.push(atr.colorSecFP);
+  if (Array.isArray(atr.coloresExtraFP)) {
+    lista.push(...atr.coloresExtraFP.filter(Boolean));
+  }
+  if (atr.colorBaseMixto) lista.push(atr.colorBaseMixto);
+  if (atr.colorBasePanel) lista.push(atr.colorBasePanel);
+  if (atr.colorPanel) lista.push(atr.colorPanel);
+  if (atr.colorAcentos) lista.push(atr.colorAcentos);
 
-    return lista.length ? [...new Set(lista)].join(", ") : "No especificado";
-  };
+  // Cuello / mangas / otros segmentos
+  if (atr.colorCuello) lista.push(`Cuello: ${atr.colorCuello}`);
+  if (atr.colorMangas) lista.push(`Mangas: ${atr.colorMangas}`);
+
+  // Listas de colores específicos por tipo de diseño
+  if (Array.isArray(atr.coloresBloque)) {
+    lista.push(...atr.coloresBloque.filter(Boolean));
+  }
+  if (Array.isArray(atr.coloresGradiente)) {
+    lista.push(...atr.coloresGradiente.filter(Boolean));
+  }
+  if (Array.isArray(atr.coloresGeometrico)) {
+    lista.push(...atr.coloresGeometrico.filter(Boolean));
+  }
+  if (Array.isArray(atr.coloresArtistico)) {
+    lista.push(...atr.coloresArtistico.filter(Boolean));
+  }
+  if (Array.isArray(atr.coloresTextura)) {
+    lista.push(...atr.coloresTextura.filter(Boolean));
+  }
+  if (Array.isArray(atr.coloresObjetos)) {
+    lista.push(...atr.coloresObjetos.filter(Boolean));
+  }
+
+  // Si usas un flag de color único de cuello y color único de prenda
+  if (atr.usarColorUnicoCuello && atr.colorCuello) {
+    lista.push(`Cuello (único): ${atr.colorCuello}`);
+  }
+
+  // Eliminar duplicados y unir
+  return lista.length ? [...new Set(lista)].join(", ") : "No especificado";
+};
+
 
   // 🔹 Acción al agregar al carrito
   const handleAgregarCarrito = async () => {
@@ -121,7 +261,7 @@ export default function DetallePrdIA() {
 
       const data = await res.json();
       if (data.ok) {
-        toast.success("✅ Prenda añadida al carrito correctamente", {
+        toast.success("Prenda añadida al carrito correctamente", {
           position: "top-right",
           autoClose: 1000,
         });
@@ -131,12 +271,12 @@ export default function DetallePrdIA() {
         setMedidasPersonalizadas("");
         setError("");
       } else {
-        toast.error("❌ Error al añadir al carrito: " + (data.msg || ""), {
+        toast.error("Error al añadir al carrito: " + (data.msg || ""), {
           position: "top-center",
         });
       }
     } catch (error) {
-      toast.error("❌ Error de conexión con el servidor", {
+      toast.error("Error de conexión con el servidor", {
         position: "top-center",
       });
     }
@@ -159,9 +299,11 @@ export default function DetallePrdIA() {
         {/* Info */}
         <div className="flex flex-col gap-5">
           <h1 className="text-3xl font-bold text-blue-900">
-            {prenda.descripcion}
+            {prenda.categoria_prd}
           </h1>
-
+          <p>
+            <strong>Descripción:</strong> {prenda.descripcion || "N/A"}
+          </p>
           <p>
             <strong>Tela:</strong> {prenda.atributos_es?.tela || "N/A"}
           </p>
@@ -182,7 +324,10 @@ export default function DetallePrdIA() {
                   name="tipoTalla"
                   value="general"
                   checked={tipoTalla === "general"}
-                  onChange={() => setTipoTalla("general")}
+                  onChange={() => {
+                    setTipoTalla("general");
+                    setError("");
+                  }}
                 />
                 Tallas Generales
               </label>
@@ -192,7 +337,10 @@ export default function DetallePrdIA() {
                   name="tipoTalla"
                   value="personalizada"
                   checked={tipoTalla === "personalizada"}
-                  onChange={() => setTipoTalla("personalizada")}
+                  onChange={() => {
+                    setTipoTalla("personalizada");
+                    setError("");
+                  }}
                 />
                 Talla Personal
               </label>
@@ -206,7 +354,10 @@ export default function DetallePrdIA() {
               {["S", "M", "L", "XL", "XXL"].map((t) => (
                 <button
                   key={t}
-                  onClick={() => setTallaSeleccionada(t)}
+                  onClick={() => {
+                    setTallaSeleccionada(t);
+                    setError("");
+                  }}
                   className={`px-3 py-2 rounded-lg border mr-2 ${
                     tallaSeleccionada === t
                       ? "bg-blue-600 text-white"
@@ -281,7 +432,9 @@ export default function DetallePrdIA() {
               type="number"
               min={1}
               value={cantidad}
-              onChange={(e) => setCantidad(parseInt(e.target.value))}
+              onChange={(e) =>
+                setCantidad(parseInt(e.target.value || 1, 10))
+              }
               className="w-full bg-white border mt-1 rounded px-3 py-2"
             />
           </div>
@@ -297,11 +450,15 @@ export default function DetallePrdIA() {
             <div className="text-gray-600 text-sm text-center">
               <p>
                 <strong>Precio al por menor:</strong>{" "}
-                ${prenda.costo?.precio_venta?.toFixed(2) || "0.00"}
+                {prenda.costo?.precio_venta !== undefined
+                  ? `$${prenda.costo.precio_venta.toFixed(2)}`
+                  : "0.00"}
               </p>
               <p>
                 <strong>Precio al por mayor (≥ 12):</strong>{" "}
-                ${prenda.costo?.precio_mayor?.toFixed(2) || "0.00"}
+                {prenda.costo?.precio_mayor !== undefined
+                  ? `$${prenda.costo.precio_mayor.toFixed(2)}`
+                  : "0.00"}
               </p>
             </div>
           </div>

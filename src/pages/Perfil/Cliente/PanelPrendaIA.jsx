@@ -7,6 +7,7 @@ export default function PanelPrendaIA({ userId: propUserId, onVer, onEditar, onE
   const { user } = useAuth();
   const [prendas, setPrendas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(4); // cuántas se muestran
 
   const currentUserId = propUserId || user?.id;
 
@@ -18,7 +19,18 @@ export default function PanelPrendaIA({ userId: propUserId, onVer, onEditar, onE
     fetch(`http://localhost:5000/api/ia/prendas/listar?user_id=${currentUserId}`)
       .then((res) => res.json())
       .then((data) => {
-        setPrendas(data.prendas || []);
+        const lista = data.prendas || [];
+
+        // Ordenar de más reciente a más antigua usando createdAt o _id
+        const ordenadas = [...lista].sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt) - new Date(a.createdAt); // más recientes primero [web:27][web:30]
+          }
+          return (b._id || "").localeCompare(a._id || "");
+        });
+
+        setPrendas(ordenadas);
+        setVisibleCount(4); // siempre empezar mostrando 10
         setLoading(false);
       })
       .catch((err) => {
@@ -66,6 +78,9 @@ export default function PanelPrendaIA({ userId: propUserId, onVer, onEditar, onE
     );
   }
 
+  const prendasVisibles = prendas.slice(0, visibleCount); // control de “mostrar más” [web:44][web:47]
+  const hayMas = visibleCount < prendas.length;
+
   return (
     <div className="bg-white shadow-md rounded-xl p-6">
       <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">
@@ -77,46 +92,59 @@ export default function PanelPrendaIA({ userId: propUserId, onVer, onEditar, onE
           Aún no has generado ninguna prenda con IA.
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {prendas.map((prenda) => (
-            <div
-              key={prenda._id}
-              className="border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-lg transition duration-200 flex flex-col"
-            >
-              <img
-                src={prenda.imageUrl}
-                alt={prenda.categoria_prd}
-                className="object-cover h-48 w-full"
-              />
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-semibold text-gray-800 text-lg mb-1">
-                  {prenda.categoria_prd}
-                </h3>
-                <p className="text-sm text-gray-500 mb-3">
-                  {prenda.atributos_es?.tela || "Sin tela especificada"}
-                </p>
-                <p className="text-blue-900 font-bold text-lg mb-3">
-                  ${prenda.costo?.precio_venta || prenda.costo?.precio_costo || "N/A"}
-                </p>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {prendasVisibles.map((prenda) => (
+              <div
+                key={prenda._id}
+                className="border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-lg transition duration-200 flex flex-col"
+              >
+                <img
+                  src={prenda.imageUrl}
+                  alt={prenda.categoria_prd}
+                  className="object-cover h-48 w-full"
+                />
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-semibold text-gray-800 text-lg mb-1">
+                    {prenda.categoria_prd}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    {prenda.atributos_es?.tela || "Sin tela especificada"}
+                  </p>
+                  <p className="text-blue-900 font-bold text-lg mb-3">
+                    ${prenda.costo?.precio_venta || prenda.costo?.precio_costo || "N/A"}
+                  </p>
 
-                <div className="mt-auto flex justify-between items-center gap-2">
-                  <Link
-                    to={`/prendaIA/${prenda._id}`}
-                    className="bg-blue-900 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 flex-1 text-center"
-                  >
-                    Detalles 
-                  </Link>
-                  <button
-                    onClick={() => handleEliminar(prenda._id)}
-                    className="bg-red-600 text-white px-3 py-2 rounded-md text-sm hover:bg-red-700 flex-1"
-                  >
-                    Eliminar
-                  </button>
+                  <div className="mt-auto flex justify-between items-center gap-2">
+                    <Link
+                      to={`/prendaIA/${prenda._id}`}
+                      className="bg-blue-900 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 flex-1 text-center"
+                    >
+                      Detalles
+                    </Link>
+                    <button
+                      onClick={() => handleEliminar(prenda._id)}
+                      className="bg-red-600 text-white px-3 py-2 rounded-md text-sm hover:bg-red-700 flex-1"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+
+          {hayMas && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 4)}
+                className="bg-blue-900 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+              >
+                Mostrar más
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

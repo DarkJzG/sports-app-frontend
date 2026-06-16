@@ -162,9 +162,6 @@ export default function Telas() {
       <NavbarA />
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
         <h2 className="text-4xl font-semibold flex-1">Telas</h2>
-        <div className="rounded-full bg-blue-200 p-3">
-          <img className="h-10" src="/img/tela.png" alt="logo tela" />
-        </div>
       </section>
 
       <main className="flex-1 max-w-6xl mx-auto w-full py-8 px-4">

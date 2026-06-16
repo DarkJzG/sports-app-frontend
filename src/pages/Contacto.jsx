@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { API_URL } from "../config";
 
 const Contacto = () => {
   const [formData, setFormData] = useState({
@@ -27,24 +28,40 @@ const Contacto = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Falta conectar al backend
+    setSubmitStatus(null);
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setSubmitStatus({
-        type: 'success',
-        message: '¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.'
+      const response = await fetch(`${API_URL}/contacto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.msg || "Error al enviar el mensaje");
+      }
+
+      setSubmitStatus({
+        type: "success",
+        message:
+          data.msg ||
+          "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.",
+      });
+
       setFormData({
         nombre: "",
         email: "",
         asunto: "",
-        mensaje: ""
+        mensaje: "",
       });
     } catch (error) {
       setSubmitStatus({
-        type: 'error',
-        message: 'Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.'
+        type: "error",
+        message:
+          error.message ||
+          "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
       });
     } finally {
       setIsSubmitting(false);
@@ -60,20 +77,19 @@ const Contacto = () => {
     {
       icon: <FaMapMarkerAlt className="text-2xl text-blue-600" />,
       title: "Dirección",
-      content: "Pedro Moncayo y Gaspar de Villarroel",
-      link: "https://maps.google.com"
+      content: "Tulcán - Pedro Moncayo y Gaspar de Villarroel",
+      link: "https://maps.app.goo.gl/3fjY8E5F6fLyJ93b8"
     },
     {
       icon: <FaPhone className="text-2xl text-blue-600" />,
       title: "Teléfono",
-      content: "+593 0959207677",
-      link: "tel:+5930959207677"
+      content: "+593 0992088186",
+
     },
     {
       icon: <FaEnvelope className="text-2xl text-blue-600" />,
       title: "Correo Electrónico",
-      content: "johan@sports.com",
-      link: "mailto:contacto@johansports.com"
+      content: "confecciones.johan.sport@gmail.com",
     },
     {
       icon: <FaClock className="text-2xl text-blue-600" />,
@@ -83,9 +99,8 @@ const Contacto = () => {
   ];
 
   const socialMedia = [
-    { icon: <FaFacebook className="text-2xl" />, name: "Facebook", url: "https://facebook.com" },
-    { icon: <FaInstagram className="text-2xl" />, name: "Instagram", url: "https://instagram.com" },
-    { icon: <FaWhatsapp className="text-2xl" />, name: "WhatsApp", url: "https://wa.me/525512345678" }
+    { icon: <FaFacebook className="text-2xl" />, name: "Facebook", url: "https://www.facebook.com/profile.php?id=100081824683242" },
+    { icon: <FaWhatsapp className="text-2xl" />, name: "WhatsApp", url: "https://wa.me/593992088186" }
   ];
 
   return (
@@ -322,11 +337,11 @@ const Contacto = () => {
               {[
                 {
                   question: "¿Cuál es el tiempo de entrega de los pedidos?",
-                  answer: "El tiempo de entrega varía según el tipo de producto y personalización. Generalmente, los pedidos estándar se envían en 3-5 días hábiles. Los productos personalizados pueden tardar entre 7-14 días hábiles."
+                  answer: "El tiempo de entrega varía según el tipo de producto y personalización. Generalmente, los pedidos menores a una docena se envían en 4-6 días hábiles. Los productos personalizados y superiores a la docena pueden tardar entre 7-14 días hábiles."
                 },
                 {
                   question: "¿Cuáles son los métodos de pago aceptados?",
-                  answer: "Aceptamos pagos con transferencia bancaria."
+                  answer: "Actaulmente solo se pueden realizar pagos por medio de transferencias bancarias del Banco Pichincha al titual Myriam España con número de cuenta: 2206100668"
                 },
                 
               ].map((faq, index) => (

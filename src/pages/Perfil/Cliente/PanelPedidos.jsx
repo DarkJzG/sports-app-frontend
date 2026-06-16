@@ -109,7 +109,7 @@ export default function PanelPedidos() {
           </svg>
           <p className="text-gray-600 mb-4">Aún no has realizado pedidos</p>
           <Link
-            to="/productos"
+            to="/catalogo"
             className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             Ver Productos

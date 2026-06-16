@@ -4,20 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../../config";
 import NavbarAdmin from "../../../components/NavbarAdmin";
 import FooterAdmin from "../../../components/FooterAdmin";
-import { 
-  FileText, 
-  Download, 
-  Eye, 
-  Search, 
-  Calendar,
-  DollarSign,
-  User,
-  Filter,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Clock
-} from "lucide-react";
+import { FileText, Download, Eye, Search, Calendar, DollarSign, User, Filter, TrendingUp, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function FacturasAdmin() {
@@ -29,30 +16,24 @@ export default function FacturasAdmin() {
   const [ordenamiento, setOrdenamiento] = useState("reciente");
   const navigate = useNavigate();
 
-  // ===== FUNCIONES AUXILIARES PARA FECHAS =====
-  // Función auxiliar para parsear fechas de MongoDB de forma segura
   const parseFechaMongoDB = (fecha) => {
     if (!fecha) return null;
 
     try {
-      // Si es un string ISO
       if (typeof fecha === 'string') {
         const parsedDate = new Date(fecha);
         return isNaN(parsedDate.getTime()) ? null : parsedDate;
       }
       
-      // Si es un objeto de fecha de MongoDB con $date
       if (typeof fecha === 'object' && fecha.$date) {
         const parsedDate = new Date(fecha.$date);
         return isNaN(parsedDate.getTime()) ? null : parsedDate;
       }
       
-      // Si ya es un objeto Date
       if (fecha instanceof Date) {
         return isNaN(fecha.getTime()) ? null : fecha;
       }
       
-      // Intentar conversión directa
       const parsedDate = new Date(fecha);
       return isNaN(parsedDate.getTime()) ? null : parsedDate;
     } catch (err) {
@@ -253,7 +234,7 @@ export default function FacturasAdmin() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-3 rounded-xl">
+              <div className="bg-blue-800 p-3 rounded-xl">
                 <FileText size={28} className="text-white" />
               </div>
               <div>
@@ -265,7 +246,7 @@ export default function FacturasAdmin() {
             </div>
             <button
               onClick={cargarFacturas}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md"
+              className="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -417,7 +398,7 @@ export default function FacturasAdmin() {
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-blue-600 to-blue-700">
+                <thead className="bg-gradient-to-r from-blue-800 to-blue-800">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Nº Factura

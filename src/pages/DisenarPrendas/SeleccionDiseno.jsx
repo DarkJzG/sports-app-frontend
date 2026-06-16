@@ -1,4 +1,3 @@
-// src/pages/DisenarPrendas/SeleccionDiseno.jsx
 import React, { useEffect, Suspense } from "react";
 import { useAuth } from "../../components/AuthContext";
 import Navbar from "../../components/Navbar";
@@ -8,7 +7,6 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { MousePointer2, Sparkles, Save } from "lucide-react";
 
-// Mini componente para vista previa 3D
 function ModelPreview({ glbPath }) {
   const gltf = useGLTF(glbPath);
   
@@ -21,14 +19,12 @@ function ModelPreview({ glbPath }) {
   );
 }
 
-// Tarjeta con vista previa 3D
 function PrendaCard({ prenda, onClick }) {
   return (
     <div
       onClick={onClick}
       className="bg-blue-900 rounded-2xl shadow-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
     >
-      {/* Vista previa 3D */}
       <div className="h-64 bg-gradient-to-br from-blue-50 to-blue-100 relative">
         <Canvas
           camera={{ position: prenda.cameraPosition, fov: prenda.cameraFov }}
@@ -74,8 +70,8 @@ export default function SeleccionDiseno() {
       id: "camiseta",
       nombre: "Camiseta",
       descripcion: "Diseña tu camiseta deportiva personalizada",
-      glb: "/prendas3d/camiseta.glb",
-      cameraPosition: [0, 5, 2],
+      glb: "/prendas3d/CamisetaFinal.glb",
+      cameraPosition: [0, 2, 5],
       cameraFov: 70,
       ruta: "/modelo3d/camiseta3d/vista/camiseta",
     },
@@ -83,8 +79,8 @@ export default function SeleccionDiseno() {
       id: "pantalon",
       nombre: "Pantalón",
       descripcion: "Crea tu pantalón deportivo único",
-      glb: "/prendas3d/pantalon_v1.glb",
-      cameraPosition: [0, 1, 5],
+      glb: "/prendas3d/pantalon_v2.glb",
+      cameraPosition: [0, 2, 5],
       cameraFov: 50,
       ruta: "/modelo3d/pantalon3d/vista/pantalon",
     },
@@ -102,7 +98,7 @@ export default function SeleccionDiseno() {
       nombre: "Chompa",
       descripcion: "Diseña tu chompa deportiva",
       glb: "/prendas3d/chompa_v1.glb",
-      cameraPosition: [0, 5, 2.5],
+      cameraPosition: [0, 3, 5],
       cameraFov: 65,
       ruta: "/modelo3d/chompa3d/vista/chompa",
     },
@@ -159,7 +155,7 @@ export default function SeleccionDiseno() {
 }
 
 // Precarga de modelos para rendimiento
-useGLTF.preload("/prendas3d/camiseta.glb");
+useGLTF.preload("/prendas3d/CamisetaFinal.glb");
 useGLTF.preload("/prendas3d/pantalon_v1.glb");
 useGLTF.preload("/prendas3d/pantaloneta_v1.glb");
 useGLTF.preload("/prendas3d/chompa_v1.glb");

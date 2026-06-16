@@ -83,35 +83,26 @@ export default function ListarPrendas3D() {
                   alt={p.modelo}
                   className="rounded-lg object-cover h-56 w-full"
                 />
-                <h2 className="mt-3 text-lg font-semibold text-gray-800">
-                  {p.modelo}
+                <h2 className="mt-3 text-lg font-semibold text-gray-800 capitalize">
+                  {p.categoria} - Diseño {p.design_id}
                 </h2>
                 <p className="text-sm text-gray-500 mb-3 capitalize">
-                  {p.categoria} - Diseño {p.design_id}
+                  {p.modelo}
                 </p>
 
                 <div className="mt-auto flex justify-between">
                   <button
                     onClick={() => navigate(`/prenda3d/${p._id}`)}
-                    className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm"
+                    className="bg-blue-900 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm"
                   >
-                    🔍 Detalles
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      navigate("/disenar3d", { state: { prendaId: p._id } })
-                    }
-                    className="bg-yellow-500 text-white px-3 py-1.5 rounded-md hover:bg-yellow-600 text-sm"
-                  >
-                    ✏️ Editar
+                    Detalles
                   </button>
 
                   <button
                     onClick={() => handleEliminar(p._id)}
                     className="bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 text-sm"
                   >
-                    🗑️ Eliminar
+                    Eliminar
                   </button>
                 </div>
               </div>

@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
-import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PantallaCarga from "../../components/PantallaCarga";
 
 /* ===============================
    PALETA DE COLORES BASE
@@ -69,7 +69,6 @@ export default function FormPantaloneta() {
   // ========== OPCIONES GENERALES ==========
   const [tela, setTela] = useState("");
   const [genero, setGenero] = useState("");
-  const [modeloIA, setModeloIA] = useState("stable");
 
   // Estados de imagen y carga
   const [imagen, setImagen] = useState(null);
@@ -206,7 +205,7 @@ export default function FormPantaloneta() {
 
     let payload = {
       userId: user?.id,
-      categoria_id: "pantaloneta_ia_v1",
+      categoria_id: "Pantaloneta IA",
       largo,
       bolsillos,
       cordon,
@@ -255,25 +254,29 @@ export default function FormPantaloneta() {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
-    const endpoint = modeloIA === "gemini"
-      ? API_URL_GEMINI
-      : `${API_URL}/api/ia/generar_pantaloneta_v1`;
-
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.imageUrl) setImagen(data.imageUrl);
-    } catch (e) {
-      console.error("Error:", e);
-      toast.error("Error al generar la pantaloneta.");
-    } finally {
-      setLoading(false);
-    }
-  };
+        // ✅ ENDPOINT UNIFICADO
+        const res = await fetch(`${API_URL}/api/ia/generar_prenda_hf`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (data.ok && data.imageUrl) {
+          setImagen(data.imageUrl);
+          toast.success("¡Pantaloneta generada exitosamente!");
+        } else if (data.error) {
+          toast.error(`Error: ${data.error}`);
+        }
+      } catch (error) {
+        console.error("❌ Error:", error);
+        toast.error("Error al generar la pantaloneta");
+      } finally {
+        setLoading(false);
+      }
+    };
 
   /* ===============================
      BLOQUES DE INTERFAZ
@@ -735,8 +738,8 @@ export default function FormPantaloneta() {
           <div className="flex justify-center gap-3 flex-wrap">
             {[
               { key: "Poliéster", label: "Poliéster", img: "/img/patrones/Poliester.png" },
-              { key: "Microfibra", label: "Algodón", img: "/img/patrones/Algodon.png" },
-              { key: "Mesh", label: "Impermeable", img: "/img/patrones/Impermeable.png" },
+              { key: "Algodón", label: "Algodón", img: "/img/patrones/Algodon.png" },
+              { key: "Impermeable", label: "Impermeable", img: "/img/patrones/Impermeable.png" },
             ].map((opt) => (
               <div
                 key={opt.key}
@@ -774,18 +777,6 @@ export default function FormPantaloneta() {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="mb-4">
-        <label className="font-semibold mr-2">Modelo IA:</label>
-        <select
-          value={modeloIA}
-          onChange={(e) => setModeloIA(e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          <option value="stable">Stable Diffusion</option>
-          <option value="gemini">Gemini Imagen</option>
-        </select>
       </div>
 
       <div className="pt-6">
@@ -860,6 +851,10 @@ export default function FormPantaloneta() {
   return (
     <div>
       <Navbar />
+      <PantallaCarga 
+        show={loading} 
+        message="Generando tu pantaloneta con IA... 10-30 segundos"
+      />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
           <div className="text-center space-y-6">

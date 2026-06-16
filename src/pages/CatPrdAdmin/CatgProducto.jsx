@@ -96,9 +96,6 @@ export default function CategoriasProductos() {
       {/* Banner */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
         <h2 className="text-4xl font-semibold flex-1">Categorías de Productos</h2>
-        <div className="rounded-full bg-blue-200 p-3">
-          <img className="h-10" src="/img/catg.png" alt="icono categoría" />
-        </div>
       </section>
 
       {/* Contenido principal */}

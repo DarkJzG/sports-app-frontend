@@ -8,8 +8,8 @@ export default function Footer() {
 
   // ✅ Valores por defecto o desde la base de datos
   const direccion = empresa?.direccion || "Pedro Moncayo y Gaspar de Villarroel";
-  const telefono = empresa?.telefono || "+593 0992088286";
-  const email = empresa?.email || "contacto@johansports.com";
+  const telefono = empresa?.telefono || "+593 0992088186";
+  const email = empresa?.email || "confecciones.johan.sport.com";
   const horario = empresa?.horarioAtencion 
     ? `${empresa.horarioAtencion.lunes || "09:00 - 18:00"}, Lunes - Viernes`
     : "09:00 - 18:00, Lunes - Viernes";
@@ -62,9 +62,6 @@ export default function Footer() {
           <p className="mb-1">
             <span className="font-semibold">Dirección:</span> {direccion}
           </p>
-          <p className="mb-1">
-            <span className="font-semibold">Teléfono:</span> {telefono}
-          </p>
           {empresa?.celular && (
             <p className="mb-1">
               <span className="font-semibold">Celular:</span> {empresa.celular}
@@ -91,26 +88,6 @@ export default function Footer() {
                   <img src="/img/icon-facebook.svg" alt="Facebook" className="h-7" />
                 </a>
               )}
-              {instagram && instagram !== "#" && (
-                <a 
-                  href={instagram} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:opacity-75 transition-opacity"
-                >
-                  <img src="/img/icon-instagram.svg" alt="Instagram" className="h-7" />
-                </a>
-              )}
-              {youtube && youtube !== "#" && (
-                <a 
-                  href={youtube} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:opacity-75 transition-opacity"
-                >
-                  <img src="/img/icon-youtube.svg" alt="YouTube" className="h-7" />
-                </a>
-              )}
             </div>
           </div>
         </div>
@@ -125,7 +102,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/privacidad" className="hover:underline">
+              <Link to="/politicas" className="hover:underline">
                 Políticas de Privacidad
               </Link>
             </li>
@@ -137,11 +114,6 @@ export default function Footer() {
             <li>
               <Link to="/contacto" className="hover:underline">
                 Contáctanos
-              </Link>
-            </li>
-            <li>
-              <Link to="/soporte" className="hover:underline">
-                Soporte
               </Link>
             </li>
           </ul>
@@ -157,18 +129,13 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/favoritos" className="hover:underline">
-                Lista de Deseados
+              <Link to="/perfil" className="hover:underline">
+                Mi perfil
               </Link>
             </li>
             <li>
               <Link to="/mis-pedidos" className="hover:underline">
                 Ver mis Pedidos
-              </Link>
-            </li>
-            <li>
-              <Link to="/ayuda" className="hover:underline">
-                Ayuda
               </Link>
             </li>
           </ul>

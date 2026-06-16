@@ -1,4 +1,3 @@
-// src/pages/Productos/AgregarProducto.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../config";
@@ -30,7 +29,6 @@ export default function AgregarProducto() {
     total: 0,
   });
 
-  // Cantidades de logos/diseños (el precio se toma de manoObra.disenos)
   const [cantDisenos, setCantDisenos] = useState({
     logo_bordado_grande: 0,
     logo_bordado_pequeno: 0,

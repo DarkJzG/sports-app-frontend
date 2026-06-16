@@ -1,4 +1,3 @@
-// src/pages/Pedidos/Cliente/Checkout.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../components/AuthContext";
 import { useEmpresa } from "../../../components/EmpresaContext"; 
@@ -10,7 +9,7 @@ import { toast } from "react-toastify";
 
 export default function Checkout() {
   const { user } = useAuth();
-  const { empresa } = useEmpresa(); // ← Agregar
+  const { empresa } = useEmpresa(); 
   const navigate = useNavigate();
 
   const [carrito, setCarrito] = useState([]);

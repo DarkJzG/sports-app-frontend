@@ -1,4 +1,3 @@
-// src/pages/DisenarPrendas/CamisetaViewer.jsx
 import React, { Suspense, useEffect, useState, useRef } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
@@ -22,33 +21,33 @@ import PanelEstilosRGB from "../../components/Prenda3D/PanelEstilosRGB";
 import { useChannelMaskTexture } from "../../components/useChannelMaskTexture";
 import { PerformanceMonitor } from "@react-three/drei";
 
+
 import { Matrix4, Vector2, Vector3 } from "three";
 
 const toDecalScale = (s, thickness = 1) =>
   Array.isArray(s) ? s : [s, s, thickness];
 
-/* ========= 1) Catálogo de diseños ========= */
 const CATALOG = {
   camiseta: {
     name: "Camiseta",
-    glb: "/prendas3d/camiseta_v2.glb",
+    glb: "/prendas3d/CamisetaFinal.glb",
     designs: {
-      base: {
-        name: "Base",
-        mask: "/prendas3d/mask_base_rgb.png",
+      basefinal: {
+        name: "Base Final",
+        mask: "/prendas3d/mask_rgb_camiseta_basefinal.png",
         zones: {
-          cuello: { label: "Cuello", channel: "R", default: "#ffffff" },
-          mangas: { label: "Mangas", channel: "G", default: "#7a2f9a" },
-          torso: { label: "Torso", channel: "B", default: "#1c9d70" },
+          cuello: { label: "Torso", channel: "R", default: "#0000FF" },
+          mangas: { label: "Mangas", channel: "G", default: "#00FF00" },
+          torso: { label: "Cuello", channel: "B", default: "#FF0000" },
         },
       },
-      rayo: {
-        name: "Rayo",
-        mask: "/prendas3d/rayo_rgb.png",
+      estilo2: {
+        name: "Estilo 2",
+        mask: "/prendas3d/mask_camiseta_base_2.png",
         zones: {
-          torso: { label: "Torso", channel: "R", default: "#d32f2f" },
-          franja: { label: "Franja", channel: "G", default: "#21c521" },
-          cuello: { label: "Cuello", channel: "B", default: "#0d47a1" },
+          cuello: { label: "Torso", channel: "R", default: "#0000FF" },
+          mangas: { label: "Mangas", channel: "G", default: "#00FF00" },
+          torso: { label: "Cuello Y Franja", channel: "B", default: "#FF0000" },
         },
       },
     },
@@ -282,7 +281,7 @@ function Scene({ product, design, colors, decals, textDecals, textures, setDecal
 
           {textDecals.filter((d) => d.meshIndex === i).map((d, k) => (
             <TextDecal key={`text-${i}-${k}`} d={d} />
-          ))}
+            ))}
         </mesh>
       ))}
       <Environment preset="studio" />
@@ -300,11 +299,13 @@ export default function CamisetaViewer() {
   const [productId] = useState("camiseta"); // Fijo a camiseta
   const product = CATALOG[productId];
 
-  const [designId, setDesignId] = useState("base");
+  const [designId, setDesignId] = useState("basefinal");
   const designs = product.designs;
   const design = designs[designId];
 
   const [dpr, setDpr] = useState(1.5);
+
+  
 
   const [colors, setColors] = useState(() =>
     Object.fromEntries(Object.entries(design.zones).map(([k, z]) => [k, z.default]))

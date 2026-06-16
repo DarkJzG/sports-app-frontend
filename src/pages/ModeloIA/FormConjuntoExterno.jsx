@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
-import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -264,9 +263,7 @@ export default function FormConjuntoExterno() {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
-    const endpoint = modeloIA === "gemini"
-      ? API_URL_GEMINI
-      : `${API_URL}/api/ia/generar_conjunto_externo_v1`;
+    const endpoint = `${API_URL}/api/ia/generar_conjunto_externo_v1`;
 
     try {
       const res = await fetch(endpoint, {

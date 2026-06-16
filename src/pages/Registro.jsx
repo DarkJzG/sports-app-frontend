@@ -1,4 +1,3 @@
-// src/pages/Registro.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
@@ -24,7 +23,6 @@ export default function Registro() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Validadores de contraseña
   const cumpleLongitud = form.password.length >= 8;
   const tieneMayuscula = /[A-Z]/.test(form.password);
   const tieneNumero = /\d/.test(form.password);
@@ -32,7 +30,7 @@ export default function Registro() {
   const coincide = form.password && form.password === form.confirmar;
   const puedeRegistrar = cumpleLongitud && tieneMayuscula && tieneNumero && tieneEspecial && coincide;
 
-  const handleRegister = async (e) => {
+  const handleRegistro = async (e) => {
     e.preventDefault();
     setMsg(null);
 
@@ -58,7 +56,7 @@ export default function Registro() {
         setMsg({ text: data.msg || "Error al registrar", color: "red" });
       } else if (data.ok) {
         setMsg({
-          text: `✅ Registro exitoso. Se ha enviado un correo de verificación a ${form.correo}.`,
+          text: `Registro exitoso. Se ha enviado un correo de verificación a ${form.correo}.`,
           color: "green",
         });
         setTimeout(() => navigate("/login"), 3000);
@@ -76,7 +74,7 @@ export default function Registro() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 to-blue-300 py-10">
       <PantallaCarga show={loading} message="Creando cuenta..." />
       <div className="relative w-full max-w-4xl min-h-[550px] flex rounded-3xl shadow-2xl overflow-hidden bg-white/90">
-        {/* Panel lateral IZQUIERDA */}
+
         <div className="flex flex-col w-1/2 justify-center items-center bg-gradient-to-br from-blue-900 to-blue-500 text-white rounded-l-3xl p-8 order-1">
           <h1 className="text-2xl font-bold font-rubik mb-2">¡Bienvenido de nuevo!</h1>
           <p className="mb-6 text-center">Introduce tus credenciales para utilizar todas las funciones del sitio.</p>
@@ -88,10 +86,10 @@ export default function Registro() {
           </button>
         </div>
 
-        {/* Formulario de Registro (DERECHA) */}
+
         <div className="w-1/2 flex items-center justify-center order-2">
           <form
-            onSubmit={handleRegister}
+            onSubmit={handleRegistro}
             className="flex flex-col gap-3 bg-white px-10 py-14 rounded-3xl shadow-md w-full max-w-md"
           >
             <h2 className="text-center text-3xl font-bold font-rubik mb-3 text-blue-900">

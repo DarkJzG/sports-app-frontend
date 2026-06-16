@@ -17,6 +17,8 @@ import OldContra from "./pages/OldContra";
 
 import SobreNosotros from "./pages/SobreNosotros";
 import Contacto from "./pages/Contacto";
+import TerminosC from "./pages/TerminosC";
+import Politicas from "./pages/Politicas";
 
 import HomeAdmin from "./pages/Home_admin";
 
@@ -131,10 +133,12 @@ function App() {
 
           <Route path="/sobre-nosotros" element={<SobreNosotros />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/terminos" element={<TerminosC />} />
+          <Route path="/politicas" element={<Politicas />} />
+
 
 
           {/* Cliente Iniciado Sesión */}
-
 
           <Route path="/perfil" element={
             <RutasPrivadas roles={["cliente", "admin"]}>

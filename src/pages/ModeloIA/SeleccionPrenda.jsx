@@ -10,7 +10,7 @@ export default function SeleccionPrenda() {
   const { user, loading } = useAuth();
   const [categorias, setCategorias] = useState([]);
 
-  // 🔹 Categorías permitidas (solo estas se mostrarán)
+
   const categoriasPermitidas = ["camiseta", "pantalón", "pantaloneta", "chompas"];
 
   useEffect(() => {
@@ -23,7 +23,6 @@ export default function SeleccionPrenda() {
     fetch(`${API_URL}/catg_prod/all`)
       .then((res) => res.json())
       .then((data) => {
-        // 🔹 Filtrar solo las categorías permitidas
         const categoriasFiltradas = Array.isArray(data)
           ? data.filter((cat) =>
               categoriasPermitidas.includes(cat.nombre.toLowerCase())

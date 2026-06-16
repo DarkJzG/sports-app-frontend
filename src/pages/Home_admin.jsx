@@ -4,7 +4,7 @@ import { useAuth } from "../components/AuthContext";
 import NavbarA from "../components/NavbarAdmin";
 import FooterA from "../components/FooterAdmin";
 import { API_URL } from "../config";
-import { Spool, Shirt, Layers2, Layers, Truck, FileTerminal, UsersRound   } from "lucide-react";
+import { Spool, Shirt, Layers2, Layers, Truck, FileTerminal, UsersRound, Building2   } from "lucide-react";
 
 
 const tools = [
@@ -50,6 +50,12 @@ const tools = [
     icon: <FileTerminal size={60} />,
     route: "/admin/facturas"
   },
+    {
+    title: "Perfil",
+    desc: "Configura la información general de tu empresa",
+    icon: <Building2 size={60} />,
+    route: "/admin/perfil-empresa"
+  },
 ];
 
 export default function HomeAdmin() {
@@ -69,11 +75,6 @@ export default function HomeAdmin() {
       {/* Banner */}
       <section className="bg-blue-900 text-white px-8 py-8 flex items-center gap-4">
         <h2 className="text-3xl font-semibold flex-1">Administrador</h2>
-        <div className="rounded-full bg-blue-200 p-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17.25l1.5 1.5M16.5 13.5a4.5 4.5 0 11-6.364-6.364A4.5 4.5 0 0116.5 13.5z" />
-          </svg>
-        </div>
         <button
           onClick={handleLogout}
           className="ml-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-4 py-2 shadow transition"
@@ -103,7 +104,7 @@ export default function HomeAdmin() {
       </main>
 
       {/* Footer */}
-      <FooterA />
+
     </div>
   );
 }

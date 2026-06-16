@@ -1,12 +1,12 @@
 // src/pages/ModeloIA/FormPantalon.jsx
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
-import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PantallaCarga from "../../components/PantallaCarga";
 
 /* ===============================
    PALETA DE COLORES BASE
@@ -81,7 +81,6 @@ export default function FormPantalon() {
   // ========== OPCIONES GENERALES ==========
   const [tela, setTela] = useState("");
   const [genero, setGenero] = useState("");
-  const [modeloIA, setModeloIA] = useState("stable");
 
   // Estados de imagen y carga
   const [imagen, setImagen] = useState(null);
@@ -229,7 +228,7 @@ export default function FormPantalon() {
 
     let payload = {
       userId: user?.id,
-      categoria_id: "pantalon_ia_v1",
+      categoria_id: "Pantalon IA",
       tipoCorte,
       tipoTobillo,
       bolsillos,
@@ -280,21 +279,27 @@ export default function FormPantalon() {
       (k) => (payload[k] === "" || payload[k] === undefined) && delete payload[k]
     );
 
-    const endpoint = modeloIA === "gemini"
-      ? API_URL_GEMINI
-      : `${API_URL}/api/ia/generar_pantalon_v1`;
-
     try {
-      const res = await fetch(endpoint, {
+      console.log("📤 Enviando payload:", payload);
+      
+      // ✅ ENDPOINT UNIFICADO
+      const res = await fetch(`${API_URL}/api/ia/generar_prenda_hf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
-      if (data.imageUrl) setImagen(data.imageUrl);
-    } catch (e) {
-      console.error("Error:", e);
-      toast.error("Error al generar el pantalón.");
+
+      if (data.ok && data.imageUrl) {
+        setImagen(data.imageUrl);
+        toast.success("Pantalón generado exitosamente!");
+      } else if (data.error) {
+        toast.error(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      toast.error("Error al generar la chompa");
     } finally {
       setLoading(false);
     }
@@ -376,7 +381,7 @@ export default function FormPantalon() {
           },
           { 
             key: "sublimacion", 
-            label: "Diseño Sublimado (IA)", 
+            label: "Diseño Sublimado", 
             img: "/img/patrones/CompletoPant.png"
           },
         ].map((opt) => (
@@ -831,18 +836,6 @@ export default function FormPantalon() {
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="font-semibold mr-2">Modelo IA:</label>
-        <select
-          value={modeloIA}
-          onChange={(e) => setModeloIA(e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          <option value="stable">Stable Diffusion</option>
-          <option value="gemini">Gemini Imagen</option>
-        </select>
-      </div>
-
       <div className="pt-6">
         <button
           onClick={(e) => {
@@ -916,6 +909,10 @@ export default function FormPantalon() {
   return (
     <div>
       <Navbar />
+      <PantallaCarga 
+        show={loading} 
+        message="Generando tu pantalón con IA... 10-30 segundos"
+      />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
           <div className="text-center space-y-6">

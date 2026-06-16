@@ -174,7 +174,6 @@ export default function DetallePedido() {
   const impuestos = pedido.costos?.impuestos || 0;
   const total = pedido.costos?.total || totalProductos + envio + impuestos;
 
-  // ✅ Verificar si hay pagos pendientes para mostrar "En Revisión"
   const haypagoPendiente = pedido.pagos?.some(p => p.estado === 'pendiente');
 
   return (
@@ -199,7 +198,7 @@ export default function DetallePedido() {
               <StatusBadge status={pedido.estado} />
               {haypagoPendiente && pedido.estado === 'en_revision' && (
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  🔍 Revisando pagos
+                  Revisando pagos
                 </span>
               )}
               <span className="text-sm text-gray-500">Creado el {formatDateSafe(pedido.createdAt, "PPp")}</span>
@@ -270,7 +269,7 @@ export default function DetallePedido() {
                 <p className="text-gray-600">{pedido.direccionEnvio}</p>
               ) : pedido.direccionEnvio.tipoEnvio === "retiro" ? (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="font-medium text-blue-900 mb-2">🏪 Retiro en Tienda</p>
+                  <p className="font-medium text-blue-900 mb-2">Retiro en Tienda</p>
                   <p className="text-sm text-blue-700">
                     El pedido será recogido en nuestras instalaciones. Te notificaremos cuando esté listo.
                   </p>
@@ -462,7 +461,6 @@ export default function DetallePedido() {
                       onClick={() => navigate(`/agregar-pago/${pedido._id}`)}
                       className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                     >
-                      <span>💳</span>
                       <span>Realizar Pago Adicional</span>
                     </button>
                   )}
@@ -470,7 +468,7 @@ export default function DetallePedido() {
               </InfoCard>
             )}
                         {pedido.facturaUrl && ['listo', 'enviado', 'retiro', 'entregado'].includes(pedido.estado) && (
-              <InfoCard title="📄 Factura" className="border-2 border-green-200">
+              <InfoCard title="Factura" className="border-2 border-green-200">
                 <div className="space-y-3">
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-start gap-3">
@@ -514,7 +512,7 @@ export default function DetallePedido() {
 
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-xs text-blue-800">
-                      <strong>💡 Tip:</strong> Guarda tu factura para futuras referencias. Este documento es válido para reclamos y garantías.
+                      <strong>Tip:</strong> Guarda tu factura para futuras referencias. Este documento es válido para reclamos y garantías.
                     </p>
                   </div>
                 </div>
@@ -582,7 +580,6 @@ export default function DetallePedido() {
                 {pedido.pagos?.filter(p => p.estado === 'pendiente').length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-yellow-700 mb-2 flex items-center gap-1">
-                      <span>⏳</span>
                       <span>Pagos en Revisión</span>
                     </h4>
                     {pedido.pagos.filter(p => p.estado === 'pendiente').map((pago, idx) => (
@@ -635,7 +632,6 @@ export default function DetallePedido() {
                 {pedido.pagos?.filter(p => p.estado === 'rechazado').length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1">
-                      <span>❌</span>
                       <span>Pagos Rechazados</span>
                     </h4>
                     {pedido.pagos.filter(p => p.estado === 'rechazado').map((pago, idx) => (
@@ -688,7 +684,7 @@ export default function DetallePedido() {
 
                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>💡 Nota:</strong> Los pagos rechazados no se toman en cuenta. 
+                        <strong>Nota:</strong> Los pagos rechazados no se toman en cuenta. 
                         Puedes enviar un nuevo comprobante usando el botón "Realizar Pago Adicional".
                       </p>
                     </div>
@@ -701,9 +697,9 @@ export default function DetallePedido() {
               </div>
             </InfoCard>
 
-            {/* ✅ NUEVO BLOQUE: Notas del Administrador */}
+
             {pedido.timeline?.some(ev => ev.nota && ev.nota.trim() !== '') && (
-              <InfoCard title="📝 Notas del Administrador" className="border-2 border-blue-200">
+              <InfoCard title="Notas del Vendedor" className="border-2 border-blue-200">
                 <div className="space-y-3">
                   {pedido.timeline
                     .filter(ev => ev.nota && ev.nota.trim() !== '')
@@ -729,7 +725,7 @@ export default function DetallePedido() {
             )}
 
 
-            <InfoCard title="❓ Ayuda">
+            <InfoCard title="Ayuda">
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">
                   Si tienes dudas sobre tu pedido o necesitas realizar algún cambio, contáctanos indicando tu número de pedido.
@@ -741,11 +737,10 @@ export default function DetallePedido() {
                   </p>
                 </div>
                 <a 
-                  href="mailto:soporte@tuempresa.com" 
+                  href="https://wa.me/593992088186" 
                   className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
                 >
-                  <span>📧</span>
-                  <span>Contactar Soporte</span>
+                  <span>+593 0992088186</span>
                 </a>
               </div>
             </InfoCard>

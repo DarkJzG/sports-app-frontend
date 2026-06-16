@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
@@ -18,12 +17,11 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Si llega ?verificado=true desde el link de verificación
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const verificado = queryParams.get("verificado");
     if (verificado === "true") {
-      setMensajeVerificado("✅ Tu cuenta ha sido verificada con éxito. Ya puedes iniciar sesión.");
+      setMensajeVerificado("Tu cuenta ha sido verificada con éxito. Ya puedes iniciar sesión.");
       const newUrl = window.location.pathname;
       window.history.replaceState(null, "", newUrl);
     }
@@ -44,11 +42,11 @@ export default function Login() {
       const data = await res.json();
 
       if (data.ok) {
-        // Guardar en contexto global
+        
         login(data.usuario, data.token);
         navigate(data.usuario.rol === "admin" ? "/admin" : "/");
       } else if (data.msg === "Cuenta no verificada") {
-        // Cuenta no verificada → mostrar opción para reenviar correo
+        
         setMsg(
           <div className="text-red-600 text-sm">
             Tu cuenta aún no está verificada.

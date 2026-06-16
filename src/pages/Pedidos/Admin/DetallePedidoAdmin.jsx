@@ -211,6 +211,23 @@ const obtenerEstadosDisponibles = (estadoActual, infoPago, tipoEntrega) => {
   });
 };
 
+function b64toBlob(b64Data, contentType = "", sliceSize = 512) {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    byteArrays.push(new Uint8Array(byteNumbers));
+  }
+
+  return new Blob(byteArrays, { type: contentType });
+}
+
+
 
 export default function DetallePedidoAdmin() {
   const { id } = useParams();
@@ -681,6 +698,16 @@ const handleRechazarPago = async (indiceOriginal) => {
                         Creado el {formatDateSafe(pedido.createdAt)}
                       </span>
                     </div>
+                      {pedido?.proformaUrl && (
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            onClick={() => window.open(pedido.proformaUrl, "_blank", "noopener,noreferrer")}
+                            className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors"
+                          >
+                            Ver proforma
+                          </button>
+                        </div>
+                      )}
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</div>
@@ -763,24 +790,72 @@ const handleRechazarPago = async (indiceOriginal) => {
               </div>
             </InfoCard>
 
-            {/* Dirección de Envío */}
+
+            {/* Dirección de Envío Condicional */}
             <InfoCard title="Dirección de Envío">
-              {typeof pedido.direccionEnvio === "string" ? (
-                <p className="text-gray-600">{pedido.direccionEnvio}</p>
+              {pedido.tipoEntrega === "retiro" || pedido.direccionEnvio?.tipoEnvio === "retiro" ? (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="font-bold text-blue-900">Retiro en Local</p>
+                  </div>
+                  <p className="text-sm text-blue-700">
+                    El cliente ha seleccionado retirar el pedido personalmente en las instalaciones de <strong>Johan Sport</strong>. 
+                  </p>
+                </div>
               ) : (
-                <React.Fragment>
-                  <p className="text-sm text-gray-500">Calle Principal y Secundaria</p>
-                  <p>{pedido.direccionEnvio.direccion_principal} y {pedido.direccionEnvio.direccion_secundaria} </p>
-                  <p className="text-sm text-gray-500">Ciudad, Provincia</p>
-                  <p>{pedido.direccionEnvio.ciudad}, {pedido.direccionEnvio.provincia}</p>
-                  <p className="text-sm text-gray-500">País</p>
-                  <p>{pedido.direccionEnvio.pais}</p>
-                  <p className="text-sm text-gray-500">Teléfono</p>
-                  <p className="text-blue-600">{pedido.direccionEnvio.telefono}</p>
-                  {pedido.direccionEnvio.codigo_postal && (
-                    <p className="text-sm text-gray-500">C.P. {pedido.direccionEnvio.codigo_postal}</p>
+                <div className="space-y-3">
+                  {typeof pedido.direccionEnvio === "string" ? (
+                    <p className="text-gray-600">{pedido.direccionEnvio}</p>
+                  ) : (
+                    <React.Fragment>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Destinatario</p>
+                          <p className="font-semibold">{pedido.direccionEnvio.nombre || usuario?.nombre}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Teléfono de Contacto</p>
+                          <p className="text-blue-600 font-bold">{pedido.direccionEnvio.telefono}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-gray-500 uppercase">Dirección Principal</p>
+                        <p className="text-gray-900">{pedido.direccionEnvio.direccion_principal}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 uppercase">Referencias / Secundaria</p>
+                        <p className="text-gray-700">
+                          {pedido.direccionEnvio.direccion_secundaria || "N/A"} 
+                          {pedido.direccionEnvio.referencia && ` — Ref: ${pedido.direccionEnvio.referencia}`}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border-t pt-2">
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Ciudad</p>
+                          <p>{pedido.direccionEnvio.ciudad}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Provincia</p>
+                          <p>{pedido.direccionEnvio.provincia}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">C.P.</p>
+                          <p>{pedido.direccionEnvio.codigo_postal || "N/A"}</p>
+                        </div>
+                      </div>
+                      
+                      {pedido.direccionEnvio.detalle && (
+                        <div className="bg-gray-50 p-2 rounded border border-dashed border-gray-300">
+                          <p className="text-xs font-medium text-gray-500 uppercase italic">Instrucciones del Cliente:</p>
+                          <p className="text-sm text-gray-700">{pedido.direccionEnvio.detalle}</p>
+                        </div>
+                      )}
+                    </React.Fragment>
                   )}
-                </React.Fragment>
+                </div>
               )}
             </InfoCard>
 
@@ -832,31 +907,6 @@ const handleRechazarPago = async (indiceOriginal) => {
                       <p className="text-sm text-gray-500">
                         ${item.precioUnitario.toFixed(2)} c/u
                       </p>
-                      {item.tipo === "ia_prenda" && item.ficha_id && (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const res = await fetch(`${API_URL}/api/ficha/${item.ficha_id}/pdf`);
-                              const data = await res.json();
-                              if (data.ok) {
-                                const link = document.createElement("a");
-                                link.href = "data:application/pdf;base64," + data.pdf_base64;
-                                link.download = `Ficha_${item.nombre}.pdf`;
-                                link.click();
-                                toast.success("Ficha técnica descargada");
-                              } else {
-                                toast.error("No se pudo generar la ficha técnica");
-                              }
-                            } catch (error) {
-                              console.error(error);
-                              toast.error("Error al descargar la ficha técnica");
-                            }
-                          }}
-                          className="mt-2 text-xs text-blue-600 hover:underline"
-                        >
-                          Descargar Ficha Técnica
-                        </button>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -978,7 +1028,6 @@ const handleRechazarPago = async (indiceOriginal) => {
                   </div>
                 </InfoCard>
               )}
-
           </div>
 
           {/* Columna derecha */}
@@ -989,7 +1038,7 @@ const handleRechazarPago = async (indiceOriginal) => {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <p className="text-sm font-bold text-green-800">✅ Pago Completo al 100%</p>
+                  <p className="text-sm font-bold text-green-800">Pago Completo al 100%</p>
                   <p className="text-xs text-green-700">El pedido puede pasar a estado "Listo" y se generará factura automáticamente</p>
                 </div>
               </div>
@@ -1002,7 +1051,7 @@ const handleRechazarPago = async (indiceOriginal) => {
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <p className="text-sm font-bold text-yellow-800">⚠️ Pago Incompleto</p>
+                  <p className="text-sm font-bold text-yellow-800">Pago Incompleto</p>
                   <p className="text-xs text-yellow-700">
                     Falta ${infoPago.saldo_pendiente.toFixed(2)} para completar el pago. 
                     No se puede marcar como "Listo" hasta que el pago esté al 100%.
@@ -1066,7 +1115,7 @@ const handleRechazarPago = async (indiceOriginal) => {
 
             {/* Comprobantes de Pago Pendientes */}
            {pagosPendientesConIndice.length > 0 && (
-              <InfoCard title="⚠️ Comprobantes Pendientes">
+              <InfoCard title="Comprobantes Pendientes">
                 <div className="space-y-3">
                   {pagosPendientesConIndice.map((pago) => (
                     <div key={pago._id || pago.indiceOriginal} className="border border-yellow-300 rounded-lg p-3 bg-yellow-50">
@@ -1154,7 +1203,11 @@ const handleRechazarPago = async (indiceOriginal) => {
                         indigo: 'bg-indigo-600 hover:bg-indigo-700',
                         purple: 'bg-purple-600 hover:bg-purple-700',
                         cyan: 'bg-cyan-600 hover:bg-cyan-700',
-                        green: 'bg-green-600 hover:bg-green-700'
+                        green: 'bg-green-600 hover:bg-green-700',
+                        blue: 'bg-blue-600 hover:bg-blue-700',
+                        yellow: 'bg-yellow-600 hover:bg-yellow-700',
+                        orange: 'bg-orange-600 hover:bg-orange-700',
+                        black: 'bg-black hover:bg-black',
                       };
                       
                       return (

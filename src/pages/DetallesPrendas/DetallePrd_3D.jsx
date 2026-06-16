@@ -7,6 +7,73 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { toast } from "react-toastify";
 
+// Factores de tela por talla (coherentes con la ficha técnica backend)
+const METROS_TELA = {
+  camiseta: {
+    S: 1.0,
+    M: 1.1,
+    L: 1.2,
+    XL: 1.3,
+    XXL: 1.4,
+  },
+  pantalon: {
+    S: 1.2,
+    M: 1.2,
+    L: 1.25,
+    XL: 1.3,
+    XXL: 1.3,
+  },
+  pantaloneta: {
+    S: 0.5,
+    M: 0.55,
+    L: 0.6,
+    XL: 0.65,
+    XXL: 0.65,
+  },
+  chompa: {
+    S: 1.5,
+    M: 1.55,
+    L: 1.6,
+    XL: 1.65,
+    XXL: 1.65,
+  },
+};
+
+// Detectar tipo de prenda a partir de la categoría
+function getCategoriaKey(prenda) {
+  const cat = (prenda?.categoria || "").toLowerCase();
+  if (cat.includes("camiseta")) return "camiseta";
+  if (cat.includes("pantaloneta")) return "pantaloneta";
+  if (cat.includes("pantalón") || cat.includes("pantalon")) return "pantalon";
+  if (cat.includes("chompa") || cat.includes("buzo")) return "chompa";
+  return "camiseta"; // fallback
+}
+
+// Calcular factor de precio según talla y tipo de talla
+function calcularFactorTalla(prenda, tipoTalla, tallaSeleccionada) {
+  const catKey = getCategoriaKey(prenda);
+
+  // Recargo por talla personalizada
+  if (tipoTalla === "personalizada") {
+    return 1.25;
+  }
+
+  // Si no se ha elegido talla general aún, no alteramos el precio
+  if (tipoTalla === "general" && !tallaSeleccionada) {
+    return 1;
+  }
+
+  const tabla = METROS_TELA[catKey];
+  if (!tabla) return 1;
+
+  const baseMetros = tabla.S || Object.values(tabla)[0];
+  const metrosTalla = tabla[tallaSeleccionada];
+
+  if (!metrosTalla || !baseMetros) return 1;
+
+  return metrosTalla / baseMetros;
+}
+
 export default function DetallePrd3D() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,16 +90,27 @@ export default function DetallePrd3D() {
   const [subtotal, setSubtotal] = useState(0);
   const [error, setError] = useState("");
 
+  // 🔹 Cargar prenda desde el backend
   useEffect(() => {
     fetch(`${API_URL}/api/3d/prenda/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setPrenda(data);
         setLoading(false);
-        const unitario =
+
+        const precioBase =
           cantidad >= 12
             ? data.precio_mayor || data.costo?.precio_mayor || 0
             : data.precio_venta || data.costo?.precio_venta || 0;
+
+        const factorTalla = calcularFactorTalla(
+          data,
+          tipoTalla,
+          tallaSeleccionada
+        );
+
+        const unitario = precioBase * factorTalla;
+
         setPrecioUnitario(unitario);
         setSubtotal(unitario * cantidad);
       })
@@ -41,17 +119,29 @@ export default function DetallePrd3D() {
         toast.error("No se pudo cargar la prenda 3D");
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // 🔹 Recalcular precio cuando cambian cantidad / talla
   useEffect(() => {
     if (!prenda) return;
-    const unitario =
+
+    const precioBase =
       cantidad >= 12
         ? prenda.precio_mayor || prenda.costo?.precio_mayor || 0
         : prenda.precio_venta || prenda.costo?.precio_venta || 0;
+
+    const factorTalla = calcularFactorTalla(
+      prenda,
+      tipoTalla,
+      tallaSeleccionada
+    );
+
+    const unitario = precioBase * factorTalla;
+
     setPrecioUnitario(unitario);
     setSubtotal(unitario * cantidad);
-  }, [cantidad, prenda]);
+  }, [cantidad, prenda, tipoTalla, tallaSeleccionada, medidasPersonalizadas]);
 
   if (loading)
     return <div className="p-6 text-center">Cargando prenda...</div>;
@@ -90,7 +180,7 @@ export default function DetallePrd3D() {
       tipo: "prenda_3d",
       nombre: prenda.modelo || "Prenda 3D",
       categoria_nombre: prenda.categoria || "Prenda 3D",
-      tela_nombre: prenda.tela_nombre || "N/A",
+      tela_nombre: prenda.tela_nombre || "Algodón",
       color:
         Object.values(prenda.colors || {}).join(", ") || "Color personalizado",
       talla: tallaFinal,
@@ -146,19 +236,22 @@ export default function DetallePrd3D() {
 
         {/* Información */}
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl font-bold text-blue-900">{prenda.modelo}</h1>
+          <h1 className="text-3xl font-bold text-blue-900 capitalize">3D {prenda.categoria} </h1>
           <p className="text-gray-700 capitalize">
-            <strong>Categoría:</strong> {prenda.categoria}
+            <strong>modelo:</strong> {prenda.modelo}
           </p>
           <p>
             <strong>Diseño base:</strong> {prenda.design_id}
           </p>
 
-          <h3 className="mt-3 font-semibold text-blue-700">🎨 Colores aplicados</h3>
-          <ul className="list-disc list-inside">
+          <h3 className="mt-3 font-semibold text-blue-700">
+            Colores aplicados
+          </h3>
+          <ul className="list-disc list-inside capitalize">
             {Object.entries(prenda.colors || {}).map(([zona, color]) => (
               <li key={zona}>
-                <strong>{zona}:</strong> <span style={{ color }}>{color}</span>
+                <strong>{zona}:</strong>{" "}
+                <span style={{ color }}>{color}</span>
               </li>
             ))}
           </ul>
@@ -173,7 +266,10 @@ export default function DetallePrd3D() {
                   name="tipoTalla"
                   value="general"
                   checked={tipoTalla === "general"}
-                  onChange={() => setTipoTalla("general")}
+                  onChange={() => {
+                    setTipoTalla("general");
+                    setError("");
+                  }}
                 />
                 Tallas Generales
               </label>
@@ -183,7 +279,10 @@ export default function DetallePrd3D() {
                   name="tipoTalla"
                   value="personalizada"
                   checked={tipoTalla === "personalizada"}
-                  onChange={() => setTipoTalla("personalizada")}
+                  onChange={() => {
+                    setTipoTalla("personalizada");
+                    setError("");
+                  }}
                 />
                 Talla Personal
               </label>
@@ -195,7 +294,10 @@ export default function DetallePrd3D() {
                 {["S", "M", "L", "XL", "XXL"].map((t) => (
                   <button
                     key={t}
-                    onClick={() => setTallaSeleccionada(t)}
+                    onClick={() => {
+                      setTallaSeleccionada(t);
+                      setError("");
+                    }}
                     className={`px-3 py-2 rounded-lg border mr-2 ${
                       tallaSeleccionada === t
                         ? "bg-blue-600 text-white"
@@ -249,9 +351,7 @@ export default function DetallePrd3D() {
                   <textarea
                     placeholder="Ejemplo: Pecho 100cm, Cintura 85cm, Largo 70cm..."
                     value={medidasPersonalizadas}
-                    onChange={(e) =>
-                      setMedidasPersonalizadas(e.target.value)
-                    }
+                    onChange={(e) => setMedidasPersonalizadas(e.target.value)}
                     className="w-full border rounded-lg p-2"
                   />
                 )}
@@ -266,7 +366,7 @@ export default function DetallePrd3D() {
               type="number"
               min={1}
               value={cantidad}
-              onChange={(e) => setCantidad(parseInt(e.target.value))}
+              onChange={(e) => setCantidad(parseInt(e.target.value || 1, 10))}
               className="w-full bg-white border mt-1 rounded px-3 py-2"
             />
           </div>

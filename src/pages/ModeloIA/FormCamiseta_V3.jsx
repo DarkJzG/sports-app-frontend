@@ -1,15 +1,14 @@
-// src/pages/ModeloIA/FormCamiseta_V3.jsx
+
 import React, { useEffect, useState, useMemo } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { API_URL } from "../../config";
-import { API_URL_GEMINI } from "../../config";
 import { useAuth } from "../../components/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PantallaCarga from "../../components/PantallaCarga";
 
-  /* Paleta base */
+
   const coloresBase = [
     { es: "Negro", en: "black", hex: "#000000" },
     { es: "Blanco", en: "white", hex: "#ffffff" },
@@ -23,30 +22,14 @@ import PantallaCarga from "../../components/PantallaCarga";
     { es: "Morado", en: "purple", hex: "#800080" },
   ];
 
-/* ===============================
-  CONFIGURACIÓN DE PATRONES
-   =============================== */
-const CONFIG_PATRONES = {
-  gradient: {label: "Degradado"},
-  geometric: {label: "Geométrico"},
-  abstract: {label: "Artístico"},
-  stripes: {label: "Rayas"},
-  camouflage: {label: "Camuflaje"},
-  two_tone: {label: "Dos tonos"},
-  solid: {label: "Sólido"},
-  full_print: {label: "Personalizado"},
-};
 
-
-
-// 🔹 Paso 1: Tipo de diseño
 const BloqueTipoDiseno = ({ tipoFullPrint, setTipoFullPrint }) => (
   <div className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-4">Tipo de diseño completo</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
-        { key: "objetos", label: "Por objetos o elementos", img: "/img/patrones/FullAnimado.png" },
-        { key: "texturas", label: "Por texturas o patrones", img: "/img/patrones/FullRealista.png" },
+        { key: "objetos", label: "Por elementos", img: "/img/patrones/FullAnimado.png" },
+        { key: "texturas", label: "Por patrones", img: "/img/patrones/FullRealista.png" },
       ].map((opt) => (
         <div
           key={opt.key}
@@ -62,9 +45,6 @@ const BloqueTipoDiseno = ({ tipoFullPrint, setTipoFullPrint }) => (
         </div>
       ))}
     </div>
-    <p className="text-sm text-gray-500 mt-4">
-      Selecciona si tu diseño se basa en <b>figuras u objetos</b> o en una <b>textura/patrón completo</b>.
-    </p>
   </div>
 );
 
@@ -152,7 +132,7 @@ const BloqueObjetosPaso2 = ({ numObjetos, coloresObjetos, setColoresObjetos, col
 
 const BloqueObjetosPaso3 = ({ styleFP, setStyleFP, distributionFP, setDistributionFP }) => (
   <div className="bg-white p-6 rounded-xl shadow-md space-y-6 text-center">
-    <h2 className="text-xl font-bold mb-4">3️⃣ Estilo visual y distribución</h2>
+    <h2 className="text-xl font-bold mb-4">Estilo visual y distribución</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Estilo visual */}
       <div className="p-4 rounded-lg border bg-gray-50">
@@ -214,7 +194,7 @@ const BloqueTexturasPaso1 = ({
   coloresBase,
 }) => (
   <div className="bg-white p-6 rounded-xl shadow-md text-center space-y-6">
-    <h2 className="text-xl font-bold mb-4">1️⃣ Colores del diseño</h2>
+    <h2 className="text-xl font-bold mb-4">Colores del diseño</h2>
     <p className="text-sm text-gray-500 mb-2">
       Color 1 = base · Color 2 = textura principal · Color 3 (opcional) = detalles
     </p>
@@ -264,14 +244,14 @@ const BloqueTexturasPaso2 = ({
   setCustomTexture,
 }) => (
   <div className="bg-white p-6 rounded-xl shadow-md text-center">
-    <h2 className="text-xl font-bold mb-4">2️⃣ Tipo de textura o patrón</h2>
+    <h2 className="text-xl font-bold mb-4">Tipo de textura o patrón</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {[ 
         { key: "moteado", label: "Moteado", img: "/img/patrones/TextMoteado.png" }, 
-        { key: "lineas", label: "Líneas o franjas", img: "/img/patrones/TextLineas.png" }, 
+        { key: "lineas", label: "Lineas", img: "/img/patrones/TextLineas.png" }, 
         { key: "circuitos", label: "Circuitos", img: "/img/patrones/TextCircuito.png" }, 
-        { key: "olas", label: "Olas o flujo", img: "/img/patrones/TextFlujo.png" }, 
-        { key: "flores", label: "Flores u orgánico", img: "/img/patrones/TextOrganico.png" }, 
+        { key: "olas", label: "Olas", img: "/img/patrones/TextFlujo.png" }, 
+        { key: "flores", label: "Flores", img: "/img/patrones/TextOrganico.png" }, 
         { key: "personalizado", label: "Otro (escribir idea)", img: "/img/patrones/TextCustom.png" }, 
         
     ].map((opt) => (
@@ -363,7 +343,7 @@ export default function FormCamiseta_V3() {
   // Propiedades para patrón Rayas
   const [direccion, setDireccion] = useState("");
   const [grosor, setGrosor] = useState("");
-  const [numRayas, setNumRayas] = useState("");
+  const [numRayas, setNumRayas] = useState("aleatorio");
   const [coberturaRayas, setCoberturaRayas] = useState("");
 
   // Propiedades para patrón Camuflaje
@@ -406,6 +386,10 @@ const validarPasoActual = () => {
   if (paso === 1) {
     if (!cuello || !manga) {
       toast.warning("Selecciona el tipo de cuello y manga.");
+      return false;
+    }
+    if (cuello === "Polo" && manga === "Larga") {
+      toast.warning("Seleccina el tipo de manga.");
       return false;
     }
     return true;
@@ -709,7 +693,6 @@ const validarPasoActual = () => {
       userId: user?.id,
       categoria_id: "Camiseta IA",
       diseno,
-      colorCuello,
       numColores,
       colores: colores.slice(0, numColores),
       tipoGradiente: diseno === "degradado" ? tipoGradiente : undefined,
@@ -732,7 +715,7 @@ const validarPasoActual = () => {
       color2TwoTone: diseno === "dos_tonos" ? color2TwoTone : undefined,
       color1: diseno === "solido" ? color1 : undefined,
       usarColorUnicoCuello: diseno === "solido" ? usarColorUnicoCuello : undefined,
-      colorCuello: diseno === "solido" ? colorCuello : undefined,
+      colorCuello: diseno === "solido" ? colorCuello : colorCuello,
       tipoFullPrint: diseno === "diseño_completo" ? tipoFullPrint : undefined,
       motifs: diseno === "diseño_completo" ? motifs : undefined,
       colorBaseFP: diseno === "diseño_completo" ? colorBaseFP : undefined,
@@ -771,7 +754,7 @@ const validarPasoActual = () => {
 
       if (data.imageUrl) {
         setImagen(data.imageUrl);
-        toast.success("¡Camiseta generada con éxito con Hugging Face!");
+        toast.success("¡Camiseta generada con éxito!");
       } else if (data.error) {
         toast.error(data.error);
       }
@@ -824,22 +807,24 @@ const validarPasoActual = () => {
             {[
               { key: "Corta", img: "/img/patrones/MangaCorta.png" },
               { key: "Larga", img: "/img/patrones/MangaLarga.png" },
-            ].map((op) => (
-              <div
-                key={op.key}
-                onClick={() => setManga(op.key)}
-                className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
-                  manga === op.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                <img
-                  src={op.img}
-                  alt={op.key}
-                  className="w-24 h-40 object-cover rounded-md mb-1"
-                />
-                <p className="text-center font-medium">{op.key}</p>
-              </div>
-            ))}
+            ]
+              .filter((op) => !(cuello === "Polo" && op.key === "Larga"))
+              .map((op) => (
+                <div
+                  key={op.key}
+                  onClick={() => setManga(op.key)}
+                  className={`cursor-pointer p-2 rounded-lg border-4 w-28 ${
+                    manga === op.key ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                  }`}
+                >
+                  <img
+                    src={op.img}
+                    alt={op.key}
+                    className="w-24 h-40 object-cover rounded-md mb-1"
+                  />
+                  <p className="text-center font-medium">{op.key}</p>
+                </div>
+              ))}
           </div>
         </div>
       </div>
@@ -948,8 +933,8 @@ const validarPasoActual = () => {
       paso2Patron,
     <div key="ncol" className="bg-white p-6 rounded-xl shadow-md text-center">
       <h2 className="text-xl font-bold mb-6">¿Cuántos colores tendrá el degradado?</h2>
-      <div className="grid grid-cols-3 gap-6 justify-center">
-        {[2, 3, 4].map((n) => (
+      <div className="grid grid-cols-2 gap-6 justify-center">
+        {[2, 3].map((n) => (
           <div
             key={n}
             onClick={() => setNumColores(n)}
@@ -1311,19 +1296,9 @@ const pasosStripes = [
   // Paso 5: Número de rayas
   <div key="numRayas" className="bg-white p-6 rounded-xl shadow-md text-center">
     <h2 className="text-xl font-bold mb-6">Número de rayas visibles</h2>
-    <div className="flex flex-wrap justify-center gap-4">
-      {[3, 5, 7, "aleatorio"].map((opt) => (
-        <button
-          key={opt}
-          onClick={() => setNumRayas(opt)}
-          className={`px-6 py-3 rounded-lg border ${
-            numRayas === opt ? "bg-blue-600 text-white" : "bg-gray-100"
-          }`}
-        >
-          {opt === "aleatorio" ? "Aleatorio" : `${opt} rayas`}
-        </button>
-      ))}
-    </div>
+    <p className="text-gray-600">
+      El número de rayas será aleatorio.
+    </p>
   </div>,
 
   // Paso 6: Cobertura
@@ -1474,19 +1449,19 @@ const pasosCamouflage = [
         {
           key: "clásico",
           label: "Clásico",
-          desc: "Manchas redondeadas, bordes suaves, estilo militar estándar.",
+          desc: "Manchas redondeadas, estilo militar estándar.",
           img: "/img/patrones/CamuflajeBosque.png",
         },
         {
           key: "digital",
-          label: "Digital / Pixelado",
-          desc: "Hecho con cuadrados o píxeles, estilo uniforme moderno.",
+          label: "Digital",
+          desc: "Hecho con cuadrados o píxeles.",
           img: "/img/patrones/CamuflajePixel.png",
         },
         {
           key: "fragmentado",
-          label: "Fragmentado moderno",
-          desc: "Formas angulares y geométricas, aspecto futurista.",
+          label: "Fragmentado",
+          desc: "Formas angulares y geométricas.",
           img: "/img/patrones/CamuflajeFragmentado.png",
         },
       ].map((opt) => (
@@ -1540,7 +1515,7 @@ const pasosTwoTone = [
           img: "/img/patrones/DosTonosDiagonal.png",
         },
         {
-          key: "mangas_torso",
+          key: "mangas y torso",
           label: "Mangas y torso",
           desc: "Torso color 1 · mangas y cuello color 2.",
           img: "/img/patrones/DosTonosMangas.png",
@@ -1629,7 +1604,7 @@ const pasosSolid = [
         onChange={() => setUsarColorUnicoCuello(!usarColorUnicoCuello)}
       />
       <span className="font-medium">
-        Cuello puños del mismo color
+        Cuello y puños del mismo color
       </span>
     </label>
     {!usarColorUnicoCuello && (
@@ -1851,7 +1826,7 @@ const pasosFullPrint = useMemo(() => {
       <Navbar />
       <PantallaCarga 
         show={loading} 
-        message="Generando tu camiseta con IA... ⏱️ 10-30 segundos"
+        message="Generando tu camiseta con IA..."
       />
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-8">
         {imagen ? (
@@ -1963,3 +1938,5 @@ const pasosFullPrint = useMemo(() => {
     </div>
   );
 }
+
+

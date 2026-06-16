@@ -42,7 +42,7 @@ export default function Navbar() {
             {/* --- CAMBIO AQUÍ --- */}
             {user ? (
               <button
-                onClick={() => navigate("/perfil")}
+                onClick={() => navigate("/admin")}
                 className="block py-2 sm:py-0 bg-blue-900 text-white rounded-lg px-4 py-2 hover:bg-blue-700 font-semibold transition sm:ml-4"
               >
                 {user.nombre}

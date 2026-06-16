@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../components/AuthContext";
 import PantallaCarga from "../../components/PantallaCarga";
 import { useNavigate } from "react-router-dom";
-import { Shirt, Palette, Type, Image, Layers, Sparkles } from "lucide-react";
+import { Palette, Type, Image, Layers, Sparkles, Save } from "lucide-react";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -24,7 +24,7 @@ import { PerformanceMonitor } from "@react-three/drei";
 
 import { Matrix4, Vector2, Vector3 } from "three";
 
-/* Cambia la profundidad a la que agrego el texto y los logos */
+
 const toDecalScale = (s, thickness = 1) =>
   Array.isArray(s) ? s : [s, s, thickness];
 
@@ -38,18 +38,18 @@ const CATALOG = {
         name: "Base",
         mask: "/prendas3d/mask_rgb_pantalon_base.png",
         zones: {
-          cintura: { label: "Cintura", channel: "R", default: "#1e3a8a" },
-          pierna_izq: { label: "Pierna Izquierda", channel: "G", default: "#059669" },
-          pierna_der: { label: "Pierna Derecha", channel: "B", default: "#dc2626" },
+          cintura: { label: "Cintura y Bastas", channel: "R", default: "#1e3a8a" },
+          pierna_izq: { label: "Laterales", channel: "G", default: "#059669" },
+          pierna_der: { label: "Piernas", channel: "B", default: "#dc2626" },
         },
       },
       estilo1: {
         name: "Estilo 1",
         mask: "/prendas3d/mask_rgb_pantalon_1.png",
         zones: {
-          cintura: { label: "Cintura", channel: "R", default: "#f59e0b" },
-          bajos: { label: "Bajos", channel: "G", default: "#8b5cf6" },
-          cuerpo: { label: "Cuerpo", channel: "B", default: "#10b981" },
+          cintura: { label: "Cintura y Bastas", channel: "R", default: "#f59e0b" },
+          bajos: { label: "Laterales", channel: "G", default: "#8b5cf6" },
+          cuerpo: { label: "Piernas", channel: "B", default: "#10b981" },
         },
       },
     },
@@ -456,23 +456,6 @@ export default function PantalonViewer() {
 
   const renderPanel = () => {
     switch (activeSection) {
-      case "prenda":
-        return (
-          <div className="bg-white rounded-2xl shadow p-4">
-            <label className="block text-sm font-semibold mb-2">Elegir prenda</label>
-            <select
-              className="w-full border rounded p-2"
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-            >
-              {Object.entries(CATALOG).map(([id, p]) => (
-                <option key={id} value={id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
       case "estilos":
         return (
           <div className="bg-white rounded-2xl shadow p-4">
@@ -626,7 +609,6 @@ export default function PantalonViewer() {
       <div className="flex flex-col p-4">
         <NavPanelesRGB
           items={[
-            { id: "prenda", label: "Prenda", icon: <Shirt size={22} /> },
             { id: "estilos", label: "Estilos", icon: <Layers size={22} /> },
             { id: "colores", label: "Colores", icon: <Palette size={22} /> },
             { id: "texto", label: "Texto", icon: <Type size={22} /> },
@@ -636,15 +618,6 @@ export default function PantalonViewer() {
         activeId={activeSection} 
         onChange={setActiveSection} 
         />
-        <button
-            onClick={handleGuardarDiseno}
-            disabled={!glRef.current}
-            className={`mt-4 w-full bg-blue-900 text-white rounded-lg py-3 px-4 font-semibold hover:bg-blue-600 transition-colors ${
-              !glRef.current ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            Guardar
-          </button>
       </div>  
 
         <div className="w-[560px] p-4 overflow-y-auto">{renderPanel()}</div>
@@ -664,7 +637,7 @@ export default function PantalonViewer() {
               antialias: true,
               powerPreference: "high-performance",
             }}
-            camera={{ position: [0, 1, 5], fov: 50 }}
+            camera={{ position: [0, 1, 7], fov: 50 }}
             onCreated={({ gl, scene, camera }) => {
               glRef.current = { gl, scene, camera };
               scene.background = new THREE.Color("#f2f2f2");
@@ -705,6 +678,17 @@ export default function PantalonViewer() {
             <p>• Click izquierdo sobre la prenda: Colocar elemento</p>
             <p>• Rueda del ratón: Zoom</p>
             <p>• Click izquierdo + arrastrar: Rotar vista</p>
+          </div>
+                    <div className="absolute top-2 right-2 bg-black/70 p-3 rounded-lg text-white text-sm">
+            <h3 className="font-bold mb-1">Guardar Diseño</h3>
+            <button
+              onClick={handleGuardarDiseno}
+              disabled={!glRef.current}
+              className={`mt-4 w-full bg-blue-900 text-white rounded-lg py-2 px-2 font-semibold hover:bg-blue-600 transition-colors ${!glRef.current ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+            >
+              <Save size={16} className="inline" />
+            </button>
           </div>
         </div>
       </div>
